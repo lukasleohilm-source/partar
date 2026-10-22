@@ -38,7 +38,7 @@ export async function updateSession(request: NextRequest) {
     if (error) {
       const url = request.nextUrl.clone();
       url.pathname = "/";
-      url.search = "";
+      url.search = "?villa=tenging";
       return NextResponse.redirect(url);
     }
   }

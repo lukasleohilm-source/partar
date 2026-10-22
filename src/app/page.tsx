@@ -7,7 +7,8 @@ import { LISTING_SUMMARY_SELECT, type ListingSummary } from "@/lib/listings";
 import { MY_CAR_COOKIE, parseMyCar } from "@/lib/search";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<{ villa?: string }> }) {
+  const { villa } = await searchParams;
   const myCar = parseMyCar((await cookies()).get(MY_CAR_COOKIE)?.value);
   const supabase = await createClient();
   const [{ data }, makes, models] = await Promise.all([
@@ -31,6 +32,12 @@ export default async function Home() {
           Partar<span className="text-orange-600">.</span>
         </h1>
       </header>
+
+      {villa === "tenging" && (
+        <p role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">
+          Ekki tókst að tengjast þjóninum. Athugaðu nettenginguna og reyndu aftur.
+        </p>
+      )}
 
       <form action="/leit" className="space-y-3">
         <input
