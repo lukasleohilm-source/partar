@@ -1,4 +1,21 @@
-export default function Home() {
+import Link from "next/link";
+import { ListingCard } from "@/components/listing/listing-card";
+import { KINDS, type Kind } from "@/lib/i18n";
+import { LISTING_SUMMARY_SELECT, type ListingSummary } from "@/lib/listings";
+import { createClient } from "@/lib/supabase/server";
+
+export default async function Home() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("listings")
+    .select(LISTING_SUMMARY_SELECT)
+    .eq("status", "active")
+    .order("published_at", { ascending: false })
+    .order("sort", { referencedTable: "listing_images" })
+    .limit(1, { referencedTable: "listing_images" })
+    .limit(20);
+  const listings = (data ?? []) as ListingSummary[];
+
   return (
     <div className="mx-auto max-w-md px-4 pt-6">
       <header className="mb-5">
@@ -30,7 +47,37 @@ export default function Home() {
         </button>
       </form>
 
-      <p className="mt-8 text-center text-sm text-stone-500">Nýjustu auglýsingar birtast hér.</p>
+      <nav aria-label="Flýtileiðir" className="mt-4 flex gap-2 overflow-x-auto pb-1">
+        {(Object.keys(KINDS) as Kind[]).map((k) => (
+          <Link
+            key={k}
+            href={`/leit?tegund=${k}`}
+            className="shrink-0 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium"
+          >
+            {k === "part" ? "Varahlutir" : k === "parts_car" ? "Partabílar" : "Ódýrir bílar"}
+          </Link>
+        ))}
+      </nav>
+
+      <section className="mt-6">
+        <h2 className="mb-3 text-lg font-semibold">Nýjustu auglýsingar</h2>
+        {listings.length ? (
+          <ul className="grid grid-cols-2 gap-3">
+            {listings.map((l) => (
+              <li key={l.id}>
+                <ListingCard listing={l} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="rounded-2xl bg-white p-6 text-center">
+            <p className="text-stone-600">Engar auglýsingar enn.</p>
+            <Link href="/ny-auglysing" className="mt-3 inline-block font-semibold text-orange-600">
+              Vertu fyrst(ur) að selja →
+            </Link>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
