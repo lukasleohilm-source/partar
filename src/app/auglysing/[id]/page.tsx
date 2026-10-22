@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { ImageGallery } from "@/components/listing/image-gallery";
 import { primaryButton, secondaryButton } from "@/components/ui/styles";
-import { CONDITIONS, KINDS, REGIONS, formatPrice, type Condition, type Kind, type Region } from "@/lib/i18n";
+import { CONDITIONS, KINDS, REGIONS, formatNumber, formatPrice, type Condition, type Kind, type Region } from "@/lib/i18n";
 import { imageUrl, timeAgo } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/server";
 import { yearRange } from "@/lib/vehicles";
@@ -98,7 +98,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
     ...(listing.categories ? [["Flokkur", listing.categories.name] as [string, string]] : []),
     ["Staðsetning", [listing.postal_code, REGIONS[listing.region]].filter(Boolean).join(" ")],
     ...(listing.mileage_km != null
-      ? [["Akstur", `${listing.mileage_km.toLocaleString("is-IS")} km`] as [string, string]]
+      ? [["Akstur", `${formatNumber(listing.mileage_km)} km`] as [string, string]]
       : []),
     ...(listing.license_plate ? [["Bílnúmer", listing.license_plate] as [string, string]] : []),
     ...(listing.part_number ? [["Vörunúmer", listing.part_number] as [string, string]] : []),

@@ -19,6 +19,16 @@ export function yearRange(from: number | null, to: number | null): string {
   return "Allar árgerðir";
 }
 
+export function carLabel(
+  car: { make: number; model: number | null; year: number | null },
+  makes: Make[],
+  models: Model[],
+): string {
+  const make = makes.find((m) => m.id === car.make)?.name ?? "";
+  const model = car.model ? models.find((m) => m.id === car.model)?.name : null;
+  return [make, model, car.year].filter(Boolean).join(" ");
+}
+
 export function describeFitment(f: Fitment, makes: Make[], models: Model[]): string {
   const make = makes.find((m) => m.id === f.make_id)?.name ?? "?";
   const model = f.model_id ? models.find((m) => m.id === f.model_id)?.name : "allar gerðir";

@@ -28,12 +28,15 @@ export const KINDS = {
 } as const;
 export type Kind = keyof typeof KINDS;
 
-const isk = new Intl.NumberFormat("is-IS");
+// Þúsundaskil með punkti. Ekki Intl: sumir vafrar hafa ekki íslensk gögn og nota þá kommu.
+export function formatNumber(n: number): string {
+  return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
 
 export function formatPrice(price: number | null): string {
   if (price === null) return "Tilboð";
   if (price === 0) return "Gefins";
-  return `${isk.format(price)} kr.`;
+  return `${formatNumber(price)} kr.`;
 }
 
 export function isRegion(v: unknown): v is Region {

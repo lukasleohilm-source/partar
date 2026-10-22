@@ -5,7 +5,7 @@ import { useState } from "react";
 import { FitmentPicker } from "@/components/listing/fitment-picker";
 import { ImagePicker } from "@/components/listing/image-picker";
 import { inputClass, labelClass, primaryButton, secondaryButton } from "@/components/ui/styles";
-import { CONDITIONS, KINDS, REGIONS, formatPrice, type Condition, type Kind, type Region } from "@/lib/i18n";
+import { CONDITIONS, KINDS, REGIONS, formatNumber, formatPrice, type Condition, type Kind, type Region } from "@/lib/i18n";
 import type { ProcessedImage } from "@/lib/images";
 import { createClient } from "@/lib/supabase/client";
 import { YEARS, describeFitment, type Category, type Fitment, type Make, type Model } from "@/lib/vehicles";
@@ -300,7 +300,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion }
             {priceMode === "verd" && (
               <div className="relative">
                 <input
-                  value={price ? Number(price).toLocaleString("is-IS") : ""}
+                  value={price ? formatNumber(Number(price)) : ""}
                   onChange={(e) => setPrice(e.target.value.replace(/\D/g, "").slice(0, 9))}
                   inputMode="numeric"
                   placeholder="0"

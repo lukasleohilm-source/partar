@@ -1,19 +1,27 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { ListingCard } from "@/components/listing/listing-card";
+import { MyCarPicker } from "@/components/search/my-car-picker";
 import { KINDS, type Kind } from "@/lib/i18n";
 import { LISTING_SUMMARY_SELECT, type ListingSummary } from "@/lib/listings";
+import { MY_CAR_COOKIE, parseMyCar } from "@/lib/search";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
+  const myCar = parseMyCar((await cookies()).get(MY_CAR_COOKIE)?.value);
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("listings")
-    .select(LISTING_SUMMARY_SELECT)
-    .eq("status", "active")
-    .order("published_at", { ascending: false })
-    .order("sort", { referencedTable: "listing_images" })
-    .limit(1, { referencedTable: "listing_images" })
-    .limit(20);
+  const [{ data }, makes, models] = await Promise.all([
+    supabase
+      .from("listings")
+      .select(LISTING_SUMMARY_SELECT)
+      .eq("status", "active")
+      .order("published_at", { ascending: false })
+      .order("sort", { referencedTable: "listing_images" })
+      .limit(1, { referencedTable: "listing_images" })
+      .limit(20),
+    supabase.from("makes").select("id, name").order("name"),
+    supabase.from("models").select("id, make_id, name").order("name"),
+  ]);
   const listings = (data ?? []) as ListingSummary[];
 
   return (
@@ -46,6 +54,15 @@ export default async function Home() {
           Leita
         </button>
       </form>
+
+      <div className="mt-4">
+        <MyCarPicker key={JSON.stringify(myCar)} makes={makes.data ?? []} models={models.data ?? []} car={myCar} />
+        {myCar && (
+          <Link href="/leit" className="mt-2 block text-center text-sm font-medium text-orange-700">
+            Sjá alla hluti sem passa →
+          </Link>
+        )}
+      </div>
 
       <nav aria-label="Flýtileiðir" className="mt-4 flex gap-2 overflow-x-auto pb-1">
         {(Object.keys(KINDS) as Kind[]).map((k) => (
