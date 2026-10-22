@@ -166,7 +166,10 @@ export default async function SearchPage({
               Leita í öllum bílum
             </Link>
           )}
-          <Link href="/oska-eftir" className="mt-3 block font-semibold text-orange-600">
+          <Link
+            href={searchHref(filters).replace(/^\/leit/, "/oska-eftir/ny")}
+            className="mt-3 block font-semibold text-orange-600"
+          >
             Skráðu ósk og fáðu tilkynningu →
           </Link>
         </div>

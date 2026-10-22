@@ -4,7 +4,7 @@ import { shortTime } from "@/lib/chat";
 import { formatPrice } from "@/lib/i18n";
 import { imageUrl } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/server";
-import { LiveRefresh } from "./live-refresh";
+import { LiveRefresh } from "@/components/live-refresh";
 
 export const metadata = { title: "Skilaboð – Partar" };
 
@@ -46,7 +46,7 @@ export default async function ConversationsPage() {
   return (
     <div className="mx-auto max-w-md px-4 pt-6">
       <h1 className="mb-4 text-2xl font-bold">Skilaboð</h1>
-      <LiveRefresh userId={user.id} />
+      <LiveRefresh channel={`samtalalisti:${user.id}`} table="conversations" event="UPDATE" />
 
       {rows.length === 0 ? (
         <div className="rounded-2xl bg-white p-6 text-center">
