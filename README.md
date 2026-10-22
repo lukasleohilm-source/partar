@@ -6,6 +6,9 @@ Markaðstorg fyrir notaða varahluti, partabíla og ódýra bíla. Next.js 15 + 
 
 Krefst **Node.js 20+** og **Docker Desktop** (Supabase keyrir staðbundið í Docker).
 
+> **Windows PowerShell:** ef `npm` gefur villuna „running scripts is disabled on this system“,
+> notaðu `npm.cmd` og `npx.cmd` í staðinn (t.d. `npm.cmd run dev`).
+
 ```bash
 npm install
 npx supabase start          # ræsir Postgres, Auth, Storage, Realtime og Mailpit

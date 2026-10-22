@@ -146,7 +146,7 @@ max_catalogs = 2
 
 # Store vector embeddings in S3 for large and durable datasets
 [storage.vector]
-enabled = true
+enabled = false
 max_buckets = 10
 max_indexes = 5
 
@@ -228,7 +228,7 @@ enable_confirmations = false
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
-max_frequency = "1s"
+max_frequency = "1m0s"
 # Number of characters used in the email OTP.
 otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
@@ -246,13 +246,15 @@ otp_expiry = 3600
 
 # Töfrahlekkir á íslensku. Hlekkurinn notar token_hash svo hann virkar
 # líka þegar hann opnast í öðrum vafra en þeim sem bað um hann (algengt í síma).
-[auth.email.template.magic_link]
-subject = "Innskráning í Partar"
-content_path = "./supabase/templates/magic_link.html"
-
-[auth.email.template.confirmation]
-subject = "Velkomin(n) í Partar – staðfestu netfangið"
-content_path = "./supabase/templates/magic_link.html"
+# ÓVIRKT: ókeypis Supabase-ský leyfir ekki eigin sniðmát án eigin SMTP-þjóns.
+# Virkja aftur ásamt [auth.email.smtp] (t.d. Resend) þegar innskráning kemur inn.
+# [auth.email.template.magic_link]
+# subject = "Innskráning í Partar"
+# content_path = "./supabase/templates/magic_link.html"
+#
+# [auth.email.template.confirmation]
+# subject = "Velkomin(n) í Partar – staðfestu netfangið"
+# content_path = "./supabase/templates/magic_link.html"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
@@ -311,8 +313,8 @@ max_enrolled_factors = 10
 
 # Control MFA via App Authenticator (TOTP)
 [auth.mfa.totp]
-enroll_enabled = false
-verify_enabled = false
+enroll_enabled = true
+verify_enabled = true
 
 # Configure MFA via Phone Messaging
 [auth.mfa.phone]

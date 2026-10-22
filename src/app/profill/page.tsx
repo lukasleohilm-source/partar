@@ -20,7 +20,7 @@ export default async function ProfilePage() {
   return (
     <div className="mx-auto max-w-md px-4 pt-6">
       <h1 className="text-2xl font-bold">Prófíll</h1>
-      <p className="mb-6 break-all text-sm text-stone-500">{user.email ?? "Gestur (innskráning kemur seinna)"}</p>
+      <p className="mb-6 break-all text-sm text-stone-500">{user.email || "Gestur (innskráning kemur seinna)"}</p>
 
       <ProfileForm
         displayName={profile?.display_name ?? ""}
