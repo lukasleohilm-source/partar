@@ -11,12 +11,15 @@ end $$;
 create trigger listings_touch before update on public.listings
   for each row execute function public.touch_updated_at();
 
--- Prófíll búinn til sjálfkrafa við nýskráningu (nafn = hluti netfangs fyrir @)
+-- Prófíll búinn til sjálfkrafa við nýskráningu (nafn = hluti netfangs fyrir @).
+-- Nafnlausir notendur (ekkert netfang) fá „Notandi xxxx“.
 create function public.handle_new_user() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
   insert into public.profiles (id, display_name)
-  values (new.id, left(split_part(coalesce(new.email, 'notandi'), '@', 1), 60));
+  values (new.id, coalesce(
+    nullif(left(split_part(new.email, '@', 1), 60), ''),
+    'Notandi ' || left(new.id::text, 4)));
   insert into public.profile_contacts (id) values (new.id);
   return new;
 end $$;

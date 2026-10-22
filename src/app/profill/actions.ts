@@ -12,7 +12,7 @@ export async function updateProfile(_prev: ProfileState, formData: FormData): Pr
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/innskraning?next=/profill");
+  if (!user) redirect("/");
 
   const displayName = String(formData.get("display_name") ?? "").trim();
   const regionRaw = String(formData.get("region") ?? "");

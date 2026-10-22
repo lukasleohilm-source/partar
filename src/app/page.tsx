@@ -1,20 +1,10 @@
-import Link from "next/link";
-import { getUser } from "@/lib/supabase/server";
-
-export default async function Home() {
-  const user = await getUser();
-
+export default function Home() {
   return (
     <div className="mx-auto max-w-md px-4 pt-6">
-      <header className="mb-5 flex items-center justify-between">
+      <header className="mb-5">
         <h1 className="text-2xl font-bold tracking-tight">
           Partar<span className="text-orange-600">.</span>
         </h1>
-        {!user && (
-          <Link href="/innskraning" className="rounded-full bg-stone-900 px-4 py-2 text-sm font-medium text-white">
-            Skrá inn
-          </Link>
-        )}
       </header>
 
       <form action="/leit" className="space-y-3">

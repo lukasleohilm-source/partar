@@ -10,7 +10,7 @@ export default async function ProfilePage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/innskraning?next=/profill");
+  if (!user) redirect("/");
 
   const [{ data: profile }, { data: contact }] = await Promise.all([
     supabase.from("profiles").select("display_name, region").eq("id", user.id).single(),
@@ -20,7 +20,7 @@ export default async function ProfilePage() {
   return (
     <div className="mx-auto max-w-md px-4 pt-6">
       <h1 className="text-2xl font-bold">Prófíll</h1>
-      <p className="mb-6 break-all text-sm text-stone-500">{user.email}</p>
+      <p className="mb-6 break-all text-sm text-stone-500">{user.email ?? "Gestur (innskráning kemur seinna)"}</p>
 
       <ProfileForm
         displayName={profile?.display_name ?? ""}
@@ -29,11 +29,14 @@ export default async function ProfilePage() {
         showPhone={contact?.show_phone ?? false}
       />
 
-      <form action={logout} className="mt-8">
-        <button type="submit" className="w-full rounded-xl border border-stone-300 py-3 font-medium text-stone-700">
-          Skrá út
-        </button>
-      </form>
+      {/* Nafnlaus notandi myndi tapa auglýsingum sínum við útskráningu */}
+      {!user.is_anonymous && (
+        <form action={logout} className="mt-8">
+          <button type="submit" className="w-full rounded-xl border border-stone-300 py-3 font-medium text-stone-700">
+            Skrá út
+          </button>
+        </form>
+      )}
     </div>
   );
 }
