@@ -38,6 +38,18 @@ npm.cmd test                # gagnagrunnsprófanir (PGlite)
 
 `next build` og `next dev` nota sömu `.next`-möppu; stöðvaðu þróunarþjóninn áður en þú byggir.
 
+### Sjálfvirk birting (Cloudflare Workers Builds)
+
+Kóðinn er á GitHub (`lukasleohilm-source/partar`). Í Cloudflare: **Workers & Pages → partar → Settings → Builds → Connect** og velja safnið, grein `main`.
+
+- Build command: `npx opennextjs-cloudflare build`
+- Deploy command: `npx opennextjs-cloudflare deploy`
+- Build variables (límdar inn í kóðann við build, allar opinberar):
+  `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
+
+Leyndarbreytan `VAPID_PRIVATE_JWK` og `SITE_URL` eru þegar á Workernum og þarf ekki að setja aftur.
+Migrations eru ekki keyrðar sjálfkrafa: `npx.cmd supabase db push` áður en kóði sem þarf þær fer upp.
+
 ## Uppbygging
 
 - `supabase/migrations/` – skema, föll/triggerar (leit, „óska eftir“, spjall), RLS og myndageymsla
