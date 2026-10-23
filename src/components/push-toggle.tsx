@@ -4,6 +4,18 @@ import { Bell, Share, SquarePlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { disablePush, enablePush, getPushState, isIos, type PushState } from "@/lib/push-client";
 import { reportError } from "@/lib/report-error";
+import { createClient } from "@/lib/supabase/client";
+
+type PrefKey = "messages" | "wanted" | "price_drop" | "reviews";
+type Prefs = Record<PrefKey, boolean>;
+
+const PREFS: { key: PrefKey; label: string; hint: string }[] = [
+  { key: "messages", label: "Skilaboð", hint: "Þegar einhver sendir þér skilaboð" },
+  { key: "wanted", label: "Óskir", hint: "Þegar ný auglýsing passar við ósk þína" },
+  { key: "price_drop", label: "Verðlækkun", hint: "Þegar verð lækkar á auglýsingu í uppáhaldi" },
+  { key: "reviews", label: "Umsagnir", hint: "Þegar kaupandi gefur þér einkunn" },
+];
+const ALL_ON: Prefs = { messages: true, wanted: true, price_drop: true, reviews: true };
 
 const TEXT: Record<PushState, string> = {
   unsupported: "Þessi vafri styður ekki tilkynningar. Prófaðu Chrome á Android eða Safari á iPhone.",
@@ -103,6 +115,7 @@ export function PushToggle({ compact = false }: { compact?: boolean }) {
           </button>
         )}
       </div>
+      {state === "on" && !compact && <NotificationPrefs />}
       {state === "ios-install" && (
         <ol className="mt-3 space-y-2 text-sm text-stone-700">
           <li className="flex items-center gap-2">
@@ -125,5 +138,65 @@ export function PushToggle({ compact = false }: { compact?: boolean }) {
         </p>
       )}
     </section>
+  );
+}
+
+// Hvaða tilkynningar notandinn vill fá. Engin vistuð röð = allt kveikt.
+function NotificationPrefs() {
+  const [supabase] = useState(createClient);
+  const [prefs, setPrefs] = useState<Prefs | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    supabase
+      .from("notification_prefs")
+      .select("messages, wanted, price_drop, reviews")
+      .maybeSingle()
+      .then(({ data }) => setPrefs(data ?? ALL_ON));
+  }, [supabase]);
+
+  async function change(key: PrefKey, value: boolean) {
+    if (!prefs) return;
+    const before = prefs;
+    const next = { ...prefs, [key]: value };
+    setPrefs(next);
+    setFailed(false);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { error } = user
+      ? await supabase.from("notification_prefs").upsert({ user_id: user.id, ...next, updated_at: new Date().toISOString() })
+      : { error: true };
+    if (error) {
+      setPrefs(before);
+      setFailed(true);
+    }
+  }
+
+  if (!prefs) return null;
+
+  return (
+    <fieldset className="mt-4 border-t border-line pt-3">
+      <legend className="mb-1 text-sm font-semibold text-stone-800">Láta mig vita um</legend>
+      {PREFS.map((p) => (
+        <label key={p.key} className="flex cursor-pointer items-center justify-between gap-3 py-2">
+          <span>
+            <span className="block text-[15px] font-medium text-stone-900">{p.label}</span>
+            <span className="block text-xs text-stone-500">{p.hint}</span>
+          </span>
+          <input
+            type="checkbox"
+            checked={prefs[p.key]}
+            onChange={(e) => void change(p.key, e.target.checked)}
+            className="size-5 shrink-0 accent-orange-600"
+          />
+        </label>
+      ))}
+      {failed && (
+        <p role="alert" className="text-sm text-red-600">
+          Ekki tókst að vista. Reyndu aftur.
+        </p>
+      )}
+    </fieldset>
   );
 }

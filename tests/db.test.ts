@@ -337,6 +337,74 @@ describe("spjall og aðgangsreglur", () => {
     expect(await t.q(`select * from push_subscriptions`)).toHaveLength(0);
   });
 
+  it("ýtitilkynningar: val um tegundir, verðlækkun á uppáhaldi og umsagnir", async () => {
+    await t.asAdmin();
+    await t.q(`delete from net.requests`);
+    const [cfg] = await t.q<{ secret: string }>(`select secret from private.push_config`);
+    const sent = async () => {
+      await t.asAdmin();
+      const r = await t.q<{ body: { kind: string; id: string } }>(`select body from net.requests order by id`);
+      await t.q(`delete from net.requests`);
+      return r.map((x) => x.body);
+    };
+
+    const listing = await publish("Verðprufa ljós", 8000, "gott", "hofudborgarsvaedid", null);
+    await t.as(buyer);
+    await t.q(`select save_push_subscription('https://push.example/val', 'p256dh-key', 'auth-key')`);
+    await t.q(`insert into favorites (user_id, listing_id) values ($1, $2)`, [buyer, listing]);
+    await sent();
+
+    // Verðlækkun sendist, hækkun ekki
+    await t.as(seller);
+    await t.q(`update listings set price_isk = 5000 where id = $1`, [listing]);
+    await t.q(`update listings set price_isk = 6000 where id = $1`, [listing]);
+    const drops = await sent();
+    expect(drops.map((b) => b.kind)).toEqual(["price_drop"]);
+    await t.as(null);
+    const [{ push_payload: p }] = await t.q<{ push_payload: { message: { title: string; body: string } } }>(
+      `select push_payload($1, 'price_drop', $2)`,
+      [cfg.secret, drops[0].id],
+    );
+    expect(p.message.title).toBe("Verðið lækkaði");
+    expect(p.message.body).toBe("Verðprufa ljós · 8.000 kr. → 5.000 kr.");
+
+    // Slökkt á verðlækkun og skilaboðum → ekkert sent; aðrir sjá ekki stillingarnar
+    await t.as(buyer);
+    await t.q(`insert into notification_prefs (user_id, price_drop, messages) values ($1, false, false)`, [buyer]);
+    await t.as(stranger);
+    expect(await t.q(`select * from notification_prefs`)).toHaveLength(0);
+    await t.as(seller);
+    await t.q(`update listings set price_isk = 4000 where id = $1`, [listing]);
+    await t.q(`insert into messages (conversation_id, sender_id, body) values ($1, $2, 'Lækkaði verðið')`, [conv, seller]);
+    expect(await sent()).toEqual([]);
+
+    // Umsögn → seljandi fær tilkynningu
+    await t.as(seller);
+    await t.q(`select save_push_subscription('https://push.example/seljandi', 'p256dh-key', 'auth-key')`);
+    await t.asAdmin();
+    await t.q(`delete from reviews`);
+    await t.as(buyer);
+    await t.q(`insert into reviews (conversation_id, reviewer_id, seller_id, stars, comment) values ($1, $2, $3, 4, 'Fínn seljandi')`, [
+      conv,
+      buyer,
+      seller,
+    ]);
+    const reviews = await sent();
+    expect(reviews.map((b) => b.kind)).toEqual(["review"]);
+    await t.as(null);
+    const [{ push_payload: r }] = await t.q<{ push_payload: { message: { title: string; body: string } } }>(
+      `select push_payload($1, 'review', $2)`,
+      [cfg.secret, reviews[0].id],
+    );
+    expect(r.message.title).toBe("Ný umsögn: ★★★★☆");
+    expect(r.message.body).toBe("Fínn seljandi");
+
+    await t.asAdmin();
+    await t.q(`delete from push_subscriptions`);
+    await t.q(`delete from notification_prefs`);
+    await t.q(`delete from listings where id = $1`, [listing]);
+  });
+
   it("stjórnborð: aðeins stjórnendur, bönn stöðva sölu og skilaboð", async () => {
     await t.asAdmin();
     await t.q(`insert into admins (user_id) values ($1)`, [stranger]);

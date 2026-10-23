@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { Avatar } from "@/components/avatar";
 import { Thumb } from "@/components/listing/thumb";
+import { PushPrompt } from "@/components/push-prompt";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { inputClass, primaryButton } from "@/components/ui/styles";
 import { MESSAGE_COLS, QUICK_REPLIES, UNREAD_EVENT, dayLabel, messageTime, sameDay, type Message } from "@/lib/chat";
@@ -308,6 +309,7 @@ export function ChatThread(props: Props) {
             </div>
           );
         })}
+        {messages.some((m) => m.sender_id === userId) && <PushPrompt reason={`Fáðu tilkynningu í símann þegar ${otherName} svarar.`} />}
         <div ref={endRef} />
       </div>
 

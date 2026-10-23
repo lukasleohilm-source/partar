@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ListingCard } from "@/components/listing/listing-card";
 import { FavoriteButton } from "@/components/listing/listing-actions";
+import { PushPrompt } from "@/components/push-prompt";
 import { LISTING_SUMMARY_SELECT, type ListingSummary } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/server";
 
@@ -33,6 +34,7 @@ export default async function FavoritesPage() {
         <h1 className="text-2xl font-bold tracking-tight">Uppáhalds</h1>
       </header>
 
+      {listings.length > 0 && <PushPrompt reason="Fáðu tilkynningu þegar verðið lækkar á auglýsingu í uppáhaldi." />}
       {listings.length ? (
         <ul className="grid grid-cols-2 gap-3">
           {listings.map((l, i) => (
