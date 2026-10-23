@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { LegalLinks } from "@/components/legal-links";
 import { ListingCard } from "@/components/listing/listing-card";
 import { MyCarPicker } from "@/components/search/my-car-picker";
 import { KINDS, type Kind } from "@/lib/i18n";
@@ -7,8 +8,8 @@ import { LISTING_SUMMARY_SELECT, type ListingSummary } from "@/lib/listings";
 import { MY_CAR_COOKIE, parseMyCar } from "@/lib/search";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ villa?: string }> }) {
-  const { villa } = await searchParams;
+export default async function Home({ searchParams }: { searchParams: Promise<{ villa?: string; eytt?: string }> }) {
+  const { villa, eytt } = await searchParams;
   const myCar = parseMyCar((await cookies()).get(MY_CAR_COOKIE)?.value);
   const supabase = await createClient();
   const [{ data }, makes, models] = await Promise.all([
@@ -33,6 +34,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
         </h1>
       </header>
 
+      {eytt && (
+        <p role="status" className="mb-4 rounded-xl bg-green-50 p-3 text-sm text-green-800">
+          Aðganginum þínum og öllum gögnum hefur verið eytt.
+        </p>
+      )}
       {villa === "tenging" && (
         <p role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">
           Ekki tókst að tengjast þjóninum. Athugaðu nettenginguna og reyndu aftur.
@@ -102,6 +108,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
           </div>
         )}
       </section>
+
+      <LegalLinks />
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { LegalLinks } from "@/components/legal-links";
+import { DeleteAccount } from "./delete-account";
 import { ProfileForm } from "./profile-form";
 import { logout } from "./actions";
 
@@ -48,6 +50,9 @@ export default async function ProfilePage() {
           </button>
         </form>
       )}
+
+      <DeleteAccount />
+      <LegalLinks />
     </div>
   );
 }

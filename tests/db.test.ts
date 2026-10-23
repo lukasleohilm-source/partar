@@ -173,6 +173,21 @@ describe("spjall og aðgangsreglur", () => {
     expect(await t.q(`select * from profile_contacts`)).toHaveLength(0);
   });
 
+  it("eyðing aðgangs fjarlægir prófíl, auglýsingar og samtöl", async () => {
+    await t.as(seller);
+    await t.q(`select delete_my_account()`);
+    await t.asAdmin();
+    const [c] = await t.q<{ users: number; listings: number; convs: number }>(
+      `select (select count(*)::int from auth.users where id = $1) users,
+              (select count(*)::int from listings where seller_id = $1) listings,
+              (select count(*)::int from conversations where seller_id = $1) convs`,
+      [seller],
+    );
+    expect(c).toEqual({ users: 0, listings: 0, convs: 0 });
+    await t.as(null);
+    await expect(t.q(`select delete_my_account()`)).rejects.toThrow();
+  });
+
   it("notandi les aðeins eigin myndir í geymslu (þarf til að geta eytt þeim)", async () => {
     await t.asAdmin();
     await t.q(`insert into storage.objects (bucket_id, name) values ('listing-images', $1), ('listing-images', $2)`, [

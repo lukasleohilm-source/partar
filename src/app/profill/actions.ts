@@ -39,6 +39,30 @@ export async function updateProfile(_prev: ProfileState, formData: FormData): Pr
   return { status: "saved" };
 }
 
+export async function deleteAccount(): Promise<{ error?: string } | void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/");
+
+  // Myndaskrár fyrst; gagnagrunnurinn sér um rest með cascade
+  const { data: images } = await supabase
+    .from("listing_images")
+    .select("path, listings!inner(seller_id)")
+    .eq("listings.seller_id", user.id);
+  if (images?.length) {
+    const { error } = await supabase.storage.from("listing-images").remove(images.map((i) => i.path));
+    if (error) return { error: "Ekki tókst að eyða myndum. Reyndu aftur." };
+  }
+
+  const { error } = await supabase.rpc("delete_my_account");
+  if (error) return { error: "Ekki tókst að eyða aðganginum. Reyndu aftur." };
+
+  await supabase.auth.signOut();
+  redirect("/?eytt=1");
+}
+
 export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
