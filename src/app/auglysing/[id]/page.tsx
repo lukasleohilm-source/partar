@@ -9,6 +9,7 @@ import { imageUrl, timeAgo } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/server";
 import { yearRange } from "@/lib/vehicles";
 import { contactSeller, setListingStatus } from "./actions";
+import { ReportListing } from "./report-listing";
 
 type ListingDetail = {
   id: string;
@@ -72,8 +73,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function ListingPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ListingPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ villa?: string }>;
+}) {
   const { id } = await params;
+  const { villa } = await searchParams;
   const listing = await getListing(id);
   if (!listing || listing.status === "removed") notFound();
 
@@ -110,6 +118,11 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
       <ImageGallery urls={listing.listing_images.map((i) => imageUrl(i.path))} title={listing.title} />
 
       <div className="space-y-5 px-4 pt-4">
+        {villa && (
+          <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
+            {villa === "lokad" ? "Seljandinn tekur ekki við skilaboðum frá þér." : "Ekki tókst að hefja spjall. Reyndu aftur."}
+          </p>
+        )}
         <header>
           {listing.status === "sold" && (
             <span className="mb-2 inline-block rounded-full bg-red-600 px-3 py-1 text-xs font-bold text-white">SELT</span>
@@ -169,6 +182,12 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
             <p className="text-sm text-stone-500">Notandi síðan {memberSince.format(new Date(listing.profiles.created_at))}</p>
           </div>
         </section>
+
+        {!isOwner && (
+          <div className="text-center">
+            <ReportListing listingId={listing.id} />
+          </div>
+        )}
       </div>
 
       {/* Aðgerðir fastar neðst, fyrir ofan aðalvalmyndina */}

@@ -30,17 +30,14 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Innskráning er ekki komin í viðmótið: á síðum sem þurfa notanda fær vafrinn
-  // nafnlausan notanda. Seinna má tengja netfang við hann (updateUser) svo gögnin haldast.
+  // Síður sem þurfa notanda: gestir fara á /byrja (CAPTCHA + nafnlaus notandi)
+  // og koma svo aftur. Netfang má tengja seinna án þess að gögn tapist.
   const path = request.nextUrl.pathname;
   if (!user && PROTECTED.some((p) => path === p || path.startsWith(p + "/"))) {
-    const { error } = await supabase.auth.signInAnonymously();
-    if (error) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/";
-      url.search = "?villa=tenging";
-      return NextResponse.redirect(url);
-    }
+    const url = request.nextUrl.clone();
+    url.pathname = "/byrja";
+    url.search = `?next=${encodeURIComponent(path + request.nextUrl.search)}`;
+    return NextResponse.redirect(url);
   }
 
   return response;

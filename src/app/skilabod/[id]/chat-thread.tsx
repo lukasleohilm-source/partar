@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { UNREAD_EVENT, dayLabel, messageTime, sameDay, type Message } from "@/lib/chat";
 import { formatPrice } from "@/lib/i18n";
 import { imageUrl } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/client";
+import { setBlocked } from "./actions";
 
 type Props = {
   conversationId: string;
   userId: string;
+  otherId: string;
+  iBlocked: boolean;
   otherName: string;
   role: "buyer" | "seller";
   listing: { id: string; title: string; price: number | null; sold: boolean; cover: string | null } | null;
@@ -19,7 +22,8 @@ type Props = {
 // Skilaboð sem eru á leiðinni fá neikvætt bráðabirgðaauðkenni
 type ChatMessage = Message & { state?: "sending" | "failed" };
 
-export function ChatThread({ conversationId, userId, otherName, role, listing, initialMessages }: Props) {
+export function ChatThread({ conversationId, userId, otherId, iBlocked, otherName, role, listing, initialMessages }: Props) {
+  const [blockPending, startBlock] = useTransition();
   const [supabase] = useState(createClient);
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [draft, setDraft] = useState("");
@@ -141,7 +145,26 @@ export function ChatThread({ conversationId, userId, otherName, role, listing, i
             {!live && " · tengist…"}
           </p>
         </div>
+        <button
+          type="button"
+          disabled={blockPending}
+          onClick={() => {
+            const msg = iBlocked
+              ? `Opna aftur fyrir ${otherName}?`
+              : `Loka á ${otherName}? Viðkomandi getur ekki sent þér skilaboð og þú sérð ekki auglýsingar viðkomandi í leit.`;
+            if (window.confirm(msg)) startBlock(() => setBlocked(conversationId, otherId, !iBlocked));
+          }}
+          className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium text-stone-600 active:bg-stone-100 disabled:opacity-50"
+        >
+          {iBlocked ? "Opna fyrir" : "🚫 Loka á"}
+        </button>
       </header>
+
+      {iBlocked && (
+        <p className="bg-stone-800 px-4 py-2 text-center text-sm text-white">
+          Þú hefur lokað á {otherName}. Hvorugt ykkar getur sent skilaboð.
+        </p>
+      )}
 
       {listing && (
         <Link href={`/auglysing/${listing.id}`} className="flex items-center gap-3 border-b border-stone-200 bg-white px-4 py-2">
@@ -190,7 +213,7 @@ export function ChatThread({ conversationId, userId, otherName, role, listing, i
                   onClick={() => send(m.body, m.id)}
                   className="mb-2 ml-auto block text-xs font-medium text-red-600"
                 >
-                  Ekki sent – ýttu til að reyna aftur
+                  Ekki sent – ýttu til að reyna aftur. Ef það gengur ekki hefur viðtakandinn lokað á skilaboð.
                 </button>
               )}
             </div>
@@ -200,6 +223,7 @@ export function ChatThread({ conversationId, userId, otherName, role, listing, i
       </div>
 
       <form
+        hidden={iBlocked}
         onSubmit={(e) => {
           e.preventDefault();
           send(draft);

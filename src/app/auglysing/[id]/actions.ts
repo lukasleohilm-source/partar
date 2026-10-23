@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { REPORT_REASONS, type ReportReason } from "@/lib/moderation";
 import { createClient } from "@/lib/supabase/server";
 
 export async function contactSeller(listingId: string) {
@@ -10,16 +11,35 @@ export async function contactSeller(listingId: string) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Innskráning er ekki komin: gestur fær nafnlausan notanda
-  if (!user) {
-    const { error } = await supabase.auth.signInAnonymously();
-    if (error) throw new Error("Ekki tókst að hefja spjall.");
-  }
+  // Gestur fer fyrst í gegnum /byrja (CAPTCHA og nafnlaus notandi) og kemur svo aftur
+  if (!user) redirect(`/byrja?next=${encodeURIComponent(`/auglysing/${listingId}`)}`);
 
   const { data: conversationId, error } = await supabase.rpc("start_conversation", { p_listing: listingId });
-  if (error || !conversationId) throw new Error("Ekki tókst að hefja spjall.");
+  if (error?.message.includes("blocked")) redirect(`/auglysing/${listingId}?villa=lokad`);
+  if (error || !conversationId) redirect(`/auglysing/${listingId}?villa=spjall`);
 
   redirect(`/skilabod/${conversationId}`);
+}
+
+export async function reportListing(
+  listingId: string,
+  reason: ReportReason,
+  details: string,
+): Promise<{ error?: boolean; needsGuest?: boolean }> {
+  if (!(reason in REPORT_REASONS)) return { error: true };
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { needsGuest: true };
+
+  const { error } = await supabase.from("reports").insert({
+    listing_id: listingId,
+    reporter_id: user.id,
+    reason,
+    details: details.trim().slice(0, 1000) || null,
+  });
+  return error ? { error: true } : {};
 }
 
 export async function setListingStatus(listingId: string, status: "active" | "sold") {

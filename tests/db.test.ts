@@ -173,6 +173,48 @@ describe("spjall og aðgangsreglur", () => {
     expect(await t.q(`select * from profile_contacts`)).toHaveLength(0);
   });
 
+  it("lokun: sá sem lokað er á getur ekki sent né hafið samtal og hverfur úr leit", async () => {
+    await t.as(seller);
+    await t.q(`insert into blocks (blocker_id, blocked_id) values ($1, $2)`, [seller, buyer]);
+
+    await t.as(buyer);
+    await expect(
+      t.q(`insert into messages (conversation_id, sender_id, body) values ($1, $2, 'halló?')`, [conv, buyer]),
+    ).rejects.toThrow();
+    const [l] = await t.q<{ id: string }>(`select id from listings where title = 'Ljós tilboð'`);
+    await expect(t.q(`select start_conversation($1)`, [l.id])).rejects.toThrow(/blocked/);
+    // Kaupandinn sér ekki lokanir seljandans
+    expect(await t.q(`select * from blocks`)).toHaveLength(0);
+
+    // Seljandi sér ekki auglýsingar þess sem hann lokaði á (kaupandi á engar; prófum öfugt)
+    await t.as(buyer);
+    await t.q(`insert into blocks (blocker_id, blocked_id) values ($1, $2)`, [buyer, seller]);
+    expect(await t.q(`select * from search_listings()`)).toHaveLength(0);
+    await t.q(`delete from blocks where blocker_id = $1`, [buyer]);
+    expect(await t.q(`select * from search_listings()`)).toHaveLength(4);
+
+    await t.as(seller);
+    await t.q(`delete from blocks where blocker_id = $1`, [seller]);
+    await t.as(buyer);
+    await t.q(`insert into messages (conversation_id, sender_id, body) values ($1, $2, 'opið aftur')`, [conv, buyer]);
+  });
+
+  it("tilkynningar: ekki eigin auglýsing, og þrjár fela auglýsingu", async () => {
+    const [l] = await t.q<{ id: string }>(`select id from listings where title = 'Ljós tilboð'`);
+    await t.as(seller);
+    await expect(t.q(`insert into reports (listing_id, reporter_id, reason) values ($1, $2, 'svik')`, [l.id, seller])).rejects.toThrow();
+
+    for (const u of [buyer, stranger, await t.createUser("thridji@test.is")]) {
+      await t.as(u);
+      await t.q(`insert into reports (listing_id, reporter_id, reason) values ($1, $2, 'svik')`, [l.id, u]);
+    }
+    await t.asAdmin();
+    const [after] = await t.q<{ status: string }>(`select status from listings where id = $1`, [l.id]);
+    expect(after.status).toBe("removed");
+    await t.q(`update listings set status = 'active' where id = $1`, [l.id]);
+    await t.q(`delete from reports where listing_id = $1`, [l.id]);
+  });
+
   it("eyðing aðgangs fjarlægir prófíl, auglýsingar og samtöl", async () => {
     await t.as(seller);
     await t.q(`select delete_my_account()`);

@@ -50,12 +50,21 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
   if (!conv) notFound();
 
   const iAmBuyer = conv.buyer_id === user.id;
+  const otherId = iAmBuyer ? conv.seller_id : conv.buyer_id;
+  const { data: block } = await supabase
+    .from("blocks")
+    .select("blocked_id")
+    .eq("blocker_id", user.id)
+    .eq("blocked_id", otherId)
+    .maybeSingle();
   const cover = conv.listings?.listing_images.sort((a, b) => a.sort - b.sort)[0];
 
   return (
     <ChatThread
       conversationId={conv.id}
       userId={user.id}
+      otherId={otherId}
+      iBlocked={Boolean(block)}
       otherName={iAmBuyer ? conv.seller.display_name : conv.buyer.display_name}
       role={iAmBuyer ? "buyer" : "seller"}
       listing={
