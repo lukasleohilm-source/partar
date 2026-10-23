@@ -12,23 +12,18 @@ self.addEventListener("push", (event) => {
   }
   const url = data.url || "/";
 
+  // Alltaf þarf að sýna tilkynningu: iPhone afturkallar áskriftina ef ýtingum er sleppt
+  // og Chrome sýnir þá sjálfur almenna „uppfært í bakgrunni“ tilkynningu
   event.waitUntil(
-    (async () => {
-      // Engin tilkynning ef notandinn er þegar með þessa síðu opna og í forgrunni
-      const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
-      const viewing = windows.some((w) => w.focused && new URL(w.url).pathname === url);
-      if (viewing) return;
-
-      await self.registration.showNotification(data.title || "Partar", {
-        body: data.body || "",
-        icon: "/pwa-icon/192",
-        badge: "/pwa-icon/192",
-        tag: data.tag,
-        renotify: Boolean(data.tag),
-        lang: "is",
-        data: { url },
-      });
-    })(),
+    self.registration.showNotification(data.title || "Partar", {
+      body: data.body || "",
+      icon: "/pwa-icon/192",
+      badge: "/pwa-icon/192",
+      tag: data.tag,
+      renotify: Boolean(data.tag),
+      lang: "is",
+      data: { url },
+    }),
   );
 });
 
