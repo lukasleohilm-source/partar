@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { LegalLinks } from "@/components/legal-links";
+import { PushToggle } from "@/components/push-toggle";
 import { DeleteAccount } from "./delete-account";
 import { ProfileForm } from "./profile-form";
 import { SaveAccount } from "./save-account";
@@ -35,6 +36,10 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         </p>
       )}
       {user.is_anonymous && <SaveAccount />}
+
+      <div className="mb-4">
+        <PushToggle />
+      </div>
 
       <Link
         href="/minar-auglysingar"

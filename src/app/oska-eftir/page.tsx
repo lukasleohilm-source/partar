@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LiveRefresh } from "@/components/live-refresh";
+import { PushToggle } from "@/components/push-toggle";
 import { formatPrice } from "@/lib/i18n";
 import { LISTING_SUMMARY_SELECT, imageUrl, timeAgo, type ListingSummary } from "@/lib/listings";
 import { searchHref } from "@/lib/search";
@@ -58,6 +59,8 @@ export default async function WantedPage() {
           ＋ Ný ósk
         </Link>
       </header>
+
+      {wants.length > 0 && <PushToggle compact />}
 
       {wants.length === 0 && notes.length === 0 && (
         <div className="rounded-2xl bg-white p-6 text-center">

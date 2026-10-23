@@ -215,6 +215,43 @@ describe("spjall og aðgangsreglur", () => {
     await t.q(`delete from reports where listing_id = $1`, [l.id]);
   });
 
+  it("ýtitilkynning: skilaboð til áskrifanda sendast á Worker með leyndarlykli", async () => {
+    await t.as(buyer);
+    await t.q(`select save_push_subscription('https://push.example/abc', 'p256dh-key', 'auth-key')`);
+
+    await t.as(seller);
+    await t.q(`insert into messages (conversation_id, sender_id, body) values ($1, $2, 'Já, hann er til')`, [conv, seller]);
+
+    await t.asAdmin();
+    const [cfg] = await t.q<{ secret: string; endpoint: string }>(`select secret, endpoint from private.push_config`);
+    const reqs = await t.q<{ url: string; body: { kind: string; id: string }; headers: Record<string, string> }>(
+      `select url, body, headers from net.requests order by id`,
+    );
+    expect(reqs).toHaveLength(1); // kaupandi á áskrift, seljandi ekki
+    expect(reqs[0].url).toBe(cfg.endpoint);
+    expect(reqs[0].body.kind).toBe("message");
+    expect(reqs[0].headers["x-partar-secret"]).toBe(cfg.secret);
+
+    await t.as(null);
+    await expect(t.q(`select push_payload('rangt', 'message', $1)`, [reqs[0].body.id])).rejects.toThrow(/forbidden/);
+    const [{ push_payload: p }] = await t.q<{ push_payload: { message: { title: string; body: string; url: string }; subscriptions: { endpoint: string }[] } }>(
+      `select push_payload($1, 'message', $2)`,
+      [cfg.secret, reqs[0].body.id],
+    );
+    expect(p.message.title).toBe("seljandi");
+    expect(p.message.body).toBe("Já, hann er til");
+    expect(p.message.url).toBe(`/skilabod/${conv}`);
+    expect(p.subscriptions.map((s) => s.endpoint)).toEqual(["https://push.example/abc"]);
+
+    // Nafnlaus getur hvorki lesið áskriftir né leyndarlykil beint
+    expect(await t.q(`select * from push_subscriptions`)).toHaveLength(0);
+    await expect(t.q(`select * from private.push_config`)).rejects.toThrow();
+
+    await t.q(`select remove_push_subscription($1, 'https://push.example/abc')`, [cfg.secret]);
+    await t.asAdmin();
+    expect(await t.q(`select * from push_subscriptions`)).toHaveLength(0);
+  });
+
   it("eyðing aðgangs fjarlægir prófíl, auglýsingar og samtöl", async () => {
     await t.as(seller);
     await t.q(`select delete_my_account()`);

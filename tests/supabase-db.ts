@@ -24,6 +24,13 @@ export async function createTestDb() {
     create function storage.foldername(name text) returns text[] language sql as $$ select string_to_array(name, '/') $$;
     alter table storage.objects enable row level security;
     create publication supabase_realtime;
+    -- pg_net: beiðnir eru skráðar í töflu í stað þess að vera sendar
+    create schema net;
+    create table net.requests (id bigint generated always as identity primary key, url text, body jsonb, headers jsonb);
+    create function net.http_post(url text, body jsonb default '{}', params jsonb default '{}',
+                                  headers jsonb default '{}', timeout_milliseconds int default 5000)
+      returns bigint language sql as
+      $$ insert into net.requests (url, body, headers) values (url, body, headers) returning id $$;
     alter default privileges in schema public grant all on tables to anon, authenticated;
     alter default privileges in schema public grant all on sequences to anon, authenticated;
   `);
