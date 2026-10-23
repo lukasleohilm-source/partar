@@ -102,7 +102,7 @@ export default async function MyListingsPage({ searchParams }: { searchParams: P
                       ) : (
                         `Birt ${timeAgo(l.published_at ?? l.created_at)}`
                       )}
-                      {chats > 0 && ` · 💬 ${chats} ${chats === 1 ? "samtal" : "samtöl"}`}
+                      {chats > 0 && ` · ${chats} ${chats === 1 ? "samtal" : "samtöl"}`}
                     </p>
                   </div>
                 </Link>

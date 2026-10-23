@@ -1,3 +1,4 @@
+import { ChevronRight, Package } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -45,10 +46,10 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         href="/minar-auglysingar"
         className="mb-6 flex items-center justify-between rounded-2xl bg-surface p-4 font-medium active:bg-stone-50"
       >
-        <span>📦 Mínar auglýsingar</span>
-        <span className="text-stone-400" aria-hidden>
-          ›
+        <span className="flex items-center gap-2.5">
+          <Package size={20} className="text-orange-600" /> Mínar auglýsingar
         </span>
+        <ChevronRight size={20} className="text-stone-400" aria-hidden />
       </Link>
 
       <ProfileForm

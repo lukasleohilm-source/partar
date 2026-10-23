@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft } from "lucide-react";
+import { Ban, ChevronLeft, SendHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { UNREAD_EVENT, dayLabel, messageTime, sameDay, type Message } from "@/lib/chat";
@@ -158,7 +158,7 @@ export function ChatThread({ conversationId, userId, otherId, iBlocked, otherNam
           }}
           className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium text-stone-600 active:bg-stone-100 disabled:opacity-50"
         >
-          {iBlocked ? "Opna fyrir" : "🚫 Loka á"}
+          {iBlocked ? "Opna fyrir" : <><Ban size={15} className="-mt-0.5 mr-1 inline" />Loka á</>}
         </button>
       </header>
 
@@ -248,7 +248,7 @@ export function ChatThread({ conversationId, userId, otherId, iBlocked, otherNam
           aria-label="Senda"
           className="flex size-11 shrink-0 items-center justify-center rounded-full bg-orange-600 text-lg text-white disabled:bg-stone-300"
         >
-          ➤
+          <SendHorizontal size={20} />
         </button>
       </form>
     </div>

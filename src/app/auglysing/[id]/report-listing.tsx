@@ -1,5 +1,7 @@
 "use client";
 
+import { Flag } from "lucide-react";
+
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -28,7 +30,7 @@ export function ReportListing({ listingId }: { listingId: string }) {
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className="text-sm text-stone-500 underline-offset-2 hover:underline">
-        🚩 Tilkynna auglýsingu
+        <Flag size={14} /> Tilkynna auglýsingu
       </button>
       <BottomSheet
         open={open}

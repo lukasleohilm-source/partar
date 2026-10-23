@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { ListingCard } from "@/components/listing/listing-card";
@@ -88,7 +89,7 @@ export default async function SearchPage({
   if (filters.sort !== "newest") chips.push({ label: SORTS[filters.sort], href: searchHref(filters, { sort: "newest" }) });
   if (urlCar) {
     chips.push({
-      label: `🚗 ${carLabel(urlCar, allMakes, allModels)}`,
+      label: carLabel(urlCar, allMakes, allModels),
       href: searchHref(filters, { make: undefined, model: undefined, year: undefined }),
     });
   }
@@ -122,7 +123,7 @@ export default async function SearchPage({
                 className="flex items-center gap-1.5 rounded-full bg-stone-900 py-1.5 pl-3 pr-2.5 text-sm text-white"
                 aria-label={`Fjarlægja síu: ${c.label}`}
               >
-                {c.label} <span aria-hidden>✕</span>
+                {c.label} <X size={14} aria-hidden />
               </Link>
             </li>
           ))}
@@ -146,12 +147,12 @@ export default async function SearchPage({
             <nav aria-label="Síður" className="flex gap-2 pt-2">
               {filters.page > 1 && (
                 <Link href={pageHref(filters.page - 1)} className="flex-1 rounded-xl border border-stone-300 bg-surface py-3 text-center font-medium">
-                  ‹ Fyrri
+                  <ChevronLeft size={18} /> Fyrri
                 </Link>
               )}
               {hasMore && (
                 <Link href={pageHref(filters.page + 1)} className="flex-1 rounded-xl border border-stone-300 bg-surface py-3 text-center font-medium">
-                  Næsta ›
+                  Næsta <ChevronRight size={18} />
                 </Link>
               )}
             </nav>

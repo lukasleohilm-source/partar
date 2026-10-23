@@ -1,3 +1,4 @@
+import { BellRing, Plus } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LiveRefresh } from "@/components/live-refresh";
@@ -56,8 +57,8 @@ export default async function WantedPage() {
 
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Óska eftir</h1>
-        <Link href="/oska-eftir/ny" className="rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white active:bg-orange-700">
-          ＋ Ný ósk
+        <Link href="/oska-eftir/ny" className="inline-flex items-center gap-1 rounded-full bg-orange-600 py-2 pl-3 pr-4 text-sm font-semibold text-white shadow-md shadow-orange-600/25 active:bg-orange-700">
+          <Plus size={17} strokeWidth={2.6} /> Ný ósk
         </Link>
       </header>
 
@@ -65,8 +66,8 @@ export default async function WantedPage() {
 
       {wants.length === 0 && notes.length === 0 && (
         <div className="rounded-2xl bg-surface p-6 text-center">
-          <div className="mb-2 text-4xl" aria-hidden>
-            🙋
+          <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-orange-50 text-orange-600" aria-hidden>
+            <BellRing size={28} />
           </div>
           <p className="font-medium">Vantar þig eitthvað?</p>
           <p className="mt-1 text-sm text-stone-600">
