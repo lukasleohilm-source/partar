@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "partar",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": { "enabled": true },
+  "routes": [{ "pattern": "partar.lukels255.com", "custom_domain": true }],
+  "vars": {
+    // Grunnslóð í hlekkjum í tölvupósti (sjá src/lib/site-url.ts)
+    "SITE_URL": "https://partar.lukels255.com"
+  }
+}

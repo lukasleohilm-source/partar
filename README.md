@@ -25,6 +25,19 @@ npm run dev                 # http://localhost:3000
 - **Supabase Studio:** http://localhost:54323
 - **Endurstilla gagnagrunn** (keyrir migrations + seed upp á nýtt): `npx supabase db reset`
 
+## Í loftinu
+
+**https://partar.lukels255.com**: Cloudflare Worker `partar` (OpenNext). Gagnagrunnur: Supabase-ský
+`tkxkrbetopzhstodavzm` (eu-west-1).
+
+```bash
+npm.cmd run cf:deploy       # byggir með OpenNext og birtir (þarf `npx wrangler login`)
+npx.cmd supabase db push    # nýjar migrations í skýið
+npm.cmd test                # gagnagrunnsprófanir (PGlite)
+```
+
+`next build` og `next dev` nota sömu `.next`-möppu; stöðvaðu þróunarþjóninn áður en þú byggir.
+
 ## Uppbygging
 
 - `supabase/migrations/` – skema, föll/triggerar (leit, „óska eftir“, spjall), RLS og myndageymsla
