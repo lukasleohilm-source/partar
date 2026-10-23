@@ -19,6 +19,8 @@ export async function createTestDb() {
     create table auth.users (id uuid primary key default gen_random_uuid(), email text);
     create function auth.uid() returns uuid language sql stable as
       $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
+    create function auth.jwt() returns jsonb language sql stable as
+      $$ select coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb $$;
     grant usage on schema auth to anon, authenticated;
     create schema storage;
     create table storage.buckets (id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);
@@ -50,12 +52,15 @@ export async function createTestDb() {
   }
 
   // Keyra sem tiltekinn notandi (RLS gildir) eða nafnlaus; asAdmin sleppir RLS
-  async function as(uid: string | null) {
-    await db.exec(`reset role; select set_config('request.jwt.claim.sub', '${uid ?? ""}', false);`);
+  async function as(uid: string | null, opts: { anonymous?: boolean } = {}) {
+    const claims = JSON.stringify(uid ? { sub: uid, is_anonymous: Boolean(opts.anonymous) } : {});
+    await db.exec(
+      `reset role; select set_config('request.jwt.claim.sub', '${uid ?? ""}', false), set_config('request.jwt.claims', '${claims}', false);`,
+    );
     await db.exec(uid ? "set role authenticated" : "set role anon");
   }
   async function asAdmin() {
-    await db.exec(`reset role; select set_config('request.jwt.claim.sub', '', false);`);
+    await db.exec(`reset role; select set_config('request.jwt.claim.sub', '', false), set_config('request.jwt.claims', '', false);`);
   }
 
   async function createUser(email: string | null) {

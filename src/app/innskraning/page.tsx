@@ -5,6 +5,7 @@ import { GoogleButton, OrDivider } from "@/components/oauth-buttons";
 import { getUser } from "@/lib/supabase/server";
 import { safeNext } from "@/lib/safe-next";
 import { LoginForm } from "./login-form";
+import { MergePrompt } from "./merge-prompt";
 
 export const metadata = { title: "Innskráning – Partar" };
 
@@ -31,22 +32,12 @@ export default async function LoginPage({
       <h1 className="mb-1 text-2xl font-extrabold tracking-tight">Skráðu þig inn</h1>
       <p className="mb-6 text-stone-600">Ekkert lykilorð. Nýir notendur eru skráðir sjálfkrafa.</p>
 
-      {villa === "google_til" ? (
-        <div role="alert" className="mb-5 space-y-3 rounded-2xl bg-amber-50 p-4 text-sm text-amber-900">
-          <p>
-            <strong>Þessi Google-aðgangur er þegar skráður á Pörtum.</strong> Þú getur skráð þig inn með honum, en þá fylgja
-            auglýsingar og skilaboð gestaaðgangsins ekki með.
-          </p>
-          <GoogleButton next={next} mode="signin" label="Skrá inn með Google samt" />
-        </div>
-      ) : (
-        villa &&
-        ERRORS[villa] && (
-          <p role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">
-            {ERRORS[villa]}
-          </p>
-        )
-      )}
+      <MergePrompt
+        next={next}
+        forced={villa === "google_til"}
+        isGuest={Boolean(user?.is_anonymous)}
+        errorText={villa ? ERRORS[villa] : undefined}
+      />
 
       <GoogleButton next={next} />
       {user?.is_anonymous && (

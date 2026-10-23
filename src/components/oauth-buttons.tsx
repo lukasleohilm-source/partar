@@ -16,7 +16,9 @@ function GoogleLogo() {
   );
 }
 
-type Mode = "auto" | "signin";
+type Mode = "auto" | "signin" | "merge";
+
+export const MERGE_TOKEN_KEY = "partar_sameina";
 
 // „Halda áfram með Google“. Gestur tengir Google við núverandi aðgang (gögn haldast);
 // annars er skráð inn. `mode="signin"` skráir alltaf inn (t.d. ef Google-aðgangurinn er þegar til).
@@ -28,10 +30,22 @@ export function GoogleButton({ next = "/", mode = "auto", label }: { next?: stri
     setPending(true);
     setError(null);
     const supabase = createClient();
-    const redirectTo = `${window.location.origin}/auth/confirm?next=${encodeURIComponent(next)}`;
     const {
       data: { session },
     } = await supabase.auth.getSession();
+
+    // Sameining: gesturinn fær einnota lykil áður en skráð er inn á hinn aðganginn
+    let target = next;
+    if (mode === "merge" && session?.user.is_anonymous) {
+      const { data: token, error: tokenError } = await supabase.rpc("create_merge_token");
+      if (tokenError || !token) {
+        setPending(false);
+        return setError("Ekki tókst að undirbúa flutning gagna. Reyndu aftur.");
+      }
+      localStorage.setItem(MERGE_TOKEN_KEY, token as string);
+      target = `/sameina?next=${encodeURIComponent(next)}`;
+    }
+    const redirectTo = `${window.location.origin}/auth/confirm?next=${encodeURIComponent(target)}`;
 
     const { error } =
       mode === "auto" && session?.user.is_anonymous

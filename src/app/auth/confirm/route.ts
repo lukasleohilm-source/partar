@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   // Villa frá Google/Supabase (t.d. hætt við, eða Google-aðgangur þegar tengdur öðrum notanda)
   const errorCode = searchParams.get("error_code") ?? searchParams.get("error");
   if (errorCode) {
-    if (errorCode === "identity_already_exists") return back("google_til");
+    if (errorCode === "identity_already_exists" || errorCode === "email_exists") return back("google_til");
     if (errorCode === "access_denied") return back("haett_vid");
     return back("google");
   }

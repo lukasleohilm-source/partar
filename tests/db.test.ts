@@ -419,3 +419,44 @@ describe("spjall og aðgangsreglur", () => {
   });
 
 });
+
+describe("sameining aðganga (gestur → aðgangur sem er til)", () => {
+  it("flytur auglýsingar, óskir, uppáhalds og stjórnandaréttindi og eyðir gestinum", async () => {
+    const guest = await t.createUser(null);
+    const owner = await t.createUser("eigandi@test.is");
+    await t.asAdmin();
+    await t.q(`insert into admins (user_id) values ($1)`, [guest]);
+    await t.q(`update profiles set display_name = 'Lúkas' where id = $1`, [guest]);
+
+    await t.as(guest, { anonymous: true });
+    const [l] = await t.q<{ id: string }>(
+      `insert into listings (seller_id, title, condition, region, universal_fit) values ($1, 'Gestaauglýsing', 'gott', 'sudurland', true) returning id`,
+      [guest],
+    );
+    await t.q(`insert into favorites (user_id, listing_id) values ($1, $2)`, [guest, l.id]);
+    await t.q(`insert into wanted_requests (user_id, query) values ($1, 'felgur')`, [guest]);
+    const [{ create_merge_token: token }] = await t.q<{ create_merge_token: string }>(`select create_merge_token()`);
+
+    // Innskráður (ekki gestur) getur ekki búið til lykil
+    await t.as(owner);
+    await expect(t.q(`select create_merge_token()`)).rejects.toThrow(/not_guest/);
+    // Rangur lykill
+    await expect(t.q(`select claim_merge_token('rangt')`)).rejects.toThrow(/invalid_token/);
+
+    const [{ claim_merge_token: moved }] = await t.q<{ claim_merge_token: number }>(`select claim_merge_token($1)`, [token]);
+    expect(moved).toBe(1);
+    await expect(t.q(`select claim_merge_token($1)`, [token])).rejects.toThrow(/invalid_token/); // einnota
+
+    await t.asAdmin();
+    const [s] = await t.q<{ seller: string; favs: number; wants: number; admin: number; guests: number; name: string }>(
+      `select (select seller_id::text from listings where id = $1) seller,
+              (select count(*)::int from favorites where user_id = $2) favs,
+              (select count(*)::int from wanted_requests where user_id = $2) wants,
+              (select count(*)::int from admins where user_id = $2) admin,
+              (select count(*)::int from auth.users where id = $3) guests,
+              (select display_name from profiles where id = $2) name`,
+      [l.id, owner, guest],
+    );
+    expect(s).toEqual({ seller: owner, favs: 1, wants: 1, admin: 1, guests: 0, name: "Lúkas" });
+  });
+});
