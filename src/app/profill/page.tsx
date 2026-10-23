@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "./profile-form";
@@ -20,7 +21,17 @@ export default async function ProfilePage() {
   return (
     <div className="mx-auto max-w-md px-4 pt-6">
       <h1 className="text-2xl font-bold">Prófíll</h1>
-      <p className="mb-6 break-all text-sm text-stone-500">{user.email || "Gestur (innskráning kemur seinna)"}</p>
+      <p className="mb-4 break-all text-sm text-stone-500">{user.email || "Gestur (innskráning kemur seinna)"}</p>
+
+      <Link
+        href="/minar-auglysingar"
+        className="mb-6 flex items-center justify-between rounded-2xl bg-white p-4 font-medium active:bg-stone-50"
+      >
+        <span>📦 Mínar auglýsingar</span>
+        <span className="text-stone-400" aria-hidden>
+          ›
+        </span>
+      </Link>
 
       <ProfileForm
         displayName={profile?.display_name ?? ""}
