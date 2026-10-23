@@ -11,6 +11,7 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://partar.lukels255.com"),
   title: "Partar – notaðir varahlutir og bílar",
   description: "Markaðstorg fyrir notaða varahluti, partabíla og ódýra bíla á Íslandi.",
   appleWebApp: { capable: true, title: "Partar", statusBarStyle: "default" },
