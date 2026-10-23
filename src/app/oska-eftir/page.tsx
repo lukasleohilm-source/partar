@@ -6,7 +6,8 @@ import { LISTING_SUMMARY_SELECT, imageUrl, timeAgo, type ListingSummary } from "
 import { searchHref } from "@/lib/search";
 import { createClient } from "@/lib/supabase/server";
 import { WANTED_SELECT, describeWanted, wantedTitle, wantedToFilters, type Wanted } from "@/lib/wanted";
-import { deleteWanted, setWantedActive } from "./actions";
+import { setWantedActive } from "./actions";
+import { DeleteWantedButton } from "./delete-wanted-button";
 import { MarkNotificationsRead } from "./mark-read";
 
 export const metadata = { title: "Óska eftir – Partar" };
@@ -138,11 +139,7 @@ export default async function WantedPage() {
                       {w.active ? "Setja í hlé" : "Virkja aftur"}
                     </button>
                   </form>
-                  <form action={deleteWanted.bind(null, w.id)}>
-                    <button type="submit" className="text-red-600">
-                      Eyða
-                    </button>
-                  </form>
+                  <DeleteWantedButton id={w.id} title={wantedTitle(w, m, c)} />
                 </div>
               </li>
             ))}
