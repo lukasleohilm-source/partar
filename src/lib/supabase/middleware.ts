@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Síður sem krefjast innskráningar
-const PROTECTED = ["/ny-auglysing", "/skilabod", "/oska-eftir", "/tilkynningar", "/minar-auglysingar", "/profill"];
+const PROTECTED = ["/ny-auglysing", "/skilabod", "/oska-eftir", "/tilkynningar", "/minar-auglysingar", "/profill", "/uppahalds", "/stjorn"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });

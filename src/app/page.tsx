@@ -1,12 +1,14 @@
-import { Car, CarFront, ChevronRight, Search, Wrench } from "lucide-react";
+import { Car, CarFront, ChevronRight, Heart, Search, Wrench } from "lucide-react";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { LegalLinks } from "@/components/legal-links";
 import { ListingCard } from "@/components/listing/listing-card";
+import { FavoriteButton } from "@/components/listing/listing-actions";
 import { Logo } from "@/components/logo";
 import { MyCarPicker } from "@/components/search/my-car-picker";
 import { SearchBox } from "@/components/search/search-box";
 import { CATEGORY_ICONS, CATEGORY_SHORT } from "@/lib/category-icons";
+import { favoriteIds } from "@/lib/favorites";
 import { LISTING_SUMMARY_SELECT, type ListingSummary } from "@/lib/listings";
 import { MY_CAR_COOKIE, parseMyCar } from "@/lib/search";
 import { createClient } from "@/lib/supabase/server";
@@ -21,7 +23,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
   const { villa, eytt } = await searchParams;
   const myCar = parseMyCar((await cookies()).get(MY_CAR_COOKIE)?.value);
   const supabase = await createClient();
-  const [{ data }, makes, models, categories] = await Promise.all([
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const [{ data }, makes, models, categories, favs] = await Promise.all([
     supabase
       .from("listings")
       .select(LISTING_SUMMARY_SELECT)
@@ -31,6 +36,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
     supabase.from("makes").select("id, name").order("name"),
     supabase.from("models").select("id, make_id, name").order("name"),
     supabase.from("categories").select("id, slug, sort").is("parent_id", null).order("sort"),
+    favoriteIds(supabase, user?.id),
   ]);
   const listings = (data ?? []) as ListingSummary[];
 
@@ -44,6 +50,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
         />
         <header className="mb-5 flex items-center justify-between">
           <Logo />
+          <Link
+            href="/uppahalds"
+            aria-label="Uppáhalds"
+            className="flex size-10 items-center justify-center rounded-full bg-surface/80 text-stone-700 shadow-sm ring-1 ring-black/5 backdrop-blur"
+          >
+            <Heart size={20} />
+          </Link>
         </header>
         <h1 className="mb-4 text-[26px] font-extrabold leading-[1.15] tracking-tight text-stone-900">
           Notaðir varahlutir,
@@ -134,7 +147,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
           <ul className="grid grid-cols-2 gap-3">
             {listings.map((l, i) => (
               <li key={l.id}>
-                <ListingCard listing={l} priority={i < 4} />
+                <ListingCard
+                  listing={l}
+                  priority={i < 4}
+                  favorite={l.seller_id !== user?.id && <FavoriteButton listingId={l.id} initial={favs.has(l.id)} />}
+                />
               </li>
             ))}
           </ul>

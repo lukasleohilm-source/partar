@@ -1,12 +1,26 @@
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, SearchX, X } from "lucide-react";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { ListingCard } from "@/components/listing/listing-card";
+import { FavoriteButton } from "@/components/listing/listing-actions";
+import { MyPlacePicker } from "@/components/search/my-place-picker";
 import { MyCarPicker } from "@/components/search/my-car-picker";
 import { SearchForm } from "@/components/search/search-form";
 import { CONDITIONS, KINDS, REGIONS, formatPrice } from "@/lib/i18n";
+import { favoriteIds } from "@/lib/favorites";
 import { LISTING_SUMMARY_SELECT, type ListingSummary } from "@/lib/listings";
-import { MY_CAR_COOKIE, PAGE_SIZE, SORTS, parseFilters, parseMyCar, searchHref, type Filters } from "@/lib/search";
+import { coordsOf, distanceKm } from "@/lib/places";
+import {
+  MY_CAR_COOKIE,
+  MY_PLACE_COOKIE,
+  PAGE_SIZE,
+  SORTS,
+  parseFilters,
+  parseMyCar,
+  parseMyPlace,
+  searchHref,
+  type Filters,
+} from "@/lib/search";
 import { createClient } from "@/lib/supabase/server";
 import { carLabel } from "@/lib/vehicles";
 
@@ -20,13 +34,19 @@ export default async function SearchPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const filters = parseFilters(await searchParams);
-  const myCar = parseMyCar((await cookies()).get(MY_CAR_COOKIE)?.value);
+  const jar = await cookies();
+  const myCar = parseMyCar(jar.get(MY_CAR_COOKIE)?.value);
+  const myPlace = parseMyPlace(jar.get(MY_PLACE_COOKIE)?.value);
 
   // Bíll í slóð gengur fyrir; annars „Minn bíll“ nema notandi hafi valið að sýna allt
   const urlCar = filters.make ? { make: filters.make, model: filters.model ?? null, year: filters.year ?? null } : null;
   const car = urlCar ?? (filters.allCars ? null : myCar);
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const useDistance = Boolean(myPlace && (filters.sort === "distance" || filters.maxKm));
   const args = {
     q: filters.q,
     p_kind: filters.kind,
@@ -41,16 +61,20 @@ export default async function SearchPage({
     p_sort: filters.sort,
     p_limit: PAGE_SIZE + 1, // einni fleiri til að vita hvort næsta síða sé til
     p_offset: (filters.page - 1) * PAGE_SIZE,
+    p_near: useDistance ? myPlace! : undefined,
+    p_max_km: myPlace ? filters.maxKm : undefined,
   };
   // Ónotaðar breytur sleppt svo sjálfgefin gildi fallsins gildi
   const rpcArgs = Object.fromEntries(Object.entries(args).filter(([, v]) => v !== undefined));
 
-  const [results, makes, models, categories] = await Promise.all([
+  const [results, makes, models, categories, favs] = await Promise.all([
     supabase.rpc("search_listings", rpcArgs).select(LISTING_SUMMARY_SELECT),
     supabase.from("makes").select("id, name").order("name"),
     supabase.from("models").select("id, make_id, name").order("name"),
     supabase.from("categories").select("id, parent_id, name, sort").order("sort"),
+    favoriteIds(supabase, user?.id),
   ]);
+  const here = myPlace ? coordsOf(myPlace, "hofudborgarsvaedid") : null;
 
   const rows = ((results.data ?? []) as Row[]).map((r) => ({
     ...r,
@@ -86,6 +110,7 @@ export default async function SearchPage({
     });
   }
   if (filters.region) chips.push({ label: REGIONS[filters.region], href: searchHref(filters, { region: undefined }) });
+  if (filters.maxKm && myPlace) chips.push({ label: `Innan ${filters.maxKm} km`, href: searchHref(filters, { maxKm: undefined }) });
   if (filters.sort !== "newest") chips.push({ label: SORTS[filters.sort], href: searchHref(filters, { sort: "newest" }) });
   if (urlCar) {
     chips.push({
@@ -114,6 +139,10 @@ export default async function SearchPage({
         />
       )}
 
+      <div className="flex gap-2">
+        <MyPlacePicker key={`${myPlace}-${filters.maxKm}`} place={myPlace} maxKm={filters.maxKm} />
+      </div>
+
       {chips.length > 0 && (
         <ul className="flex flex-wrap gap-2">
           {chips.map((c) => (
@@ -139,19 +168,23 @@ export default async function SearchPage({
           <ul className="grid grid-cols-2 gap-3 pt-1">
             {listings.map((l) => (
               <li key={l.id}>
-                <ListingCard listing={l} />
+                <ListingCard
+                  listing={l}
+                  distanceKm={here ? distanceKm(here, coordsOf(l.postal_code, l.region)) : null}
+                  favorite={l.seller_id !== user?.id && <FavoriteButton listingId={l.id} initial={favs.has(l.id)} />}
+                />
               </li>
             ))}
           </ul>
           {(filters.page > 1 || hasMore) && (
             <nav aria-label="Síður" className="flex gap-2 pt-2">
               {filters.page > 1 && (
-                <Link href={pageHref(filters.page - 1)} className="flex-1 rounded-xl border border-stone-300 bg-surface py-3 text-center font-medium">
+                <Link href={pageHref(filters.page - 1)} className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-stone-300 bg-surface py-3 font-medium">
                   <ChevronLeft size={18} /> Fyrri
                 </Link>
               )}
               {hasMore && (
-                <Link href={pageHref(filters.page + 1)} className="flex-1 rounded-xl border border-stone-300 bg-surface py-3 text-center font-medium">
+                <Link href={pageHref(filters.page + 1)} className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-stone-300 bg-surface py-3 font-medium">
                   Næsta <ChevronRight size={18} />
                 </Link>
               )}
@@ -159,8 +192,9 @@ export default async function SearchPage({
           )}
         </>
       ) : (
-        <div className="rounded-2xl bg-surface p-6 text-center">
-          <p className="font-medium">Ekkert fannst</p>
+        <div className="rounded-2xl bg-surface p-8 text-center shadow-sm">
+          <SearchX size={36} className="mx-auto mb-2 text-stone-400" />
+          <p className="font-semibold">Ekkert fannst</p>
           <p className="mt-1 text-sm text-stone-500">Prófaðu færri síur eða önnur leitarorð.</p>
           {car && !urlCar && (
             <Link href={searchHref(filters, noCarFilters)} className="mt-3 block font-semibold text-orange-600">

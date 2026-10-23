@@ -72,3 +72,24 @@ export function coordsOf(postal: string | null | undefined, region: Region): [nu
   const p = postal ? POSTAL[postal] : undefined;
   return p ? [p[1], p[2]] : REGION_CENTER[region];
 }
+
+// Fjarlægð í km (haversine), sama og public.distance_km í gagnagrunninum
+export function distanceKm([lat1, lng1]: [number, number], [lat2, lng2]: [number, number]): number {
+  const rad = (d: number) => (d * Math.PI) / 180;
+  const a = Math.sin(rad(lat2 - lat1) / 2) ** 2 + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(rad(lng2 - lng1) / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.sqrt(a));
+}
+
+// Næsta póstnúmer við hnit (t.d. úr GPS símans)
+export function nearestPostal(lat: number, lng: number): string {
+  let best = "101";
+  let bestD = Infinity;
+  for (const [code, [, plat, plng]] of Object.entries(POSTAL)) {
+    const d = distanceKm([lat, lng], [plat, plng]);
+    if (d < bestD) {
+      bestD = d;
+      best = code;
+    }
+  }
+  return best;
+}

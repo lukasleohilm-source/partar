@@ -1,4 +1,4 @@
-import { ChevronRight, Package } from "lucide-react";
+import { ChevronRight, Heart, Package } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -41,6 +41,16 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
       <div className="mb-4">
         <PushToggle />
       </div>
+
+      <Link
+        href="/uppahalds"
+        className="mb-2 flex items-center justify-between rounded-2xl bg-surface p-4 font-medium active:bg-stone-50"
+      >
+        <span className="flex items-center gap-2.5">
+          <Heart size={20} className="text-red-500" /> Uppáhalds
+        </span>
+        <ChevronRight size={20} className="text-stone-400" aria-hidden />
+      </Link>
 
       <Link
         href="/minar-auglysingar"

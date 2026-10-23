@@ -12,6 +12,7 @@ export type Filters = {
   maxPrice?: number; // verd_til
   conditions?: Condition[]; // astand=gott,notad
   region?: Region; // landshluti
+  maxKm?: number; // innan (km frá „Minn staður“)
   sort: Sort; // rodun
   page: number; // sida
   allCars?: boolean; // bill=allir: hunsa „Minn bíll“
@@ -21,6 +22,7 @@ export const SORTS = {
   newest: "Nýjast fyrst",
   price_asc: "Lægsta verð",
   price_desc: "Hæsta verð",
+  distance: "Næst mér",
 } as const;
 export type Sort = keyof typeof SORTS;
 
@@ -60,6 +62,7 @@ export function parseFilters(p: Params): Filters {
     maxPrice: int(p, "verd_til"),
     conditions: conditions.length ? conditions : undefined,
     region: region && region in REGIONS ? (region as Region) : undefined,
+    maxKm: int(p, "innan", 1000),
     sort: sort && sort in SORTS ? (sort as Sort) : "newest",
     page: Math.max(1, int(p, "sida", 1000) ?? 1),
     allCars: str(p, "bill") === "allir",
@@ -80,6 +83,7 @@ export function searchHref(f: Filters, patch: Partial<Filters> = {}): string {
   if (m.maxPrice != null) sp.set("verd_til", String(m.maxPrice));
   if (m.conditions?.length) sp.set("astand", m.conditions.join(","));
   if (m.region) sp.set("landshluti", m.region);
+  if (m.maxKm) sp.set("innan", String(m.maxKm));
   if (m.sort !== "newest") sp.set("rodun", m.sort);
   if (m.allCars) sp.set("bill", "allir");
   if (m.page > 1) sp.set("sida", String(m.page));
@@ -112,4 +116,18 @@ export function serializeMyCar(car: MyCar | null): string {
   const maxAge = car ? 60 * 60 * 24 * 365 : 0;
   const value = car ? encodeURIComponent(JSON.stringify(car)) : "";
   return `${MY_CAR_COOKIE}=${value}; path=/; max-age=${maxAge}; samesite=lax`;
+}
+
+// ===== „Minn staður“ (póstnúmer, fyrir fjarlægð) =====
+
+export const MY_PLACE_COOKIE = "minn_stadur";
+export const DISTANCES = [10, 25, 50, 100, 200] as const;
+
+export function parseMyPlace(raw: string | undefined): string | null {
+  return raw && /^\d{3}$/.test(raw) ? raw : null;
+}
+
+export function serializeMyPlace(postal: string | null): string {
+  const maxAge = postal ? 60 * 60 * 24 * 365 : 0;
+  return `${MY_PLACE_COOKIE}=${postal ?? ""}; path=/; max-age=${maxAge}; samesite=lax`;
 }

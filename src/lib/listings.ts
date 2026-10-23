@@ -25,6 +25,7 @@ export function storagePaths(images: { path: string; thumb_path: string | null }
 
 export type ListingSummary = {
   id: string;
+  seller_id: string;
   title: string;
   kind: Kind;
   status: "active" | "sold";
@@ -37,7 +38,7 @@ export type ListingSummary = {
 };
 
 // Dálkar fyrir auglýsingaspjöld
-export const LISTING_SUMMARY_SELECT = `id, title, kind, status, price_isk, condition, region, postal_code, published_at, listing_images(${IMAGE_COLS})`;
+export const LISTING_SUMMARY_SELECT = `id, seller_id, title, kind, status, price_isk, condition, region, postal_code, published_at, listing_images(${IMAGE_COLS})`;
 
 const rtf = new Intl.RelativeTimeFormat("is", { numeric: "auto" });
 const dateFmt = new Intl.DateTimeFormat("is-IS", { day: "numeric", month: "long", year: "numeric" });
