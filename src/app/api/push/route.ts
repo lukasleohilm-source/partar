@@ -1,10 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
+import { sendEmail } from "@/lib/email";
 import { sendWebPush, type PushSubscriptionKeys } from "@/lib/web-push";
 
 // Gagnagrunnurinn (pg_net) kallar hingað þegar ný skilaboð eða óska-tilkynning verða til.
 // Leyndarlykillinn í hausnum er sannreyndur af push_payload() í gagnagrunninum.
 
 type Payload = {
+  user: string;
+  kind: string;
   message: { title: string; body: string; url: string; tag: string };
   subscriptions: PushSubscriptionKeys[];
 } | null;
@@ -29,6 +32,23 @@ export async function POST(request: Request) {
 
   const payload = data as Payload;
   if (!payload) return Response.json({ sent: 0 });
+
+  // Engin ýtiáskrift (t.d. iPhone án heimaskjás) → tölvupóstur, ef gagnagrunnurinn leyfir
+  if (!payload.subscriptions.length) {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) return Response.json({ sent: 0, email: "not_configured" });
+    const { data: to } = await supabase.rpc("claim_email", { p_secret: secret, p_user: payload.user, p_tag: payload.message.tag });
+    if (!to) return Response.json({ sent: 0, email: "skipped" });
+    const status = await sendEmail({
+      apiKey: apiKey.trim(),
+      from: process.env.EMAIL_FROM ?? "Partar <partar@lukels255.com>",
+      to: to as string,
+      kind: payload.kind,
+      message: payload.message,
+      siteUrl: process.env.SITE_URL ?? "https://partar.lukels255.com",
+    });
+    return Response.json({ sent: 0, email: status });
+  }
 
   // BOM getur fylgt ef leyndarbreytan var sett úr PowerShell
   const jwk = JSON.parse(privateJwk.replace(/^﻿/, "")) as JsonWebKey;

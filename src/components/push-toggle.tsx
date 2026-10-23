@@ -6,7 +6,7 @@ import { disablePush, enablePush, getPushState, isIos, type PushState } from "@/
 import { reportError } from "@/lib/report-error";
 import { createClient } from "@/lib/supabase/client";
 
-type PrefKey = "messages" | "wanted" | "price_drop" | "reviews";
+type PrefKey = "messages" | "wanted" | "price_drop" | "reviews" | "email";
 type Prefs = Record<PrefKey, boolean>;
 
 const PREFS: { key: PrefKey; label: string; hint: string }[] = [
@@ -14,8 +14,9 @@ const PREFS: { key: PrefKey; label: string; hint: string }[] = [
   { key: "wanted", label: "Óskir", hint: "Þegar ný auglýsing passar við ósk þína" },
   { key: "price_drop", label: "Verðlækkun", hint: "Þegar verð lækkar á auglýsingu í uppáhaldi" },
   { key: "reviews", label: "Umsagnir", hint: "Þegar kaupandi gefur þér einkunn" },
+  { key: "email", label: "Líka í tölvupósti", hint: "Ef tilkynningar í síma eru ekki virkar" },
 ];
-const ALL_ON: Prefs = { messages: true, wanted: true, price_drop: true, reviews: true };
+const ALL_ON: Prefs = { messages: true, wanted: true, price_drop: true, reviews: true, email: true };
 
 const TEXT: Record<PushState, string> = {
   unsupported: "Þessi vafri styður ekki tilkynningar. Prófaðu Chrome á Android eða Safari á iPhone.",
@@ -115,7 +116,7 @@ export function PushToggle({ compact = false }: { compact?: boolean }) {
           </button>
         )}
       </div>
-      {state === "on" && !compact && <NotificationPrefs />}
+      {!compact && <NotificationPrefs pushOn={state === "on"} />}
       {state === "ios-install" && (
         <ol className="mt-3 space-y-2 text-sm text-stone-700">
           <li className="flex items-center gap-2">
@@ -142,15 +143,17 @@ export function PushToggle({ compact = false }: { compact?: boolean }) {
 }
 
 // Hvaða tilkynningar notandinn vill fá. Engin vistuð röð = allt kveikt.
-function NotificationPrefs() {
+function NotificationPrefs({ pushOn }: { pushOn: boolean }) {
   const [supabase] = useState(createClient);
   const [prefs, setPrefs] = useState<Prefs | null>(null);
   const [failed, setFailed] = useState(false);
+  const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setEmail(user?.email || null));
     supabase
       .from("notification_prefs")
-      .select("messages, wanted, price_drop, reviews")
+      .select("messages, wanted, price_drop, reviews, email")
       .maybeSingle()
       .then(({ data }) => setPrefs(data ?? ALL_ON));
   }, [supabase]);
@@ -173,16 +176,17 @@ function NotificationPrefs() {
     }
   }
 
-  if (!prefs) return null;
+  // Gestir án netfangs fá hvorki póst né stillingar fyrr en kveikt er á tilkynningum í síma
+  if (!prefs || (!pushOn && !email)) return null;
 
   return (
     <fieldset className="mt-4 border-t border-line pt-3">
       <legend className="mb-1 text-sm font-semibold text-stone-800">Láta mig vita um</legend>
-      {PREFS.map((p) => (
+      {PREFS.filter((p) => p.key !== "email" || email).map((p) => (
         <label key={p.key} className="flex cursor-pointer items-center justify-between gap-3 py-2">
           <span>
             <span className="block text-[15px] font-medium text-stone-900">{p.label}</span>
-            <span className="block text-xs text-stone-500">{p.hint}</span>
+            <span className="block text-xs text-stone-500">{p.key === "email" ? `${p.hint} (${email})` : p.hint}</span>
           </span>
           <input
             type="checkbox"

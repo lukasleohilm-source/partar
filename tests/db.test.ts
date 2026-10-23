@@ -301,6 +301,8 @@ describe("spjall og aðgangsreglur", () => {
   });
 
   it("ýtitilkynning: skilaboð til áskrifanda sendast á Worker með leyndarlykli", async () => {
+    await t.asAdmin();
+    await t.q(`delete from net.requests`);
     await t.as(buyer);
     await t.q(`select save_push_subscription('https://push.example/abc', 'p256dh-key', 'auth-key')`);
 
@@ -403,6 +405,50 @@ describe("spjall og aðgangsreglur", () => {
     await t.q(`delete from push_subscriptions`);
     await t.q(`delete from notification_prefs`);
     await t.q(`delete from listings where id = $1`, [listing]);
+  });
+
+  it("tölvupóstur: aðeins án ýtiáskriftar, einn á hvert samtal á 30 mín, og hægt að slökkva", async () => {
+    await t.asAdmin();
+    await t.q(`delete from net.requests`);
+    const [cfg] = await t.q<{ secret: string }>(`select secret from private.push_config`);
+    const claim = async (user: string, tag: string) => {
+      await t.as(null);
+      const [{ claim_email: e }] = await t.q<{ claim_email: string | null }>(`select claim_email($1, $2, $3)`, [cfg.secret, user, tag]);
+      return e;
+    };
+
+    // Kaupandi á enga áskrift en netfang → beiðni fer á Worker, og payload segir hver fær
+    await t.as(seller);
+    await t.q(`insert into messages (conversation_id, sender_id, body) values ($1, $2, 'Póstprufa')`, [conv, seller]);
+    await t.asAdmin();
+    const [req] = await t.q<{ body: { kind: string; id: string } }>(`select body from net.requests`);
+    await t.as(null);
+    const [{ push_payload: p }] = await t.q<{ push_payload: { user: string } }>(`select push_payload($1, 'message', $2)`, [cfg.secret, req.body.id]);
+    expect(p.user).toBe(buyer);
+
+    await expect(t.q(`select claim_email('rangt', $1, 'x')`, [buyer])).rejects.toThrow(/forbidden/);
+    expect(await claim(buyer, `samtal-${conv}`)).toBe("kaupandi@test.is");
+    expect(await claim(buyer, `samtal-${conv}`)).toBeNull(); // innan 30 mín
+    expect(await claim(buyer, "annad-efni")).toBe("kaupandi@test.is");
+
+    // Með ýtiáskrift fer enginn póstur
+    await t.as(buyer);
+    await t.q(`select save_push_subscription('https://push.example/post', 'p256dh-key', 'auth-key')`);
+    expect(await claim(buyer, "thridja-efni")).toBeNull();
+    await t.asAdmin();
+    await t.q(`delete from push_subscriptions`);
+
+    // Slökkt á pósti → engin beiðni á Worker
+    await t.as(buyer);
+    await t.q(`insert into notification_prefs (user_id, email) values ($1, false)`, [buyer]);
+    expect(await claim(buyer, "fjorda-efni")).toBeNull();
+    await t.asAdmin();
+    await t.q(`delete from net.requests`);
+    await t.as(seller);
+    await t.q(`insert into messages (conversation_id, sender_id, body) values ($1, $2, 'Engin tilkynning')`, [conv, seller]);
+    await t.asAdmin();
+    expect(await t.q(`select * from net.requests`)).toHaveLength(0);
+    await t.q(`delete from notification_prefs`);
   });
 
   it("stjórnborð: aðeins stjórnendur, bönn stöðva sölu og skilaboð", async () => {
