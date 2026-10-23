@@ -4,11 +4,13 @@ import { createClient } from "@/lib/supabase/server";
 import { LegalLinks } from "@/components/legal-links";
 import { DeleteAccount } from "./delete-account";
 import { ProfileForm } from "./profile-form";
+import { SaveAccount } from "./save-account";
 import { logout } from "./actions";
 
 export const metadata = { title: "Prófíll – Partar" };
 
-export default async function ProfilePage() {
+export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ vistad?: string }> }) {
+  const { vistad } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -23,7 +25,16 @@ export default async function ProfilePage() {
   return (
     <div className="mx-auto max-w-md px-4 pt-6">
       <h1 className="text-2xl font-bold">Prófíll</h1>
-      <p className="mb-4 break-all text-sm text-stone-500">{user.email || "Gestur (innskráning kemur seinna)"}</p>
+      <p className="mb-4 break-all text-sm text-stone-500">
+        {user.email || (user.new_email ? `Bíður staðfestingar: ${user.new_email}` : "Gestur")}
+      </p>
+
+      {vistad && !user.is_anonymous && (
+        <p role="status" className="mb-4 rounded-xl bg-green-50 p-3 text-sm text-green-800">
+          Aðgangurinn er vistaður. Þú getur nú skráð þig inn með netfanginu á hvaða tæki sem er.
+        </p>
+      )}
+      {user.is_anonymous && <SaveAccount />}
 
       <Link
         href="/minar-auglysingar"

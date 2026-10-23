@@ -5,7 +5,8 @@
       <h1 style="font-size:22px; margin:0 0 12px;">Partar</h1>
       <p style="font-size:16px; line-height:1.5;">Ýttu á hnappinn til að skrá þig inn.</p>
       <p style="margin:24px 0;">
-        <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next={{ .RedirectTo }}"
+        <!-- RedirectTo er /auth/confirm?next=… ; token_hash virkar líka í öðrum vafra en þeim sem bað um hlekkinn -->
+        <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=magiclink"
            style="display:inline-block; background:#ea580c; color:#fff; text-decoration:none; padding:14px 22px; border-radius:10px; font-weight:600;">
           Skrá inn
         </a>

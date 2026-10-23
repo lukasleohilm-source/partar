@@ -255,6 +255,10 @@ otp_expiry = 3600
 # [auth.email.template.confirmation]
 # subject = "Velkomin(n) í Partar – staðfestu netfangið"
 # content_path = "./supabase/templates/magic_link.html"
+#
+# [auth.email.template.email_change]
+# subject = "Staðfestu netfangið þitt á Pörtum"
+# content_path = "./supabase/templates/email_change.html"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
