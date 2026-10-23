@@ -99,7 +99,7 @@ export function WantedForm({ userId, makes, models, categories, initial }: Props
               type="button"
               onClick={() => setKind(k)}
               aria-pressed={kind === k}
-              className={`rounded-lg py-2 text-sm font-medium ${kind === k ? "bg-white shadow-sm" : "text-stone-600"}`}
+              className={`rounded-lg py-2 text-sm font-medium ${kind === k ? "bg-surface shadow-sm" : "text-stone-600"}`}
             >
               {k ? KINDS[k] : "Allt"}
             </button>
@@ -128,7 +128,7 @@ export function WantedForm({ userId, makes, models, categories, initial }: Props
         </label>
       )}
 
-      <fieldset className="space-y-3 rounded-2xl bg-white p-4">
+      <fieldset className="space-y-3 rounded-2xl bg-surface p-4">
         <legend className="sr-only">Bíll</legend>
         <p className="font-medium">Fyrir hvaða bíl?</p>
         <label className="block">

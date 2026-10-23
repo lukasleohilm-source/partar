@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { setListingStatus } from "@/app/auglysing/[id]/actions";
 import { formatPrice } from "@/lib/i18n";
-import { imageUrl, timeAgo } from "@/lib/listings";
+import { Thumb } from "@/components/listing/thumb";
+import { IMAGE_COLS, coverOf, timeAgo, type ImageRef } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteListingButton } from "./delete-button";
 
@@ -15,7 +16,7 @@ type Row = {
   price_isk: number | null;
   published_at: string | null;
   created_at: string;
-  listing_images: { path: string; sort: number }[];
+  listing_images: ImageRef[];
   conversations: { count: number }[];
 };
 
@@ -37,7 +38,7 @@ export default async function MyListingsPage({ searchParams }: { searchParams: P
 
   const { data } = await supabase
     .from("listings")
-    .select("id, title, status, price_isk, published_at, created_at, listing_images(path, sort), conversations(count)")
+    .select(`id, title, status, price_isk, published_at, created_at, listing_images(${IMAGE_COLS}), conversations(count)`)
     .eq("seller_id", user.id)
     .neq("status", "removed")
     .order("created_at", { ascending: false })
@@ -64,7 +65,7 @@ export default async function MyListingsPage({ searchParams }: { searchParams: P
             key={t}
             href={t === "virkar" ? "/minar-auglysingar" : "/minar-auglysingar?flipi=seldar"}
             aria-current={t === tab ? "page" : undefined}
-            className={`rounded-lg py-2 text-center text-sm font-medium ${t === tab ? "bg-white shadow-sm" : "text-stone-600"}`}
+            className={`rounded-lg py-2 text-center text-sm font-medium ${t === tab ? "bg-surface shadow-sm" : "text-stone-600"}`}
           >
             {TABS[t].label} ({counts[t]})
           </Link>
@@ -72,7 +73,7 @@ export default async function MyListingsPage({ searchParams }: { searchParams: P
       </nav>
 
       {rows.length === 0 ? (
-        <div className="rounded-2xl bg-white p-6 text-center">
+        <div className="rounded-2xl bg-surface p-6 text-center">
           <p className="font-medium">{tab === "virkar" ? "Engar auglýsingar til sölu" : "Ekkert selt enn"}</p>
           {tab === "virkar" && (
             <Link href="/ny-auglysing" className="mt-3 inline-block font-semibold text-orange-600">
@@ -83,17 +84,14 @@ export default async function MyListingsPage({ searchParams }: { searchParams: P
       ) : (
         <ul className="space-y-2">
           {rows.map((l) => {
-            const cover = [...l.listing_images].sort((a, b) => a.sort - b.sort)[0];
             const chats = l.conversations[0]?.count ?? 0;
             return (
-              <li key={l.id} className="rounded-2xl bg-white p-3">
+              <li key={l.id} className="rounded-2xl bg-surface p-3">
                 <Link href={`/auglysing/${l.id}`} className="flex gap-3">
-                  <div className="size-16 shrink-0 overflow-hidden rounded-xl bg-stone-200">
-                    {cover && (
-                      // eslint-disable-next-line @next/next/no-img-element -- myndir þegar minnkaðar við upphleðslu
-                      <img src={imageUrl(cover.path)} alt="" className={`size-full object-cover ${l.status === "sold" ? "grayscale" : ""}`} />
-                    )}
-                  </div>
+                  <Thumb
+                    image={coverOf(l.listing_images)}
+                    className={`size-16 shrink-0 rounded-xl ${l.status === "sold" ? "grayscale" : ""}`}
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">{l.title}</p>
                     <p className="font-bold text-orange-600">{formatPrice(l.price_isk)}</p>

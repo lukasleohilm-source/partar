@@ -50,7 +50,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
           type="search"
           name="q"
           placeholder="Hvað vantar þig? t.d. framljós"
-          className="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+          className="w-full rounded-xl border border-stone-300 bg-surface px-4 py-3 text-base outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
         />
         <div className="relative">
           <input
@@ -82,7 +82,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
           <Link
             key={k}
             href={`/leit?tegund=${k}`}
-            className="shrink-0 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium"
+            className="shrink-0 rounded-full border border-stone-300 bg-surface px-4 py-2 text-sm font-medium"
           >
             {k === "part" ? "Varahlutir" : k === "parts_car" ? "Partabílar" : "Ódýrir bílar"}
           </Link>
@@ -100,7 +100,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
             ))}
           </ul>
         ) : (
-          <div className="rounded-2xl bg-white p-6 text-center">
+          <div className="rounded-2xl bg-surface p-6 text-center">
             <p className="text-stone-600">Engar auglýsingar enn.</p>
             <Link href="/ny-auglysing" className="mt-3 inline-block font-semibold text-orange-600">
               Vertu fyrst(ur) að selja →

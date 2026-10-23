@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { shortTime } from "@/lib/chat";
 import { formatPrice } from "@/lib/i18n";
-import { imageUrl } from "@/lib/listings";
+import { Thumb } from "@/components/listing/thumb";
+import { IMAGE_COLS, coverOf, type ImageRef } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/server";
 import { LiveRefresh } from "@/components/live-refresh";
 
@@ -17,7 +18,7 @@ type Row = {
   last_sender_id: string | null;
   buyer_last_read_at: string | null;
   seller_last_read_at: string | null;
-  listings: { title: string; price_isk: number | null; status: string; listing_images: { path: string; sort: number }[] } | null;
+  listings: { title: string; price_isk: number | null; status: string; listing_images: ImageRef[] } | null;
   buyer: { display_name: string };
   seller: { display_name: string };
 };
@@ -34,7 +35,7 @@ export default async function ConversationsPage() {
     .select(
       `id, buyer_id, seller_id, last_message_at, last_message_body, last_sender_id,
        buyer_last_read_at, seller_last_read_at,
-       listings(title, price_isk, status, listing_images(path, sort)),
+       listings(title, price_isk, status, listing_images(${IMAGE_COLS})),
        buyer:profiles!conversations_buyer_id_fkey(display_name),
        seller:profiles!conversations_seller_id_fkey(display_name)`,
     )
@@ -49,7 +50,7 @@ export default async function ConversationsPage() {
       <LiveRefresh channel={`samtalalisti:${user.id}`} table="conversations" event="UPDATE" />
 
       {rows.length === 0 ? (
-        <div className="rounded-2xl bg-white p-6 text-center">
+        <div className="rounded-2xl bg-surface p-6 text-center">
           <p className="font-medium">Engin skilaboð enn</p>
           <p className="mt-1 text-sm text-stone-500">Þegar þú hefur samband við seljanda birtist samtalið hér.</p>
           <Link href="/leit" className="mt-3 inline-block font-semibold text-orange-600">
@@ -57,7 +58,7 @@ export default async function ConversationsPage() {
           </Link>
         </div>
       ) : (
-        <ul className="divide-y divide-stone-200 overflow-hidden rounded-2xl bg-white">
+        <ul className="divide-y divide-stone-200 overflow-hidden rounded-2xl bg-surface">
           {rows.map((c) => {
             const iAmBuyer = c.buyer_id === user.id;
             const other = iAmBuyer ? c.seller.display_name : c.buyer.display_name;
@@ -65,17 +66,12 @@ export default async function ConversationsPage() {
             const unread =
               c.last_sender_id !== user.id &&
               (!myRead || new Date(c.last_message_at ?? 0) > new Date(myRead));
-            const cover = c.listings?.listing_images.sort((a, b) => a.sort - b.sort)[0];
+            const cover = coverOf(c.listings?.listing_images);
 
             return (
               <li key={c.id}>
                 <Link href={`/skilabod/${c.id}`} className="flex gap-3 p-3 active:bg-stone-50">
-                  <div className="size-14 shrink-0 overflow-hidden rounded-xl bg-stone-200">
-                    {cover && (
-                      // eslint-disable-next-line @next/next/no-img-element -- myndir þegar minnkaðar við upphleðslu
-                      <img src={imageUrl(cover.path)} alt="" className="size-full object-cover" />
-                    )}
-                  </div>
+                  <Thumb image={cover} className="size-14 shrink-0 rounded-xl" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
                       <p className={`truncate ${unread ? "font-bold" : "font-medium"}`}>{other}</p>

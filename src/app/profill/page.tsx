@@ -43,7 +43,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
 
       <Link
         href="/minar-auglysingar"
-        className="mb-6 flex items-center justify-between rounded-2xl bg-white p-4 font-medium active:bg-stone-50"
+        className="mb-6 flex items-center justify-between rounded-2xl bg-surface p-4 font-medium active:bg-stone-50"
       >
         <span>📦 Mínar auglýsingar</span>
         <span className="text-stone-400" aria-hidden>

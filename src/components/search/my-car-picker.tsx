@@ -49,7 +49,7 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
   return (
     <>
       {car ? (
-        <div className={`flex items-center gap-3 rounded-2xl p-3 ${active ? "bg-orange-50 ring-1 ring-orange-200" : "bg-white"}`}>
+        <div className={`flex items-center gap-3 rounded-2xl p-3 ${active ? "bg-orange-50 ring-1 ring-orange-200" : "bg-surface"}`}>
           <span className="text-2xl" aria-hidden>
             🚗
           </span>
@@ -70,7 +70,7 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="flex w-full items-center gap-3 rounded-2xl border-2 border-dashed border-orange-300 bg-white p-3 text-left active:bg-orange-50"
+          className="flex w-full items-center gap-3 rounded-2xl border-2 border-dashed border-orange-300 bg-surface p-3 text-left active:bg-orange-50"
         >
           <span className="text-2xl" aria-hidden>
             🚗

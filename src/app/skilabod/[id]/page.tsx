@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import type { Message } from "@/lib/chat";
+import { IMAGE_COLS, coverOf, type ImageRef } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/server";
 import { ChatThread } from "./chat-thread";
 
@@ -12,7 +13,7 @@ type Conversation = {
   listing_id: string;
   buyer_id: string;
   seller_id: string;
-  listings: { title: string; price_isk: number | null; status: string; listing_images: { path: string; sort: number }[] } | null;
+  listings: { title: string; price_isk: number | null; status: string; listing_images: ImageRef[] } | null;
   buyer: { display_name: string };
   seller: { display_name: string };
 };
@@ -33,7 +34,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
       .from("conversations")
       .select(
         `id, listing_id, buyer_id, seller_id,
-         listings(title, price_isk, status, listing_images(path, sort)),
+         listings(title, price_isk, status, listing_images(${IMAGE_COLS})),
          buyer:profiles!conversations_buyer_id_fkey(display_name),
          seller:profiles!conversations_seller_id_fkey(display_name)`,
       )
@@ -57,7 +58,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
     .eq("blocker_id", user.id)
     .eq("blocked_id", otherId)
     .maybeSingle();
-  const cover = conv.listings?.listing_images.sort((a, b) => a.sort - b.sort)[0];
+  const cover = coverOf(conv.listings?.listing_images);
 
   return (
     <ChatThread
@@ -74,7 +75,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
               title: conv.listings.title,
               price: conv.listings.price_isk,
               sold: conv.listings.status === "sold",
-              cover: cover?.path ?? null,
+              cover,
             }
           : null
       }

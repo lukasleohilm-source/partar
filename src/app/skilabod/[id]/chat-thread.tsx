@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { UNREAD_EVENT, dayLabel, messageTime, sameDay, type Message } from "@/lib/chat";
 import { formatPrice } from "@/lib/i18n";
-import { imageUrl } from "@/lib/listings";
+import { Thumb } from "@/components/listing/thumb";
+import type { ImageRef } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/client";
 import { setBlocked } from "./actions";
 
@@ -15,7 +16,7 @@ type Props = {
   iBlocked: boolean;
   otherName: string;
   role: "buyer" | "seller";
-  listing: { id: string; title: string; price: number | null; sold: boolean; cover: string | null } | null;
+  listing: { id: string; title: string; price: number | null; sold: boolean; cover: ImageRef | null } | null;
   initialMessages: Message[];
 };
 
@@ -134,7 +135,7 @@ export function ChatThread({ conversationId, userId, otherId, iBlocked, otherNam
 
   return (
     <div className="fixed inset-0 z-50 mx-auto flex max-w-md flex-col bg-stone-100">
-      <header className="flex items-center gap-2 border-b border-stone-200 bg-white px-2 py-2">
+      <header className="flex items-center gap-2 border-b border-stone-200 bg-surface px-2 py-2">
         <Link href="/skilabod" aria-label="Til baka" className="px-2 text-2xl text-stone-600">
           ‹
         </Link>
@@ -167,13 +168,8 @@ export function ChatThread({ conversationId, userId, otherId, iBlocked, otherNam
       )}
 
       {listing && (
-        <Link href={`/auglysing/${listing.id}`} className="flex items-center gap-3 border-b border-stone-200 bg-white px-4 py-2">
-          <div className="size-10 shrink-0 overflow-hidden rounded-lg bg-stone-200">
-            {listing.cover && (
-              // eslint-disable-next-line @next/next/no-img-element -- myndir þegar minnkaðar við upphleðslu
-              <img src={imageUrl(listing.cover)} alt="" className="size-full object-cover" />
-            )}
-          </div>
+        <Link href={`/auglysing/${listing.id}`} className="flex items-center gap-3 border-b border-stone-200 bg-surface px-4 py-2">
+          <Thumb image={listing.cover} className="size-10 shrink-0 rounded-lg" />
           <div className="min-w-0">
             <p className="truncate text-sm font-medium">{listing.title}</p>
             <p className="text-sm font-bold text-orange-600">
@@ -198,7 +194,7 @@ export function ChatThread({ conversationId, userId, otherId, iBlocked, otherNam
               <div className={`mb-1.5 flex ${mine ? "justify-end" : "justify-start"}`}>
                 <div
                   className={`max-w-[80%] rounded-2xl px-3.5 py-2 ${
-                    mine ? "rounded-br-md bg-orange-600 text-white" : "rounded-bl-md bg-white text-stone-900"
+                    mine ? "rounded-br-md bg-orange-600 text-white" : "rounded-bl-md bg-surface text-stone-900"
                   } ${m.state === "sending" ? "opacity-60" : ""}`}
                 >
                   <p className="whitespace-pre-wrap break-words">{m.body}</p>
@@ -228,7 +224,7 @@ export function ChatThread({ conversationId, userId, otherId, iBlocked, otherNam
           e.preventDefault();
           send(draft);
         }}
-        className="flex items-end gap-2 border-t border-stone-200 bg-white px-3 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]"
+        className="flex items-end gap-2 border-t border-stone-200 bg-surface px-3 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]"
       >
         <textarea
           value={draft}

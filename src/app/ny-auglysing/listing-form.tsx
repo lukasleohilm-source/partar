@@ -7,7 +7,7 @@ import { ImagePicker } from "@/components/listing/image-picker";
 import { inputClass, labelClass, primaryButton, secondaryButton } from "@/components/ui/styles";
 import { CONDITIONS, KINDS, REGIONS, formatNumber, formatPrice, type Condition, type Kind, type Region } from "@/lib/i18n";
 import type { PickedImage } from "@/lib/images";
-import { imageUrl } from "@/lib/listings";
+import { imageUrl, storagePaths } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/client";
 import { YEARS, describeFitment, type Category, type Fitment, type Make, type Model } from "@/lib/vehicles";
 
@@ -26,7 +26,7 @@ export type ExistingListing = {
   mileage_km: number | null;
   license_plate: string | null;
   universal_fit: boolean;
-  images: { path: string; width: number | null; height: number | null }[];
+  images: { path: string; thumb_path: string | null; color: string | null; width: number | null; height: number | null }[];
   fitments: Fitment[];
 };
 
@@ -69,9 +69,11 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
         source: "stored" as const,
         id: img.path,
         path: img.path,
-        url: imageUrl(img.path),
+        thumbPath: img.thumb_path,
+        url: imageUrl(img.thumb_path ?? img.path),
         width: img.width,
         height: img.height,
+        color: img.color,
       })) ?? [],
   );
   const [title, setTitle] = useState(ex?.title ?? "");
@@ -162,22 +164,26 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
 
   // Hleður upp nýjum myndum og skilar línum fyrir listing_images í réttri röð
   async function uploadImages(supabase: ReturnType<typeof createClient>, listingId: string, uploaded: string[]) {
-    const rows = [];
-    for (const [i, img] of images.entries()) {
-      let path: string;
-      if (img.source === "stored") {
-        path = img.path;
-      } else {
-        path = `${userId}/${listingId}/${img.id}.${img.ext}`;
-        const { error } = await supabase.storage
-          .from("listing-images")
-          .upload(path, img.blob, { contentType: img.blob.type, cacheControl: "31536000" });
-        if (error) throw error;
-        uploaded.push(path);
-      }
-      rows.push({ listing_id: listingId, path, sort: i, width: img.width, height: img.height });
-    }
-    return rows;
+    const upload = async (path: string, blob: Blob) => {
+      const { error } = await supabase.storage
+        .from("listing-images")
+        .upload(path, blob, { contentType: blob.type, cacheControl: "31536000" });
+      if (error) throw error;
+      uploaded.push(path);
+    };
+
+    // Myndum hlaðið upp samhliða (full stærð + smámynd) til að flýta fyrir í farsímaneti
+    return Promise.all(
+      images.map(async (img, i) => {
+        if (img.source === "stored") {
+          return { listing_id: listingId, path: img.path, thumb_path: img.thumbPath, color: img.color, sort: i, width: img.width, height: img.height };
+        }
+        const path = `${userId}/${listingId}/${img.id}.${img.ext}`;
+        const thumbPath = `${userId}/${listingId}/${img.id}-t.${img.ext}`;
+        await Promise.all([upload(path, img.blob), upload(thumbPath, img.thumb)]);
+        return { listing_id: listingId, path, thumb_path: thumbPath, color: img.color, sort: i, width: img.width, height: img.height };
+      }),
+    );
   }
 
   function revokePreviews() {
@@ -271,7 +277,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
 
       // Myndir sem voru fjarlægðar
       const kept = new Set(images.flatMap((i) => (i.source === "stored" ? [i.path] : [])));
-      const removed = ex.images.map((i) => i.path).filter((p) => !kept.has(p));
+      const removed = storagePaths(ex.images.filter((i) => !kept.has(i.path)));
       if (removed.length) await supabase.storage.from("listing-images").remove(removed);
 
       revokePreviews();
@@ -317,7 +323,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
                 setKind(k);
                 setStep(1);
               }}
-              className={`block w-full rounded-2xl border-2 bg-white p-4 text-left active:bg-stone-50 ${
+              className={`block w-full rounded-2xl border-2 bg-surface p-4 text-left active:bg-stone-50 ${
                 kind === k ? "border-orange-500" : "border-transparent"
               }`}
             >
@@ -382,7 +388,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
                   onClick={() => setCondition(c)}
                   aria-pressed={condition === c}
                   className={`rounded-full border px-4 py-2 text-sm ${
-                    condition === c ? "border-orange-600 bg-orange-600 text-white" : "border-stone-300 bg-white"
+                    condition === c ? "border-orange-600 bg-orange-600 text-white" : "border-stone-300 bg-surface"
                   }`}
                 >
                   {CONDITIONS[c]}
@@ -406,7 +412,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
                   type="button"
                   onClick={() => setPriceMode(mode)}
                   aria-pressed={priceMode === mode}
-                  className={`rounded-lg py-2 text-sm font-medium ${priceMode === mode ? "bg-white shadow-sm" : "text-stone-600"}`}
+                  className={`rounded-lg py-2 text-sm font-medium ${priceMode === mode ? "bg-surface shadow-sm" : "text-stone-600"}`}
                 >
                   {label}
                 </button>
@@ -480,7 +486,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
 
       {step === 3 &&
         (isCar ? (
-          <div className="space-y-3 rounded-xl bg-white p-4">
+          <div className="space-y-3 rounded-xl bg-surface p-4">
             <label className="block">
               <span className={labelClass}>Tegund</span>
               <select
@@ -566,7 +572,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
             />
           </label>
 
-          <section className="rounded-2xl bg-white p-4">
+          <section className="rounded-2xl bg-surface p-4">
             <h2 className="mb-3 font-semibold">Yfirlit</h2>
             <div className="flex gap-3">
               {images[0] && (

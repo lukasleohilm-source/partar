@@ -37,7 +37,7 @@ export function PushToggle({ compact = false }: { compact?: boolean }) {
   const canToggle = state === "on" || state === "off";
 
   return (
-    <section className="rounded-2xl bg-white p-4">
+    <section className="rounded-2xl bg-surface p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="font-semibold">🔔 Tilkynningar í síma</p>

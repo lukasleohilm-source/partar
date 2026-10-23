@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { storagePaths } from "@/lib/listings";
 import { REPORT_REASONS, type ReportReason } from "@/lib/moderation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -61,11 +62,11 @@ export async function deleteListing(listingId: string): Promise<{ error?: string
   // Myndaskrár fyrst; línurnar í listing_images, fitments og samtöl fara með auglýsingunni (cascade)
   const { data: images } = await supabase
     .from("listing_images")
-    .select("path, listings!inner(seller_id)")
+    .select("path, thumb_path, listings!inner(seller_id)")
     .eq("listing_id", listingId)
     .eq("listings.seller_id", user.id);
   if (images?.length) {
-    await supabase.storage.from("listing-images").remove(images.map((i) => i.path));
+    await supabase.storage.from("listing-images").remove(storagePaths(images));
   }
 
   const { error, count } = await supabase

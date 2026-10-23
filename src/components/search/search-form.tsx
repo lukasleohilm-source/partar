@@ -76,7 +76,7 @@ export function SearchForm({ filters, categories, activeCount }: Props) {
         <button
           type="button"
           onClick={openSheet}
-          className="relative shrink-0 rounded-xl border border-stone-300 bg-white px-4 font-medium"
+          className="relative shrink-0 rounded-xl border border-stone-300 bg-surface px-4 font-medium"
         >
           Síur
           {activeCount > 0 && (
@@ -118,7 +118,7 @@ export function SearchForm({ filters, categories, activeCount }: Props) {
                   type="button"
                   onClick={() => setDraft({ ...draft, kind: k, category: k && k !== "part" ? undefined : draft.category })}
                   aria-pressed={draft.kind === k}
-                  className={`rounded-lg py-2 text-sm font-medium ${draft.kind === k ? "bg-white shadow-sm" : "text-stone-600"}`}
+                  className={`rounded-lg py-2 text-sm font-medium ${draft.kind === k ? "bg-surface shadow-sm" : "text-stone-600"}`}
                 >
                   {k ? KINDS[k] : "Allt"}
                 </button>
@@ -167,7 +167,7 @@ export function SearchForm({ filters, categories, activeCount }: Props) {
                     type="button"
                     onClick={() => toggleCondition(c)}
                     aria-pressed={on}
-                    className={`rounded-full border px-4 py-2 text-sm ${on ? "border-orange-600 bg-orange-600 text-white" : "border-stone-300 bg-white"}`}
+                    className={`rounded-full border px-4 py-2 text-sm ${on ? "border-orange-600 bg-orange-600 text-white" : "border-stone-300 bg-surface"}`}
                   >
                     {CONDITIONS[c]}
                   </button>

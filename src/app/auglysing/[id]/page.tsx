@@ -5,7 +5,7 @@ import { cache } from "react";
 import { ImageGallery } from "@/components/listing/image-gallery";
 import { primaryButton, secondaryButton } from "@/components/ui/styles";
 import { CONDITIONS, KINDS, REGIONS, formatNumber, formatPrice, type Condition, type Kind, type Region } from "@/lib/i18n";
-import { imageUrl, timeAgo } from "@/lib/listings";
+import { IMAGE_COLS, imageUrl, timeAgo, type ImageRef } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/server";
 import { yearRange } from "@/lib/vehicles";
 import { contactSeller, setListingStatus } from "./actions";
@@ -29,7 +29,7 @@ type ListingDetail = {
   published_at: string | null;
   created_at: string;
   categories: { name: string } | null;
-  listing_images: { path: string; sort: number }[];
+  listing_images: ImageRef[];
   listing_fitments: {
     year_from: number | null;
     year_to: number | null;
@@ -52,7 +52,7 @@ const getListing = cache(async (id: string) => {
       `id, seller_id, kind, status, title, description, price_isk, condition, region, postal_code,
        part_number, license_plate, mileage_km, universal_fit, published_at, created_at,
        categories(name),
-       listing_images(path, sort),
+       listing_images(${IMAGE_COLS}),
        listing_fitments(year_from, year_to, makes(name), models(name)),
        profiles(display_name, created_at)`,
     )
@@ -139,7 +139,7 @@ export default async function ListingPage({
 
         <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-stone-200">
           {facts.map(([k, v]) => (
-            <div key={k} className="bg-white px-4 py-3">
+            <div key={k} className="bg-surface px-4 py-3">
               <dt className="text-xs text-stone-500">{k}</dt>
               <dd className="font-medium">{v}</dd>
             </div>
@@ -173,7 +173,7 @@ export default async function ListingPage({
           </section>
         )}
 
-        <section className="flex items-center gap-3 rounded-2xl bg-white p-4">
+        <section className="flex items-center gap-3 rounded-2xl bg-surface p-4">
           <div className="flex size-11 items-center justify-center rounded-full bg-stone-200 text-lg font-semibold">
             {listing.profiles.display_name.charAt(0).toUpperCase()}
           </div>
@@ -191,7 +191,7 @@ export default async function ListingPage({
       </div>
 
       {/* Aðgerðir fastar neðst, fyrir ofan aðalvalmyndina */}
-      <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-stone-200 bg-white/95 px-4 py-3 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-stone-200 bg-surface/95 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-md gap-2">
           {isOwner ? (
             <>

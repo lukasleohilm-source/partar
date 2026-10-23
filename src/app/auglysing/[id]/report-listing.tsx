@@ -53,7 +53,7 @@ export function ReportListing({ listingId }: { listingId: string }) {
             <fieldset className="space-y-2">
               <legend className={labelClass}>Hvað er að?</legend>
               {(Object.keys(REPORT_REASONS) as ReportReason[]).map((r) => (
-                <label key={r} className="flex items-center gap-3 rounded-xl bg-white p-3">
+                <label key={r} className="flex items-center gap-3 rounded-xl bg-surface p-3">
                   <input
                     type="radio"
                     name="reason"

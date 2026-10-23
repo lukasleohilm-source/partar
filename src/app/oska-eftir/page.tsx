@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { LiveRefresh } from "@/components/live-refresh";
 import { PushToggle } from "@/components/push-toggle";
 import { formatPrice } from "@/lib/i18n";
-import { LISTING_SUMMARY_SELECT, imageUrl, timeAgo, type ListingSummary } from "@/lib/listings";
+import { Thumb } from "@/components/listing/thumb";
+import { LISTING_SUMMARY_SELECT, coverOf, timeAgo, type ListingSummary } from "@/lib/listings";
 import { searchHref } from "@/lib/search";
 import { createClient } from "@/lib/supabase/server";
 import { WANTED_SELECT, describeWanted, wantedTitle, wantedToFilters, type Wanted } from "@/lib/wanted";
@@ -17,7 +18,7 @@ type NotificationRow = {
   id: number;
   read_at: string | null;
   created_at: string;
-  listings: (Omit<ListingSummary, "listing_images"> & { listing_images: { path: string; sort: number }[] }) | null;
+  listings: ListingSummary | null;
   wanted_requests: Wanted | null;
 };
 
@@ -63,7 +64,7 @@ export default async function WantedPage() {
       {wants.length > 0 && <PushToggle compact />}
 
       {wants.length === 0 && notes.length === 0 && (
-        <div className="rounded-2xl bg-white p-6 text-center">
+        <div className="rounded-2xl bg-surface p-6 text-center">
           <div className="mb-2 text-4xl" aria-hidden>
             🙋
           </div>
@@ -80,20 +81,14 @@ export default async function WantedPage() {
       {notes.length > 0 && (
         <section>
           <h2 className="mb-2 font-semibold">Tilkynningar</h2>
-          <ul className="divide-y divide-stone-200 overflow-hidden rounded-2xl bg-white">
+          <ul className="divide-y divide-stone-200 overflow-hidden rounded-2xl bg-surface">
             {notes.map((n) => {
               const l = n.listings!;
-              const cover = [...l.listing_images].sort((a, b) => a.sort - b.sort)[0];
               const unread = !n.read_at;
               return (
                 <li key={n.id}>
                   <Link href={`/auglysing/${l.id}`} className={`flex gap-3 p-3 active:bg-stone-50 ${unread ? "bg-orange-50" : ""}`}>
-                    <div className="size-16 shrink-0 overflow-hidden rounded-xl bg-stone-200">
-                      {cover && (
-                        // eslint-disable-next-line @next/next/no-img-element -- myndir þegar minnkaðar við upphleðslu
-                        <img src={imageUrl(cover.path)} alt="" className="size-full object-cover" />
-                      )}
-                    </div>
+                    <Thumb image={coverOf(l.listing_images)} className="size-16 shrink-0 rounded-xl" />
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-orange-700">
                         {unread && <span className="mr-1 inline-block size-2 rounded-full bg-orange-600" aria-label="Nýtt" />}
@@ -119,7 +114,7 @@ export default async function WantedPage() {
           <h2 className="mb-2 font-semibold">Mínar óskir</h2>
           <ul className="space-y-2">
             {wants.map((w) => (
-              <li key={w.id} className={`rounded-2xl bg-white p-4 ${w.active ? "" : "opacity-60"}`}>
+              <li key={w.id} className={`rounded-2xl bg-surface p-4 ${w.active ? "" : "opacity-60"}`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-semibold">{wantedTitle(w, m, c)}</p>

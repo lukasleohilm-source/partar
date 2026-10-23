@@ -11,7 +11,7 @@ import { carLabel } from "@/lib/vehicles";
 
 export const metadata = { title: "Leit – Partar" };
 
-type Row = Omit<ListingSummary, "listing_images"> & { listing_images: { path: string; sort: number }[] };
+type Row = ListingSummary;
 
 export default async function SearchPage({
   searchParams,
@@ -53,7 +53,7 @@ export default async function SearchPage({
 
   const rows = ((results.data ?? []) as Row[]).map((r) => ({
     ...r,
-    listing_images: [...r.listing_images].sort((a, b) => a.sort - b.sort).slice(0, 1),
+    listing_images: [...r.listing_images].sort((a, b) => a.sort - b.sort),
   }));
   const hasMore = rows.length > PAGE_SIZE;
   const listings = rows.slice(0, PAGE_SIZE);
@@ -145,12 +145,12 @@ export default async function SearchPage({
           {(filters.page > 1 || hasMore) && (
             <nav aria-label="Síður" className="flex gap-2 pt-2">
               {filters.page > 1 && (
-                <Link href={pageHref(filters.page - 1)} className="flex-1 rounded-xl border border-stone-300 bg-white py-3 text-center font-medium">
+                <Link href={pageHref(filters.page - 1)} className="flex-1 rounded-xl border border-stone-300 bg-surface py-3 text-center font-medium">
                   ‹ Fyrri
                 </Link>
               )}
               {hasMore && (
-                <Link href={pageHref(filters.page + 1)} className="flex-1 rounded-xl border border-stone-300 bg-white py-3 text-center font-medium">
+                <Link href={pageHref(filters.page + 1)} className="flex-1 rounded-xl border border-stone-300 bg-surface py-3 text-center font-medium">
                   Næsta ›
                 </Link>
               )}
@@ -158,7 +158,7 @@ export default async function SearchPage({
           )}
         </>
       ) : (
-        <div className="rounded-2xl bg-white p-6 text-center">
+        <div className="rounded-2xl bg-surface p-6 text-center">
           <p className="font-medium">Ekkert fannst</p>
           <p className="mt-1 text-sm text-stone-500">Prófaðu færri síur eða önnur leitarorð.</p>
           {car && !urlCar && (

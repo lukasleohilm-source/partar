@@ -12,7 +12,7 @@ type Props = {
 };
 
 const input =
-  "w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200";
+  "w-full rounded-xl border border-stone-300 bg-surface px-4 py-3 text-base outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200";
 
 export function ProfileForm({ displayName, region, phone, showPhone }: Props) {
   const [state, action, pending] = useActionState<ProfileState, FormData>(updateProfile, { status: "idle" });

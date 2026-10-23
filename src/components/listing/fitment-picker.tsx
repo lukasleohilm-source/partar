@@ -49,7 +49,7 @@ export function FitmentPicker({ makes, models, fitments, onChange, universal, on
 
   return (
     <div className="space-y-4">
-      <label className="flex items-start gap-3 rounded-xl bg-white p-4">
+      <label className="flex items-start gap-3 rounded-xl bg-surface p-4">
         <input
           type="checkbox"
           checked={universal}
@@ -83,7 +83,7 @@ export function FitmentPicker({ makes, models, fitments, onChange, universal, on
           )}
 
           {fitments.length < MAX_FITMENTS && (
-            <fieldset className="space-y-3 rounded-xl bg-white p-4">
+            <fieldset className="space-y-3 rounded-xl bg-surface p-4">
               <legend className="sr-only">Bæta við bíl</legend>
               <label className="block">
                 <span className={labelClass}>Tegund</span>

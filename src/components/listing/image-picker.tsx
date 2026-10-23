@@ -97,7 +97,7 @@ export function ImagePicker({ images, onChange }: Props) {
               type="button"
               onClick={() => inputRef.current?.click()}
               disabled={busy}
-              className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-stone-300 bg-white text-stone-500 active:bg-stone-100"
+              className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-stone-300 bg-surface text-stone-500 active:bg-stone-100"
             >
               <span className="text-3xl leading-none">{busy ? "…" : "📷"}</span>
               <span className="text-xs">{busy ? "Vinn myndir" : "Bæta við"}</span>

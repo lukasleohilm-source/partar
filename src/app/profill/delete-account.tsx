@@ -8,7 +8,7 @@ export function DeleteAccount() {
   const [error, setError] = useState<string | null>(null);
 
   return (
-    <section className="mt-10 rounded-2xl border border-red-200 bg-white p-4">
+    <section className="mt-10 rounded-2xl border border-red-200 bg-surface p-4">
       <h2 className="font-semibold text-red-700">Eyða aðgangi</h2>
       <p className="mt-1 text-sm text-stone-600">
         Allar auglýsingar, myndir, skilaboð og óskir þínar verða fjarlægðar. Þetta er ekki hægt að afturkalla.

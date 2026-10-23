@@ -8,7 +8,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 type Row = Omit<ExistingListing, "images" | "fitments"> & {
   seller_id: string;
-  listing_images: { path: string; width: number | null; height: number | null; sort: number }[];
+  listing_images: (ExistingListing["images"][number] & { sort: number })[];
   listing_fitments: ExistingListing["fitments"];
 };
 
@@ -28,7 +28,7 @@ export default async function EditListingPage({ params }: { params: Promise<{ id
       .select(
         `id, seller_id, kind, title, description, category_id, price_isk, condition, region, postal_code,
          part_number, mileage_km, license_plate, universal_fit,
-         listing_images(path, width, height, sort),
+         listing_images(path, thumb_path, color, width, height, sort),
          listing_fitments(make_id, model_id, year_from, year_to)`,
       )
       .eq("id", id)

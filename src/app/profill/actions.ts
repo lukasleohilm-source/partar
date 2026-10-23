@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isRegion } from "@/lib/i18n";
+import { storagePaths } from "@/lib/listings";
 
 export type ProfileState = { status: "idle" | "saved" | "error"; message?: string };
 
@@ -49,10 +50,10 @@ export async function deleteAccount(): Promise<{ error?: string } | void> {
   // Myndaskrár fyrst; gagnagrunnurinn sér um rest með cascade
   const { data: images } = await supabase
     .from("listing_images")
-    .select("path, listings!inner(seller_id)")
+    .select("path, thumb_path, listings!inner(seller_id)")
     .eq("listings.seller_id", user.id);
   if (images?.length) {
-    const { error } = await supabase.storage.from("listing-images").remove(images.map((i) => i.path));
+    const { error } = await supabase.storage.from("listing-images").remove(storagePaths(images));
     if (error) return { error: "Ekki tókst að eyða myndum. Reyndu aftur." };
   }
 

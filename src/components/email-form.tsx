@@ -33,7 +33,7 @@ export function EmailForm({ action, submitLabel, sentText, hidden, captcha, foot
 
   if (state.status === "sent") {
     return (
-      <div className="rounded-2xl bg-white p-6 text-center shadow-sm">
+      <div className="rounded-2xl bg-surface p-6 text-center shadow-sm">
         <div className="mb-3 text-4xl" aria-hidden>
           📬
         </div>
@@ -44,7 +44,7 @@ export function EmailForm({ action, submitLabel, sentText, hidden, captcha, foot
   }
 
   return (
-    <form action={formAction} className="space-y-4 rounded-2xl bg-white p-5 shadow-sm">
+    <form action={formAction} className="space-y-4 rounded-2xl bg-surface p-5 shadow-sm">
       {Object.entries(hidden ?? {}).map(([k, v]) => (
         <input key={k} type="hidden" name={k} value={v} />
       ))}
