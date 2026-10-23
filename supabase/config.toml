@@ -178,7 +178,10 @@ enable_signup = true
 # Allow/disallow anonymous sign-ins to your project.
 enable_anonymous_sign_ins = true
 # Allow/disallow testing manual linking of accounts
-enable_manual_linking = false
+# Gestir (nafnlausir) geta tengt Google-aðgang við sig svo gögn haldist (linkIdentity)
+enable_manual_linking = true
+# ATH: Google-innskráning (Client ID/Secret) er stillt í Supabase-stjórnborðinu, ekki hér.
+# Skoðaðu alltaf mismuninn áður en `supabase config push` er samþykkt svo Google verði ekki óvirkjað.
 # Passwords shorter than this value will be rejected as weak. Minimum 6, recommended 8 or more.
 minimum_password_length = 6
 # Passwords that do not meet the following requirements will be rejected as weak. Supported values

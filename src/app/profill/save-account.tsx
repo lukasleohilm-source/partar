@@ -3,18 +3,21 @@
 import Link from "next/link";
 import { linkEmail } from "@/app/innskraning/actions";
 import { EmailForm } from "@/components/email-form";
+import { GoogleButton, OrDivider } from "@/components/oauth-buttons";
 
-// Fyrir gesti: tengja netfang við núverandi aðgang svo auglýsingar og spjall haldist
+// Fyrir gesti: tengja Google eða netfang við núverandi aðgang svo auglýsingar og spjall haldist
 export function SaveAccount() {
   return (
     <section className="mb-6">
-      <div className="mb-2 rounded-2xl bg-orange-50 p-4 text-sm text-orange-900">
+      <div className="mb-3 rounded-2xl bg-orange-50 p-4 text-sm text-orange-900">
         <p className="font-semibold">Vistaðu aðganginn þinn</p>
         <p className="mt-1">
-          Þú ert gestur. Ef þú hreinsar vafrann eða skiptir um síma tapast auglýsingar þínar og skilaboð. Tengdu netfang
-          til að geta skráð þig inn hvar sem er.
+          Þú ert gestur. Ef þú hreinsar vafrann eða skiptir um síma tapast auglýsingar þínar og skilaboð. Tengdu Google
+          eða netfang til að geta skráð þig inn hvar sem er.
         </p>
       </div>
+      <GoogleButton next="/profill?vistad=1" label="Vista með Google" />
+      <OrDivider />
       <EmailForm
         action={linkEmail}
         submitLabel="Tengja netfang"

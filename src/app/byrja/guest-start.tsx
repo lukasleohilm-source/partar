@@ -47,7 +47,7 @@ export function GuestStart({ next }: { next: string }) {
         </div>
       )}
       <Link href={`/innskraning?next=${encodeURIComponent(next)}`} className="mt-8 inline-block text-sm font-medium text-orange-700">
-        Ertu með aðgang? Skráðu þig inn með netfangi
+        Ertu með aðgang? Skráðu þig inn með Google eða netfangi
       </Link>
     </div>
   );

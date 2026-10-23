@@ -16,7 +16,6 @@ export function LoginForm({ next }: { next: string }) {
           halda áfram.
         </>
       )}
-      footer={<p className="text-center text-sm text-stone-500">Ekkert lykilorð. Nýir notendur eru skráðir sjálfkrafa.</p>}
     />
   );
 }
