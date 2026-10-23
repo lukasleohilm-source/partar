@@ -337,6 +337,37 @@ describe("spjall og aðgangsreglur", () => {
     expect(await t.q(`select * from push_subscriptions`)).toHaveLength(0);
   });
 
+  it("stjórnborð: aðeins stjórnendur, bönn stöðva sölu og skilaboð", async () => {
+    await t.asAdmin();
+    await t.q(`insert into admins (user_id) values ($1)`, [stranger]);
+
+    await t.as(buyer);
+    await expect(t.q(`select * from admin_stats()`)).rejects.toThrow(/forbidden/);
+    await expect(t.q(`select admin_ban_user($1, true)`, [seller])).rejects.toThrow(/forbidden/);
+
+    await t.as(stranger);
+    const [stats] = await t.q<{ listings_active: number }>(`select * from admin_stats()`);
+    expect(stats.listings_active).toBeGreaterThan(0);
+    await t.q(`select admin_ban_user($1, true)`, [seller]);
+
+    await t.as(seller);
+    await expect(
+      t.q(`insert into listings (seller_id, title, condition, region) values ($1, 'Bannað', 'gott', 'sudurland')`, [seller]),
+    ).rejects.toThrow();
+    await expect(t.q(`insert into messages (conversation_id, sender_id, body) values ($1, $2, 'hæ')`, [conv, seller])).rejects.toThrow();
+    await t.as(null);
+    expect(await t.q(`select * from search_listings()`)).toHaveLength(0); // allar auglýsingar faldar
+
+    await t.as(stranger);
+    await t.q(`select admin_ban_user($1, false)`, [seller]);
+    // Villuskráning: allir mega skrá, aðeins stjórnandi les
+    await t.as(null);
+    await t.q(`insert into client_errors (message, url) values ('TypeError: x', '/leit')`);
+    await expect(t.q(`select * from client_errors`)).resolves.toHaveLength(0);
+    await t.as(stranger);
+    expect(await t.q(`select * from admin_errors()`)).toHaveLength(1);
+  });
+
   it("eyðing aðgangs fjarlægir prófíl, auglýsingar og samtöl", async () => {
     await t.as(seller);
     await t.q(`select delete_my_account()`);

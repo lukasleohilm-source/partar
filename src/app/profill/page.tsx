@@ -1,4 +1,4 @@
-import { ChevronRight, Heart, Package } from "lucide-react";
+import { ChevronRight, Heart, Package, Shield } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -19,9 +19,10 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
-  const [{ data: profile }, { data: contact }] = await Promise.all([
+  const [{ data: profile }, { data: contact }, { data: isAdmin }] = await Promise.all([
     supabase.from("profiles").select("display_name, region").eq("id", user.id).single(),
     supabase.from("profile_contacts").select("phone, show_phone").eq("id", user.id).single(),
+    supabase.rpc("is_admin"),
   ]);
 
   return (
@@ -41,6 +42,18 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
       <div className="mb-4">
         <PushToggle />
       </div>
+
+      {isAdmin && (
+        <Link
+          href="/stjorn"
+          className="mb-2 flex items-center justify-between rounded-2xl bg-stone-900 p-4 font-medium text-white active:opacity-90"
+        >
+          <span className="flex items-center gap-2.5">
+            <Shield size={20} /> Stjórnborð
+          </span>
+          <ChevronRight size={20} className="opacity-60" aria-hidden />
+        </Link>
+      )}
 
       <Link
         href="/uppahalds"

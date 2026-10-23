@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { BottomNav } from "@/components/bottom-nav";
+import { ErrorReporter } from "@/components/error-reporter";
 import { ServiceWorker } from "@/components/service-worker";
 import "./globals.css";
 
@@ -33,6 +34,7 @@ export default function RootLayout({
         <main className="min-h-dvh pb-24">{children}</main>
         <BottomNav />
         <ServiceWorker />
+        <ErrorReporter />
       </body>
     </html>
   );
