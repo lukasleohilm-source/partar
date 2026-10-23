@@ -6,9 +6,29 @@ import { FitmentPicker } from "@/components/listing/fitment-picker";
 import { ImagePicker } from "@/components/listing/image-picker";
 import { inputClass, labelClass, primaryButton, secondaryButton } from "@/components/ui/styles";
 import { CONDITIONS, KINDS, REGIONS, formatNumber, formatPrice, type Condition, type Kind, type Region } from "@/lib/i18n";
-import type { ProcessedImage } from "@/lib/images";
+import type { PickedImage } from "@/lib/images";
+import { imageUrl } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/client";
 import { YEARS, describeFitment, type Category, type Fitment, type Make, type Model } from "@/lib/vehicles";
+
+// Auglýsing sem verið er að breyta
+export type ExistingListing = {
+  id: string;
+  kind: Kind;
+  title: string;
+  description: string | null;
+  category_id: number | null;
+  price_isk: number | null;
+  condition: Condition;
+  region: Region;
+  postal_code: string | null;
+  part_number: string | null;
+  mileage_km: number | null;
+  license_plate: string | null;
+  universal_fit: boolean;
+  images: { path: string; width: number | null; height: number | null }[];
+  fitments: Fitment[];
+};
 
 type Props = {
   userId: string;
@@ -16,9 +36,16 @@ type Props = {
   models: Model[];
   categories: Category[];
   defaultRegion: Region | null;
+  existing?: ExistingListing;
 };
 
 type PriceMode = "verd" | "tilbod" | "gefins";
+
+function initialPriceMode(price: number | null | undefined): PriceMode {
+  if (price === null) return "tilbod";
+  if (price === 0) return "gefins";
+  return "verd";
+}
 
 const KIND_HELP: Record<Kind, string> = {
   part: "Einn hlutur eða sett, t.d. framljós eða felgur",
@@ -28,28 +55,42 @@ const KIND_HELP: Record<Kind, string> = {
 
 const STEPS = ["Tegund", "Myndir", "Upplýsingar", "Passar í", "Staðsetning"];
 
-export function ListingForm({ userId, makes, models, categories, defaultRegion }: Props) {
+export function ListingForm({ userId, makes, models, categories, defaultRegion, existing: ex }: Props) {
   const router = useRouter();
-  const [step, setStep] = useState(0);
+  const editing = Boolean(ex);
+  const [step, setStep] = useState(editing ? 1 : 0);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const [kind, setKind] = useState<Kind>("part");
-  const [images, setImages] = useState<ProcessedImage[]>([]);
-  const [title, setTitle] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [condition, setCondition] = useState<Condition | "">("");
-  const [priceMode, setPriceMode] = useState<PriceMode>("verd");
-  const [price, setPrice] = useState("");
-  const [description, setDescription] = useState("");
-  const [partNumber, setPartNumber] = useState("");
-  const [mileage, setMileage] = useState("");
-  const [plate, setPlate] = useState("");
-  const [fitments, setFitments] = useState<Fitment[]>([]);
-  const [universal, setUniversal] = useState(false);
-  const [car, setCar] = useState({ make: "", model: "", year: "" });
-  const [region, setRegion] = useState<Region | "">(defaultRegion ?? "");
-  const [postalCode, setPostalCode] = useState("");
+  const [kind, setKind] = useState<Kind>(ex?.kind ?? "part");
+  const [images, setImages] = useState<PickedImage[]>(
+    () =>
+      ex?.images.map((img) => ({
+        source: "stored" as const,
+        id: img.path,
+        path: img.path,
+        url: imageUrl(img.path),
+        width: img.width,
+        height: img.height,
+      })) ?? [],
+  );
+  const [title, setTitle] = useState(ex?.title ?? "");
+  const [categoryId, setCategoryId] = useState(ex?.category_id ? String(ex.category_id) : "");
+  const [condition, setCondition] = useState<Condition | "">(ex?.condition ?? "");
+  const [priceMode, setPriceMode] = useState<PriceMode>(initialPriceMode(ex?.price_isk));
+  const [price, setPrice] = useState(ex?.price_isk ? String(ex.price_isk) : "");
+  const [description, setDescription] = useState(ex?.description ?? "");
+  const [partNumber, setPartNumber] = useState(ex?.part_number ?? "");
+  const [mileage, setMileage] = useState(ex?.mileage_km != null ? String(ex.mileage_km) : "");
+  const [plate, setPlate] = useState(ex?.license_plate ?? "");
+  const [fitments, setFitments] = useState<Fitment[]>(ex && ex.kind === "part" ? ex.fitments : []);
+  const [universal, setUniversal] = useState(ex?.universal_fit ?? false);
+  const [car, setCar] = useState(() => {
+    const f = ex && ex.kind !== "part" ? ex.fitments[0] : undefined;
+    return { make: f ? String(f.make_id) : "", model: f?.model_id ? String(f.model_id) : "", year: f?.year_from ? String(f.year_from) : "" };
+  });
+  const [region, setRegion] = useState<Region | "">(ex?.region ?? defaultRegion ?? "");
+  const [postalCode, setPostalCode] = useState(ex?.postal_code ?? "");
 
   const isCar = kind !== "part";
   const parents = categories.filter((c) => c.parent_id === null);
@@ -98,6 +139,51 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion }
     window.scrollTo({ top: 0 });
   }
 
+  function listingFields() {
+    return {
+      kind,
+      title: title.trim(),
+      description: description.trim() || null,
+      category_id: isCar ? null : Number(categoryId),
+      price_isk: priceValue,
+      condition: condition as Condition,
+      region: region as Region,
+      postal_code: postalCode || null,
+      part_number: (!isCar && partNumber.trim()) || null,
+      mileage_km: isCar && mileage ? Number(mileage) : null,
+      license_plate: (isCar && plate.trim().toUpperCase()) || null,
+      universal_fit: !isCar && universal,
+    };
+  }
+
+  function chosenFitments(): Fitment[] {
+    return isCar ? [carFitment()!] : universal ? [] : fitments;
+  }
+
+  // Hleður upp nýjum myndum og skilar línum fyrir listing_images í réttri röð
+  async function uploadImages(supabase: ReturnType<typeof createClient>, listingId: string, uploaded: string[]) {
+    const rows = [];
+    for (const [i, img] of images.entries()) {
+      let path: string;
+      if (img.source === "stored") {
+        path = img.path;
+      } else {
+        path = `${userId}/${listingId}/${img.id}.${img.ext}`;
+        const { error } = await supabase.storage
+          .from("listing-images")
+          .upload(path, img.blob, { contentType: img.blob.type, cacheControl: "31536000" });
+        if (error) throw error;
+        uploaded.push(path);
+      }
+      rows.push({ listing_id: listingId, path, sort: i, width: img.width, height: img.height });
+    }
+    return rows;
+  }
+
+  function revokePreviews() {
+    images.forEach((img) => img.source === "new" && URL.revokeObjectURL(img.url));
+  }
+
   async function publish() {
     const err = validate(4);
     if (err) return setError(err);
@@ -112,43 +198,19 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion }
       // 1. Vista sem draft svo triggerinn sjái fitments þegar auglýsingin birtist
       const { data: listing, error: e1 } = await supabase
         .from("listings")
-        .insert({
-          seller_id: userId,
-          kind,
-          status: "draft",
-          title: title.trim(),
-          description: description.trim() || null,
-          category_id: isCar ? null : Number(categoryId),
-          price_isk: priceValue,
-          condition,
-          region,
-          postal_code: postalCode || null,
-          part_number: (!isCar && partNumber.trim()) || null,
-          mileage_km: isCar && mileage ? Number(mileage) : null,
-          license_plate: (isCar && plate.trim().toUpperCase()) || null,
-          universal_fit: !isCar && universal,
-        })
+        .insert({ seller_id: userId, status: "draft", ...listingFields() })
         .select("id")
         .single();
       if (e1) throw e1;
       listingId = listing.id as string;
 
       // 2. Myndir
-      const rows = [];
-      for (const [i, img] of images.entries()) {
-        const path = `${userId}/${listingId}/${img.id}.${img.ext}`;
-        const { error } = await supabase.storage
-          .from("listing-images")
-          .upload(path, img.blob, { contentType: img.blob.type, cacheControl: "31536000" });
-        if (error) throw error;
-        uploaded.push(path);
-        rows.push({ listing_id: listingId, path, sort: i, width: img.width, height: img.height });
-      }
+      const rows = await uploadImages(supabase, listingId, uploaded);
       const { error: e2 } = await supabase.from("listing_images").insert(rows);
       if (e2) throw e2;
 
       // 3. Passar í
-      const fits = isCar ? [carFitment()!] : universal ? [] : fitments;
+      const fits = chosenFitments();
       if (fits.length) {
         const { error: e3 } = await supabase
           .from("listing_fitments")
@@ -160,13 +222,64 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion }
       const { error: e4 } = await supabase.from("listings").update({ status: "active" }).eq("id", listingId);
       if (e4) throw e4;
 
-      images.forEach((img) => URL.revokeObjectURL(img.url));
+      revokePreviews();
       router.push(`/auglysing/${listingId}`);
     } catch {
       // Hreinsa hálfkláraða auglýsingu
       if (uploaded.length) await supabase.storage.from("listing-images").remove(uploaded);
       if (listingId) await supabase.from("listings").delete().eq("id", listingId);
       setError("Ekki tókst að birta auglýsinguna. Athugaðu nettenginguna og reyndu aftur.");
+      setSubmitting(false);
+    }
+  }
+
+  async function saveChanges() {
+    if (!ex) return;
+    for (const s of [1, 2, 3, 4]) {
+      const err = validate(s);
+      if (err) {
+        setStep(s);
+        return setError(err);
+      }
+    }
+    setError(null);
+    setSubmitting(true);
+
+    const supabase = createClient();
+    const uploaded: string[] = [];
+
+    try {
+      const { error: e1 } = await supabase.from("listings").update(listingFields()).eq("id", ex.id);
+      if (e1) throw e1;
+
+      // Myndir: nýjar hlaðast upp, svo er röðin skrifuð upp á nýtt
+      const rows = await uploadImages(supabase, ex.id, uploaded);
+      const { error: e2 } = await supabase.from("listing_images").delete().eq("listing_id", ex.id);
+      if (e2) throw e2;
+      const { error: e3 } = await supabase.from("listing_images").insert(rows);
+      if (e3) throw e3;
+
+      const { error: e4 } = await supabase.from("listing_fitments").delete().eq("listing_id", ex.id);
+      if (e4) throw e4;
+      const fits = chosenFitments();
+      if (fits.length) {
+        const { error: e5 } = await supabase
+          .from("listing_fitments")
+          .insert(fits.map((f) => ({ ...f, listing_id: ex.id })));
+        if (e5) throw e5;
+      }
+
+      // Myndir sem voru fjarlægðar
+      const kept = new Set(images.flatMap((i) => (i.source === "stored" ? [i.path] : [])));
+      const removed = ex.images.map((i) => i.path).filter((p) => !kept.has(p));
+      if (removed.length) await supabase.storage.from("listing-images").remove(removed);
+
+      revokePreviews();
+      router.push(`/auglysing/${ex.id}`);
+      router.refresh();
+    } catch {
+      if (uploaded.length) await supabase.storage.from("listing-images").remove(uploaded);
+      setError("Ekki tókst að vista breytingarnar. Athugaðu nettenginguna og reyndu aftur.");
       setSubmitting(false);
     }
   }
@@ -180,7 +293,9 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion }
               ‹
             </button>
           )}
-          <h1 className="text-xl font-bold">{step === 0 ? "Hvað ertu að selja?" : STEPS[step]}</h1>
+          <h1 className="text-xl font-bold">
+            {editing ? `Breyta: ${STEPS[step].toLowerCase()}` : step === 0 ? "Hvað ertu að selja?" : STEPS[step]}
+          </h1>
           <span className="ml-auto text-sm text-stone-500">
             {step + 1}/{STEPS.length}
           </span>
@@ -486,7 +601,19 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion }
 
       {step > 0 && (
         <div className="mt-6 space-y-2">
-          {step < STEPS.length - 1 ? (
+          {editing ? (
+            // Við breytingu má vista úr hvaða skrefi sem er
+            <>
+              <button type="button" onClick={saveChanges} disabled={submitting} className={primaryButton}>
+                {submitting ? "Vista…" : "Vista breytingar"}
+              </button>
+              {step < STEPS.length - 1 && (
+                <button type="button" onClick={next} disabled={submitting} className={secondaryButton}>
+                  Áfram í {STEPS[step + 1].toLowerCase()}
+                </button>
+              )}
+            </>
+          ) : step < STEPS.length - 1 ? (
             <button type="button" onClick={next} className={primaryButton}>
               Áfram
             </button>

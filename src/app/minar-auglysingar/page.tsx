@@ -108,6 +108,9 @@ export default async function MyListingsPage({ searchParams }: { searchParams: P
                   </div>
                 </Link>
                 <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-stone-100 pt-2 text-sm font-medium">
+                  <Link href={`/auglysing/${l.id}/breyta`} className="text-orange-700">
+                    Breyta
+                  </Link>
                   {l.status !== "draft" && (
                     <form action={setListingStatus.bind(null, l.id, l.status === "sold" ? "active" : "sold")}>
                       <button type="submit" className="text-stone-700">

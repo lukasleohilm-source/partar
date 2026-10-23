@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { ImageGallery } from "@/components/listing/image-gallery";
@@ -174,11 +175,16 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
       <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-stone-200 bg-white/95 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-md gap-2">
           {isOwner ? (
-            <form action={setListingStatus.bind(null, listing.id, listing.status === "sold" ? "active" : "sold")} className="flex-1">
-              <button type="submit" className={secondaryButton}>
-                {listing.status === "sold" ? "Merkja aftur til sölu" : "Merkja sem selt"}
-              </button>
-            </form>
+            <>
+              <Link href={`/auglysing/${listing.id}/breyta`} className={`${primaryButton} flex-1 text-center`}>
+                ✏️ Breyta
+              </Link>
+              <form action={setListingStatus.bind(null, listing.id, listing.status === "sold" ? "active" : "sold")} className="flex-1">
+                <button type="submit" className={secondaryButton}>
+                  {listing.status === "sold" ? "Aftur í sölu" : "Merkja selt"}
+                </button>
+              </form>
+            </>
           ) : listing.status === "active" ? (
             <>
               <form action={contactSeller.bind(null, listing.id)} className="flex-1">

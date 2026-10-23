@@ -1,13 +1,13 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { processImage, type ProcessedImage } from "@/lib/images";
+import { processImage, type PickedImage } from "@/lib/images";
 
 export const MAX_IMAGES = 10;
 
 type Props = {
-  images: ProcessedImage[];
-  onChange: (images: ProcessedImage[]) => void;
+  images: PickedImage[];
+  onChange: (images: PickedImage[]) => void;
 };
 
 export function ImagePicker({ images, onChange }: Props) {
@@ -21,7 +21,7 @@ export function ImagePicker({ images, onChange }: Props) {
     setBusy(true);
     const room = MAX_IMAGES - images.length;
     const picked = Array.from(files).slice(0, room);
-    const added: ProcessedImage[] = [];
+    const added: PickedImage[] = [];
     for (const file of picked) {
       try {
         added.push(await processImage(file));
@@ -37,7 +37,7 @@ export function ImagePicker({ images, onChange }: Props) {
 
   function remove(id: string) {
     const img = images.find((i) => i.id === id);
-    if (img) URL.revokeObjectURL(img.url);
+    if (img?.source === "new") URL.revokeObjectURL(img.url);
     onChange(images.filter((i) => i.id !== id));
   }
 

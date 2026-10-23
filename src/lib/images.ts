@@ -4,6 +4,7 @@ const MAX_SIDE = 1600;
 const QUALITY = 0.82;
 
 export type ProcessedImage = {
+  source: "new";
   id: string;
   blob: Blob;
   url: string; // object URL fyrir forskoðun
@@ -11,6 +12,18 @@ export type ProcessedImage = {
   height: number;
   ext: "webp" | "jpg";
 };
+
+// Mynd sem er þegar í geymslunni (þegar auglýsingu er breytt)
+export type StoredImage = {
+  source: "stored";
+  id: string;
+  path: string;
+  url: string;
+  width: number | null;
+  height: number | null;
+};
+
+export type PickedImage = ProcessedImage | StoredImage;
 
 function toBlob(canvas: HTMLCanvasElement, type: string): Promise<Blob | null> {
   return new Promise((resolve) => canvas.toBlob(resolve, type, QUALITY));
@@ -38,5 +51,5 @@ export async function processImage(file: File): Promise<ProcessedImage> {
   }
   if (!blob) throw new Error("image_encode_failed");
 
-  return { id: crypto.randomUUID(), blob, url: URL.createObjectURL(blob), width, height, ext };
+  return { source: "new", id: crypto.randomUUID(), blob, url: URL.createObjectURL(blob), width, height, ext };
 }
