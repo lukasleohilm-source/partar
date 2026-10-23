@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import { BottomNav } from "@/components/bottom-nav";
 import { ErrorReporter } from "@/components/error-reporter";
 import { ServiceWorker } from "@/components/service-worker";
+import { WelcomeGate } from "@/components/welcome-gate";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -36,6 +37,7 @@ export default function RootLayout({
         <BottomNav />
         <ServiceWorker />
         <ErrorReporter />
+        <WelcomeGate />
       </body>
     </html>
   );
