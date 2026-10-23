@@ -1,3 +1,4 @@
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { setListingStatus } from "@/app/auglysing/[id]/actions";
@@ -54,7 +55,7 @@ export default async function MyListingsPage({ searchParams }: { searchParams: P
     <div className="mx-auto max-w-md px-4 pt-6">
       <header className="mb-4 flex items-center gap-2">
         <Link href="/profill" aria-label="Til baka" className="-ml-2 px-2 text-2xl text-stone-600">
-          ‹
+          <ChevronLeft size={26} />
         </Link>
         <h1 className="text-2xl font-bold">Mínar auglýsingar</h1>
       </header>

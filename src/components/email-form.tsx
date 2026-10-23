@@ -1,5 +1,6 @@
 "use client";
 
+import { MailCheck } from "lucide-react";
 import { useActionState, useCallback, useEffect, useState } from "react";
 import { TURNSTILE_SITE_KEY, Turnstile } from "@/components/turnstile";
 import { inputClass, primaryButton } from "@/components/ui/styles";
@@ -34,8 +35,8 @@ export function EmailForm({ action, submitLabel, sentText, hidden, captcha, foot
   if (state.status === "sent") {
     return (
       <div className="rounded-2xl bg-surface p-6 text-center shadow-sm">
-        <div className="mb-3 text-4xl" aria-hidden>
-          📬
+        <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-orange-50 text-orange-600" aria-hidden>
+          <MailCheck size={28} />
         </div>
         <h2 className="text-lg font-semibold">Athugaðu tölvupóstinn</h2>
         <p className="mt-2 text-stone-600">{sentText(state.email ?? "")}</p>

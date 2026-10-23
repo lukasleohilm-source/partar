@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FitmentPicker } from "@/components/listing/fitment-picker";
@@ -296,7 +297,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
         <div className="mb-3 flex items-center gap-3">
           {step > 0 && (
             <button type="button" onClick={back} aria-label="Til baka" className="-ml-2 px-2 text-2xl text-stone-600">
-              ‹
+              <ChevronLeft size={26} />
             </button>
           )}
           <h1 className="text-xl font-bold">

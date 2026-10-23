@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft, ChevronRight, ImagePlus, Loader2, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { processImage, type PickedImage } from "@/lib/images";
 
@@ -66,7 +67,7 @@ export function ImagePicker({ images, onChange }: Props) {
               aria-label={`Eyða mynd ${i + 1}`}
               className="absolute right-1 top-1 flex size-7 items-center justify-center rounded-full bg-black/60 text-white"
             >
-              ✕
+              <X size={16} />
             </button>
             <div className="absolute inset-x-1 bottom-1 flex justify-between">
               <button
@@ -76,7 +77,7 @@ export function ImagePicker({ images, onChange }: Props) {
                 aria-label="Færa framar"
                 className="flex size-7 items-center justify-center rounded-full bg-black/60 text-white disabled:invisible"
               >
-                ‹
+                <ChevronLeft size={18} />
               </button>
               <button
                 type="button"
@@ -85,7 +86,7 @@ export function ImagePicker({ images, onChange }: Props) {
                 aria-label="Færa aftar"
                 className="flex size-7 items-center justify-center rounded-full bg-black/60 text-white disabled:invisible"
               >
-                ›
+                <ChevronRight size={18} />
               </button>
             </div>
           </li>
@@ -99,7 +100,7 @@ export function ImagePicker({ images, onChange }: Props) {
               disabled={busy}
               className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-stone-300 bg-surface text-stone-500 active:bg-stone-100"
             >
-              <span className="text-3xl leading-none">{busy ? "…" : "📷"}</span>
+              {busy ? <Loader2 size={28} className="animate-spin" /> : <ImagePlus size={30} strokeWidth={1.8} />}
               <span className="text-xs">{busy ? "Vinn myndir" : "Bæta við"}</span>
             </button>
           </li>

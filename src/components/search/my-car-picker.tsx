@@ -1,5 +1,6 @@
 "use client";
 
+import { CarFront, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -49,9 +50,11 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
   return (
     <>
       {car ? (
-        <div className={`flex items-center gap-3 rounded-2xl p-3 ${active ? "bg-orange-50 ring-1 ring-orange-200" : "bg-surface"}`}>
-          <span className="text-2xl" aria-hidden>
-            🚗
+        <div
+          className={`flex items-center gap-3 rounded-2xl p-3 shadow-sm ring-1 ${active ? "bg-orange-50 ring-orange-200" : "bg-surface ring-black/5"}`}
+        >
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 text-white" aria-hidden>
+            <CarFront size={22} />
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-xs text-stone-500">{active ? "Sýni bara það sem passar í" : "Minn bíll"}</p>
@@ -70,15 +73,16 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="flex w-full items-center gap-3 rounded-2xl border-2 border-dashed border-orange-300 bg-surface p-3 text-left active:bg-orange-50"
+          className="flex w-full items-center gap-3 rounded-2xl border-2 border-dashed border-orange-300 bg-surface/70 p-3 text-left active:bg-orange-50"
         >
-          <span className="text-2xl" aria-hidden>
-            🚗
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600" aria-hidden>
+            <CarFront size={22} />
           </span>
-          <span>
+          <span className="min-w-0 flex-1">
             <span className="block font-semibold">Veldu þinn bíl</span>
             <span className="text-sm text-stone-500">Sjáðu bara hluti sem passa</span>
           </span>
+          <ChevronRight size={20} className="text-stone-400" aria-hidden />
         </button>
       )}
 

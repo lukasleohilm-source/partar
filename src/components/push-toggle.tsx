@@ -1,5 +1,6 @@
 "use client";
 
+import { Bell } from "lucide-react";
 import { useEffect, useState } from "react";
 import { disablePush, enablePush, getPushState, type PushState } from "@/lib/push-client";
 
@@ -40,7 +41,9 @@ export function PushToggle({ compact = false }: { compact?: boolean }) {
     <section className="rounded-2xl bg-surface p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="font-semibold">🔔 Tilkynningar í síma</p>
+          <p className="flex items-center gap-2 font-semibold">
+            <Bell size={18} className="text-orange-600" /> Tilkynningar í síma
+          </p>
           <p className="mt-0.5 text-sm text-stone-600">{TEXT[state]}</p>
         </div>
         {canToggle && (

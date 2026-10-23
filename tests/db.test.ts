@@ -131,6 +131,37 @@ describe("leit", () => {
     );
   });
 
+  it("samheiti, hlutar orða og innsláttarvillur", async () => {
+    // „aðalljós“ er samheiti framljóss
+    expect(titles(await t.q(`select title from search_listings(q => 'aðalljós', p_sort => 'price_asc')`))).toEqual([
+      "Framljós Toyota allar gerðir",
+      "Framljós vinstra megin",
+    ]);
+    // „ljos“ (án kommu) finnur líka afturljós sem hluta orðs
+    expect(await t.q(`select title from search_listings(q => 'ljos')`)).toHaveLength(4);
+    // Innsláttarvilla
+    expect(titles(await t.q(`select title from search_listings(q => 'afturljos yarsi')`))).toEqual(["Afturljós Yaris"]);
+    expect(await t.q(`select title from search_listings(q => 'dráttarkrókur')`)).toHaveLength(0);
+  });
+
+  it("uppástungur: bílar, flokkar og auglýsingar", async () => {
+    const s = await t.q<{ kind: string; label: string }>(`select kind, label from search_suggestions('land cr')`);
+    expect(s.filter((r) => r.kind === "car").map((r) => r.label)).toContain("Toyota Land Cruiser 120");
+    const l = await t.q<{ kind: string; label: string }>(`select kind, label from search_suggestions('framlj')`);
+    expect(l.some((r) => r.kind === "category" && r.label === "Framljós")).toBe(true);
+    expect(l.some((r) => r.kind === "listing" && r.label === "Framljós vinstra megin")).toBe(true);
+  });
+
+  it("fjarlægð: röðun og hámarksfjarlægð frá póstnúmeri", async () => {
+    // Auglýsingar: höfuðborgarsvæði (×2), Norðurland eystra, Suðurland. Frá Akureyri (600):
+    const near = await t.q<{ title: string; region: string }>(
+      `select title, region from search_listings(p_near => '600', p_sort => 'distance')`,
+    );
+    expect(near[0].region).toBe("nordurland_eystra");
+    const within = await t.q(`select title from search_listings(p_near => '600', p_max_km => 100)`);
+    expect(titles(within as { title: string }[])).toEqual(["Afturljós Yaris"]);
+  });
+
   it("textaleit með og án kommu og yfirflokkur", async () => {
     expect(titles(await t.q(`select title from search_listings(q => 'afturljós yaris')`))).toEqual(["Afturljós Yaris"]);
     expect(await t.q(`select title from search_listings(q => 'framljos')`)).not.toHaveLength(0);
@@ -213,6 +244,60 @@ describe("spjall og aðgangsreglur", () => {
     expect(after.status).toBe("removed");
     await t.q(`update listings set status = 'active' where id = $1`, [l.id]);
     await t.q(`delete from reports where listing_id = $1`, [l.id]);
+  });
+
+  it("uppáhalds eru einkamál hvers notanda", async () => {
+    const [l] = await t.q<{ id: string }>(`select id from listings where title = 'Afturljós Yaris'`);
+    await t.as(buyer);
+    await t.q(`insert into favorites (user_id, listing_id) values ($1, $2)`, [buyer, l.id]);
+    expect(await t.q(`select * from favorites`)).toHaveLength(1);
+    await t.as(stranger);
+    expect(await t.q(`select * from favorites`)).toHaveLength(0);
+    await expect(t.q(`insert into favorites (user_id, listing_id) values ($1, $2)`, [buyer, l.id])).rejects.toThrow();
+  });
+
+  it("ýta upp: aðeins seljandi, einu sinni á 7 dögum", async () => {
+    const [l] = await t.q<{ id: string }>(`select id from listings where title = 'Ljós tilboð'`);
+    await t.as(buyer);
+    await expect(t.q(`select bump_listing($1)`, [l.id])).rejects.toThrow(/not_allowed/);
+    await t.as(seller);
+    await expect(t.q(`select bump_listing($1)`, [l.id])).rejects.toThrow(/too_soon/); // nýbirt
+    await t.asAdmin();
+    await t.q(`update listings set published_at = now() - interval '8 days' where id = $1`, [l.id]);
+    await t.as(seller);
+    await t.q(`select bump_listing($1)`, [l.id]);
+    await t.as(null);
+    const [first] = await t.q<{ title: string }>(`select title from search_listings()`);
+    expect(first.title).toBe("Ljós tilboð");
+    await t.as(seller);
+    await expect(t.q(`select bump_listing($1)`, [l.id])).rejects.toThrow(/too_soon/);
+  });
+
+  it("einkunnir: aðeins kaupandi sem seljandi hefur svarað", async () => {
+    await t.as(buyer);
+    await expect(
+      t.q(`insert into reviews (conversation_id, reviewer_id, seller_id, stars) values ($1, $2, $3, 5)`, [conv, buyer, seller]),
+    ).rejects.toThrow(); // seljandi hefur ekki svarað enn
+    await t.as(seller);
+    await t.q(`insert into messages (conversation_id, sender_id, body) values ($1, $2, 'Hæ, já')`, [conv, seller]);
+
+    await t.as(stranger);
+    await expect(
+      t.q(`insert into reviews (conversation_id, reviewer_id, seller_id, stars) values ($1, $2, $3, 5)`, [conv, stranger, seller]),
+    ).rejects.toThrow();
+    await t.as(buyer);
+    await t.q(`insert into reviews (conversation_id, reviewer_id, seller_id, stars, comment) values ($1, $2, $3, 4, 'Fínt')`, [
+      conv,
+      buyer,
+      seller,
+    ]);
+    await expect(
+      t.q(`insert into reviews (conversation_id, reviewer_id, seller_id, stars) values ($1, $2, $3, 5)`, [conv, buyer, seller]),
+    ).rejects.toThrow(); // bara ein á samtal
+    await t.as(null);
+    const [r] = await t.q<{ average: string; total: number }>(`select * from seller_rating($1)`, [seller]);
+    expect(Number(r.average)).toBe(4);
+    expect(r.total).toBe(1);
   });
 
   it("ýtitilkynning: skilaboð til áskrifanda sendast á Worker með leyndarlykli", async () => {

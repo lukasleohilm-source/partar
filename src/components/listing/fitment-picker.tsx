@@ -1,5 +1,6 @@
 "use client";
 
+import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import { inputClass, labelClass, secondaryButton } from "@/components/ui/styles";
 import { YEARS, describeFitment, type Fitment, type Make, type Model } from "@/lib/vehicles";
@@ -75,7 +76,7 @@ export function FitmentPicker({ makes, models, fitments, onChange, universal, on
                     aria-label="Fjarlægja"
                     className="text-stone-500"
                   >
-                    ✕
+                    <X size={18} />
                   </button>
                 </li>
               ))}
@@ -160,7 +161,7 @@ export function FitmentPicker({ makes, models, fitments, onChange, universal, on
               )}
 
               <button type="button" onClick={add} className={secondaryButton}>
-                ＋ Bæta við bíl
+                <Plus size={18} className="-mt-0.5 mr-1 inline" /> Bæta við bíl
               </button>
             </fieldset>
           )}

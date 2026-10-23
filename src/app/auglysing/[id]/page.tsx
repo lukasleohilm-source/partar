@@ -1,11 +1,32 @@
+import {
+  ArrowUp,
+  BadgeCheck,
+  CarFront,
+  CheckCircle2,
+  Clock,
+  Gauge,
+  Hash,
+  LayoutGrid,
+  MapPin,
+  MessageCircle,
+  Pencil,
+  Phone,
+  Sparkles,
+  Tag,
+  type LucideIcon,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
+import { Avatar } from "@/components/avatar";
 import { ImageGallery } from "@/components/listing/image-gallery";
+import { BackButton, BumpButton, FavoriteButton, ShareButton } from "@/components/listing/listing-actions";
+import { SellerRating } from "@/components/stars";
 import { primaryButton, secondaryButton } from "@/components/ui/styles";
 import { CONDITIONS, KINDS, REGIONS, formatNumber, formatPrice, type Condition, type Kind, type Region } from "@/lib/i18n";
-import { IMAGE_COLS, imageUrl, timeAgo, type ImageRef } from "@/lib/listings";
+import { IMAGE_COLS, coverOf, imageUrl, timeAgo, type ImageRef } from "@/lib/listings";
+import { placeLabel } from "@/lib/places";
 import { createClient } from "@/lib/supabase/server";
 import { yearRange } from "@/lib/vehicles";
 import { contactSeller, setListingStatus } from "./actions";
@@ -27,10 +48,13 @@ type ListingDetail = {
   mileage_km: number | null;
   universal_fit: boolean;
   published_at: string | null;
+  bumped_at: string | null;
   created_at: string;
   categories: { name: string } | null;
   listing_images: ImageRef[];
   listing_fitments: {
+    make_id: number;
+    model_id: number | null;
     year_from: number | null;
     year_to: number | null;
     makes: { name: string };
@@ -41,7 +65,7 @@ type ListingDetail = {
 
 const memberSince = new Intl.DateTimeFormat("is-IS", { month: "long", year: "numeric" });
 
-const UUID_RE =/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const getListing = cache(async (id: string) => {
   if (!UUID_RE.test(id)) return null;
@@ -50,26 +74,31 @@ const getListing = cache(async (id: string) => {
     .from("listings")
     .select(
       `id, seller_id, kind, status, title, description, price_isk, condition, region, postal_code,
-       part_number, license_plate, mileage_km, universal_fit, published_at, created_at,
+       part_number, license_plate, mileage_km, universal_fit, published_at, bumped_at, created_at,
        categories(name),
        listing_images(${IMAGE_COLS}),
-       listing_fitments(year_from, year_to, makes(name), models(name)),
-       profiles(display_name, created_at)`,
+       listing_fitments(make_id, model_id, year_from, year_to, makes(name), models(name)),
+       profiles!listings_seller_id_fkey(display_name, created_at)`,
     )
     .eq("id", id)
-    .order("sort", { referencedTable: "listing_images" })
     .maybeSingle<ListingDetail>();
   return data;
 });
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const listing = await getListing((await params).id);
+  const { id } = await params;
+  const listing = await getListing(id);
   if (!listing) return { title: "Auglýsing fannst ekki – Partar" };
-  const cover = listing.listing_images[0];
+  const title = `${listing.title} – ${formatPrice(listing.price_isk)}`;
+  const description =
+    listing.description?.slice(0, 160) ?? `${KINDS[listing.kind]} · ${placeLabel(listing.postal_code, listing.region)} · Partar`;
   return {
-    title: `${listing.title} – ${formatPrice(listing.price_isk)} – Partar`,
-    description: listing.description?.slice(0, 160) ?? `${KINDS[listing.kind]} · ${REGIONS[listing.region]}`,
-    openGraph: cover ? { images: [imageUrl(cover.path)] } : undefined,
+    title: `${title} – Partar`,
+    description,
+    alternates: { canonical: `/auglysing/${listing.id}` },
+    // Deilimynd með verði og merki: /auglysing/[id]/opengraph-image
+    openGraph: { title, description, type: "website", siteName: "Partar", locale: "is_IS" },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 
@@ -86,78 +115,131 @@ export default async function ListingPage({
   if (!listing || listing.status === "removed") notFound();
 
   const supabase = await createClient();
-  const [
-    {
-      data: { user },
-    },
-    { data: contact },
-  ] = await Promise.all([
-    supabase.auth.getUser(),
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const [{ data: contact }, { data: fav }] = await Promise.all([
     // RLS skilar síma aðeins ef seljandi leyfir það
     supabase.from("profile_contacts").select("phone").eq("id", listing.seller_id).maybeSingle(),
+    user
+      ? supabase.from("favorites").select("listing_id").eq("listing_id", listing.id).eq("user_id", user.id).maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
+  const isFavorite = Boolean(fav);
+
+  // Vörugögn fyrir Google (schema.org/Product)
+  const cover = coverOf(listing.listing_images);
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: listing.title,
+    description: listing.description ?? undefined,
+    image: cover ? [imageUrl(cover.path)] : undefined,
+    sku: listing.part_number ?? undefined,
+    itemCondition: listing.condition === "nytt" ? "https://schema.org/NewCondition" : "https://schema.org/UsedCondition",
+    offers:
+      listing.price_isk != null
+        ? {
+            "@type": "Offer",
+            price: listing.price_isk,
+            priceCurrency: "ISK",
+            availability: listing.status === "active" ? "https://schema.org/InStock" : "https://schema.org/SoldOut",
+            areaServed: "IS",
+          }
+        : undefined,
+  };
 
   const isOwner = user?.id === listing.seller_id;
   const isCar = listing.kind !== "part";
   const phone = contact?.phone ?? null;
 
-  const facts: [string, string][] = [
-    ["Tegund", KINDS[listing.kind]],
-    ["Ástand", CONDITIONS[listing.condition]],
-    ...(listing.categories ? [["Flokkur", listing.categories.name] as [string, string]] : []),
-    ["Staðsetning", [listing.postal_code, REGIONS[listing.region]].filter(Boolean).join(" ")],
-    ...(listing.mileage_km != null
-      ? [["Akstur", `${formatNumber(listing.mileage_km)} km`] as [string, string]]
-      : []),
-    ...(listing.license_plate ? [["Bílnúmer", listing.license_plate] as [string, string]] : []),
-    ...(listing.part_number ? [["Vörunúmer", listing.part_number] as [string, string]] : []),
+  const facts: { icon: LucideIcon; label: string; value: string }[] = [
+    { icon: Tag, label: "Tegund", value: KINDS[listing.kind] },
+    { icon: Sparkles, label: "Ástand", value: CONDITIONS[listing.condition] },
+    ...(listing.categories ? [{ icon: LayoutGrid, label: "Flokkur", value: listing.categories.name }] : []),
+    {
+      icon: MapPin,
+      label: "Staðsetning",
+      value: listing.postal_code ? `${listing.postal_code} ${placeLabel(listing.postal_code, listing.region)}` : REGIONS[listing.region],
+    },
+    ...(listing.mileage_km != null ? [{ icon: Gauge, label: "Akstur", value: `${formatNumber(listing.mileage_km)} km` }] : []),
+    ...(listing.license_plate ? [{ icon: Hash, label: "Bílnúmer", value: listing.license_plate }] : []),
+    ...(listing.part_number ? [{ icon: Hash, label: "Vörunúmer", value: listing.part_number }] : []),
   ];
 
   return (
-    <article className="mx-auto max-w-md pb-28">
-      <ImageGallery urls={listing.listing_images.map((i) => imageUrl(i.path))} title={listing.title} />
+    <article className="mx-auto max-w-md pb-32">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <div className="relative">
+        <ImageGallery images={[...listing.listing_images].sort((a, b) => a.sort - b.sort)} title={listing.title} />
+        <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-between p-3">
+          <BackButton />
+          <div className="pointer-events-auto flex gap-2">
+            <ShareButton title={listing.title} text={`${listing.title} – ${formatPrice(listing.price_isk)}`} />
+            {!isOwner && <FavoriteButton listingId={listing.id} initial={isFavorite} variant="overlay" />}
+          </div>
+        </div>
+      </div>
 
-      <div className="space-y-5 px-4 pt-4">
+      <div className="-mt-4 space-y-5 rounded-t-3xl bg-canvas px-4 pt-5 [position:relative]">
         {villa && (
           <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
             {villa === "lokad" ? "Seljandinn tekur ekki við skilaboðum frá þér." : "Ekki tókst að hefja spjall. Reyndu aftur."}
           </p>
         )}
         <header>
-          {listing.status === "sold" && (
-            <span className="mb-2 inline-block rounded-full bg-red-600 px-3 py-1 text-xs font-bold text-white">SELT</span>
-          )}
-          {listing.status === "draft" && (
-            <span className="mb-2 inline-block rounded-full bg-stone-300 px-3 py-1 text-xs font-bold">Óbirt</span>
-          )}
-          <h1 className="text-xl font-bold leading-tight">{listing.title}</h1>
-          <p className="mt-1 text-2xl font-bold text-orange-600">{formatPrice(listing.price_isk)}</p>
-          <p className="mt-1 text-sm text-stone-500">
-            Birt {timeAgo(listing.published_at ?? listing.created_at)}
+          <div className="mb-2 flex flex-wrap gap-1.5">
+            {listing.status === "sold" && (
+              <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold text-white">SELT</span>
+            )}
+            {listing.status === "draft" && (
+              <span className="rounded-full bg-stone-300 px-2.5 py-0.5 text-xs font-bold">Óbirt</span>
+            )}
+            {listing.bumped_at && listing.published_at && listing.bumped_at > listing.published_at && (
+              <span className="flex items-center gap-1 rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-semibold text-orange-700">
+                <ArrowUp size={12} /> Ýtt upp
+              </span>
+            )}
+          </div>
+          <h1 className="text-[22px] font-extrabold leading-tight tracking-tight">{listing.title}</h1>
+          <p className="mt-1 text-[28px] font-black tracking-tight text-orange-600">{formatPrice(listing.price_isk)}</p>
+          <p className="mt-1 flex items-center gap-1.5 text-sm text-stone-500">
+            <Clock size={14} /> Birt {timeAgo(listing.published_at ?? listing.created_at)}
           </p>
         </header>
 
-        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-stone-200">
-          {facts.map(([k, v]) => (
-            <div key={k} className="bg-surface px-4 py-3">
-              <dt className="text-xs text-stone-500">{k}</dt>
-              <dd className="font-medium">{v}</dd>
+        <dl className="grid grid-cols-2 gap-2">
+          {facts.map(({ icon: Icon, label, value }) => (
+            <div key={label} className="flex items-start gap-2.5 rounded-2xl bg-surface p-3 shadow-sm ring-1 ring-black/5">
+              <Icon size={18} className="mt-0.5 shrink-0 text-orange-600" />
+              <div className="min-w-0">
+                <dt className="text-[11px] font-medium uppercase tracking-wide text-stone-500">{label}</dt>
+                <dd className="truncate font-semibold">{value}</dd>
+              </div>
             </div>
           ))}
         </dl>
 
         <section>
-          <h2 className="mb-2 font-semibold">{isCar ? "Bíllinn" : "Passar í"}</h2>
+          <h2 className="mb-2 text-lg font-bold tracking-tight">{isCar ? "Bíllinn" : "Passar í"}</h2>
           {listing.universal_fit ? (
-            <p className="rounded-xl bg-orange-50 px-4 py-3 text-sm">Passar í alla bíla</p>
+            <p className="flex items-center gap-2 rounded-2xl bg-orange-50 px-4 py-3 text-sm font-medium text-orange-900">
+              <CheckCircle2 size={18} className="text-orange-600" /> Passar í alla bíla
+            </p>
           ) : listing.listing_fitments.length ? (
-            <ul className="space-y-2">
+            <ul className="flex flex-wrap gap-2">
               {listing.listing_fitments.map((f, i) => (
-                <li key={i} className="rounded-xl bg-orange-50 px-4 py-3 text-sm">
-                  <span className="font-medium">
-                    {f.makes.name} {f.models?.name ?? (isCar ? "" : "– allar gerðir")}
-                  </span>{" "}
-                  · {yearRange(f.year_from, f.year_to)}
+                <li key={i}>
+                  <Link
+                    href={`/leit?merki=${f.make_id}${f.model_id ? `&gerd=${f.model_id}` : ""}`}
+                    className="flex items-center gap-2 rounded-full bg-orange-50 py-2 pl-3 pr-3.5 text-sm text-orange-900 active:bg-orange-100"
+                  >
+                    <CarFront size={16} className="text-orange-600" />
+                    <span className="font-semibold">
+                      {f.makes.name} {f.models?.name ?? (isCar ? "" : "– allar gerðir")}
+                    </span>
+                    <span className="text-orange-700">{yearRange(f.year_from, f.year_to)}</span>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -168,52 +250,58 @@ export default async function ListingPage({
 
         {listing.description && (
           <section>
-            <h2 className="mb-2 font-semibold">Lýsing</h2>
-            <p className="whitespace-pre-line break-words text-stone-800">{listing.description}</p>
+            <h2 className="mb-2 text-lg font-bold tracking-tight">Lýsing</h2>
+            <p className="whitespace-pre-line break-words leading-relaxed text-stone-800">{listing.description}</p>
           </section>
         )}
 
-        <section className="flex items-center gap-3 rounded-2xl bg-surface p-4">
-          <div className="flex size-11 items-center justify-center rounded-full bg-stone-200 text-lg font-semibold">
-            {listing.profiles.display_name.charAt(0).toUpperCase()}
+        <section className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-black/5">
+          <div className="flex items-center gap-3">
+            <Avatar name={listing.profiles.display_name} />
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-bold">{listing.profiles.display_name}</p>
+              <p className="text-sm text-stone-500">Á Pörtum síðan {memberSince.format(new Date(listing.profiles.created_at))}</p>
+            </div>
           </div>
-          <div>
-            <p className="font-medium">{listing.profiles.display_name}</p>
-            <p className="text-sm text-stone-500">Notandi síðan {memberSince.format(new Date(listing.profiles.created_at))}</p>
-          </div>
+          <SellerRating sellerId={listing.seller_id} />
         </section>
 
         {!isOwner && (
-          <div className="text-center">
+          <div className="flex justify-center pb-2">
             <ReportListing listingId={listing.id} />
           </div>
         )}
       </div>
 
       {/* Aðgerðir fastar neðst, fyrir ofan aðalvalmyndina */}
-      <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-stone-200 bg-surface/95 px-4 py-3 backdrop-blur">
-        <div className="mx-auto flex max-w-md gap-2">
+      <div className="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-30 px-3">
+        <div className="mx-auto flex max-w-md gap-2 rounded-2xl bg-surface/95 p-2 shadow-xl ring-1 ring-black/10 backdrop-blur-xl">
           {isOwner ? (
             <>
-              <Link href={`/auglysing/${listing.id}/breyta`} className={`${primaryButton} flex-1 text-center`}>
-                ✏️ Breyta
+              <Link href={`/auglysing/${listing.id}/breyta`} className={`${primaryButton} flex flex-1 items-center justify-center gap-2`}>
+                <Pencil size={18} /> Breyta
               </Link>
+              {listing.status === "active" && <BumpButton listingId={listing.id} bumpedAt={listing.bumped_at} publishedAt={listing.published_at} />}
               <form action={setListingStatus.bind(null, listing.id, listing.status === "sold" ? "active" : "sold")} className="flex-1">
-                <button type="submit" className={secondaryButton}>
-                  {listing.status === "sold" ? "Aftur í sölu" : "Merkja selt"}
+                <button type="submit" className={`${secondaryButton} flex items-center justify-center gap-2`}>
+                  <BadgeCheck size={18} /> {listing.status === "sold" ? "Í sölu" : "Selt"}
                 </button>
               </form>
             </>
           ) : listing.status === "active" ? (
             <>
-              <form action={contactSeller.bind(null, listing.id)} className="flex-1">
-                <button type="submit" className={primaryButton}>
-                  💬 Senda skilaboð
+              <form action={contactSeller.bind(null, listing.id)} className="flex-[2]">
+                <button type="submit" className={`${primaryButton} flex items-center justify-center gap-2`}>
+                  <MessageCircle size={19} /> Senda skilaboð
                 </button>
               </form>
               {phone && (
-                <a href={`tel:${phone.replace(/\s/g, "")}`} className={`${secondaryButton} flex-1 text-center`}>
-                  📞 Hringja
+                <a
+                  href={`tel:${phone.replace(/\s/g, "")}`}
+                  aria-label="Hringja í seljanda"
+                  className={`${secondaryButton} flex flex-1 items-center justify-center gap-2`}
+                >
+                  <Phone size={18} /> Hringja
                 </a>
               )}
             </>

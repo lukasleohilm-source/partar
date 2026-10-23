@@ -1,13 +1,15 @@
 // Keyrir migrations og seed í PGlite (Postgres í minni) með lágmarks eftirlíkingu af Supabase.
 import { PGlite } from "@electric-sql/pglite";
 import { pg_trgm } from "@electric-sql/pglite/contrib/pg_trgm";
+import { unaccent } from "@electric-sql/pglite/contrib/unaccent";
+import { fuzzystrmatch } from "@electric-sql/pglite/contrib/fuzzystrmatch";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = join(__dirname, "..", "supabase");
 
 export async function createTestDb() {
-  const db = new PGlite({ extensions: { pg_trgm } });
+  const db = new PGlite({ extensions: { pg_trgm, unaccent, fuzzystrmatch } });
 
   await db.exec(`
     create schema extensions;

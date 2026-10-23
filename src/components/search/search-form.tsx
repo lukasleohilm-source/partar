@@ -1,7 +1,9 @@
 "use client";
 
+import { SlidersHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { SearchBox } from "./search-box";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { inputClass, labelClass, primaryButton, secondaryButton } from "@/components/ui/styles";
 import { CONDITIONS, KINDS, REGIONS, formatNumber, type Condition, type Kind } from "@/lib/i18n";
@@ -17,13 +19,12 @@ type Props = {
 export function SearchForm({ filters, categories, activeCount }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [q, setQ] = useState(filters.q ?? "");
   const [draft, setDraft] = useState(filters);
   const parents = categories.filter((c) => c.parent_id === null);
 
-  function go(next: Filters) {
+  function go(next: Filters, q = filters.q) {
     setOpen(false);
-    router.push(searchHref({ ...next, q: q.trim() || undefined }));
+    router.push(searchHref({ ...next, q: q?.trim() || undefined }));
   }
 
   function openSheet() {
@@ -56,36 +57,22 @@ export function SearchForm({ filters, categories, activeCount }: Props) {
 
   return (
     <>
-      <form
-        role="search"
-        onSubmit={(e) => {
-          e.preventDefault();
-          go(filters);
-        }}
-        className="flex gap-2"
-      >
-        <input
-          type="search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Leita að hlut…"
-          aria-label="Leitarorð"
-          enterKeyHint="search"
-          className={`${inputClass} flex-1`}
-        />
+      <div className="flex gap-2">
+        <SearchBox defaultValue={filters.q ?? ""} onSearch={(q) => go(filters, q)} />
         <button
           type="button"
           onClick={openSheet}
-          className="relative shrink-0 rounded-xl border border-stone-300 bg-surface px-4 font-medium"
+          aria-label={activeCount ? `Síur (${activeCount} virkar)` : "Síur"}
+          className="relative flex size-[52px] shrink-0 items-center justify-center rounded-2xl border border-stone-200 bg-surface shadow-sm active:scale-95"
         >
-          Síur
+          <SlidersHorizontal size={21} />
           {activeCount > 0 && (
-            <span className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-orange-600 text-xs text-white">
+            <span className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-orange-600 text-[11px] font-bold text-white ring-2 ring-canvas">
               {activeCount}
             </span>
           )}
         </button>
-      </form>
+      </div>
 
       <BottomSheet
         open={open}

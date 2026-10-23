@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { UNREAD_EVENT, dayLabel, messageTime, sameDay, type Message } from "@/lib/chat";
@@ -137,7 +138,7 @@ export function ChatThread({ conversationId, userId, otherId, iBlocked, otherNam
     <div className="fixed inset-0 z-50 mx-auto flex max-w-md flex-col bg-stone-100">
       <header className="flex items-center gap-2 border-b border-stone-200 bg-surface px-2 py-2">
         <Link href="/skilabod" aria-label="Til baka" className="px-2 text-2xl text-stone-600">
-          ‹
+          <ChevronLeft size={26} />
         </Link>
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold">{otherName}</p>

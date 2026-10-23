@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 type Props = {
@@ -33,7 +34,7 @@ export function BottomSheet({ open, onClose, title, children, footer }: Props) {
         <header className="flex items-center justify-between border-b border-stone-200 px-4 py-3">
           <h2 className="text-lg font-semibold">{title}</h2>
           <button type="button" onClick={onClose} aria-label="Loka" className="-mr-2 px-2 text-xl text-stone-500">
-            ✕
+            <X size={22} />
           </button>
         </header>
         <div className="flex-1 overflow-y-auto px-4 py-4">{children}</div>

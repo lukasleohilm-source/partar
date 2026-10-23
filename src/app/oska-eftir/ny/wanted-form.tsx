@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { inputClass, labelClass, primaryButton } from "@/components/ui/styles";
@@ -72,7 +73,7 @@ export function WantedForm({ userId, makes, models, categories, initial }: Props
     <form onSubmit={save} className="mx-auto max-w-md space-y-5 px-4 pt-4">
       <header className="flex items-center gap-2">
         <button type="button" onClick={() => router.back()} aria-label="Til baka" className="-ml-2 px-2 text-2xl text-stone-600">
-          ‹
+          <ChevronLeft size={26} />
         </button>
         <h1 className="text-xl font-bold">Ný ósk</h1>
       </header>
