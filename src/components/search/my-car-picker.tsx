@@ -1,8 +1,8 @@
 "use client";
 
-import { CarFront, ChevronRight } from "lucide-react";
+import { Check, CarFront, ChevronRight, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { inputClass, labelClass, primaryButton, secondaryButton } from "@/components/ui/styles";
 import { serializeMyCar, type MyCar } from "@/lib/search";
@@ -18,9 +18,39 @@ type Props = {
   toggleHref?: string;
 };
 
+// „Mínir bílar“: listi yfir bíla notandans í þessum vafra (virki bíllinn er í vafraköku)
+const GARAGE_KEY = "partar_bilar";
+const sameCar = (a: MyCar, b: MyCar) => a.make === b.make && a.model === b.model && a.year === b.year;
+
+function readGarage(): MyCar[] {
+  try {
+    const v = JSON.parse(localStorage.getItem(GARAGE_KEY) ?? "[]");
+    return Array.isArray(v) ? v.filter((x) => Number.isInteger(x?.make)).slice(0, 6) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeGarage(cars: MyCar[]) {
+  try {
+    localStorage.setItem(GARAGE_KEY, JSON.stringify(cars.slice(0, 6)));
+  } catch {
+    // Geymsla ekki tiltæk (t.d. huliðsgluggi); listinn gleymist bara
+  }
+}
+
 export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [garage, setGarage] = useState<MyCar[]>([]);
+
+  useEffect(() => {
+    if (!open) return;
+    const cars = readGarage();
+    // Virki bíllinn er alltaf í listanum
+    if (car && !cars.some((x) => sameCar(x, car))) cars.unshift(car);
+    setGarage(cars);
+  }, [open, car]);
   const [draft, setDraft] = useState({
     make: car ? String(car.make) : "",
     model: car?.model ? String(car.model) : "",
@@ -40,11 +70,20 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
 
   function save() {
     if (!draft.make) return;
-    apply({
+    const next = {
       make: Number(draft.make),
       model: draft.model ? Number(draft.model) : null,
       year: draft.year ? Number(draft.year) : null,
-    });
+    };
+    writeGarage([next, ...garage.filter((x) => !sameCar(x, next))]);
+    apply(next);
+  }
+
+  function forget(target: MyCar) {
+    const rest = garage.filter((x) => !sameCar(x, target));
+    writeGarage(rest);
+    setGarage(rest);
+    if (car && sameCar(car, target)) apply(rest[0] ?? null);
   }
 
   return (
@@ -93,7 +132,7 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
         footer={
           <div className="space-y-2">
             <button type="button" onClick={save} disabled={!draft.make} className={primaryButton}>
-              Vista bíl
+              Vista og nota bíl
             </button>
             {car && (
               <button type="button" onClick={() => apply(null)} className={secondaryButton}>
@@ -104,6 +143,33 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
         }
       >
         <div className="space-y-3">
+          {garage.length > 0 && (
+            <section className="mb-2">
+              <h3 className={labelClass}>Mínir bílar</h3>
+              <ul className="space-y-1.5">
+                {garage.map((g) => {
+                  const isActive = car ? sameCar(car, g) : false;
+                  return (
+                    <li key={`${g.make}-${g.model}-${g.year}`} className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => apply(g)}
+                        className={`flex flex-1 items-center gap-3 rounded-xl px-3 py-2.5 text-left ring-1 ${isActive ? "bg-orange-50 ring-orange-300" : "bg-surface ring-black/5"}`}
+                      >
+                        <CarFront size={18} className="text-orange-600" />
+                        <span className="flex-1 truncate font-medium">{carLabel(g, makes, models)}</span>
+                        {isActive && <Check size={18} className="text-orange-600" />}
+                      </button>
+                      <button type="button" onClick={() => forget(g)} aria-label="Fjarlægja bíl" className="flex size-10 items-center justify-center rounded-xl text-stone-400 active:bg-stone-100">
+                        <X size={18} />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+              <h3 className={`${labelClass} mt-4`}>Bæta við bíl</h3>
+            </section>
+          )}
           <label className="block">
             <span className={labelClass}>Tegund</span>
             <select
@@ -152,7 +218,7 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
               ))}
             </select>
           </label>
-          <p className="text-sm text-stone-500">Bíllinn er vistaður í þessum vafra. Leit eftir bílnúmeri kemur síðar.</p>
+          <p className="text-sm text-stone-500">Bílarnir eru vistaðir í þessum vafra. Leit eftir bílnúmeri kemur síðar.</p>
         </div>
       </BottomSheet>
     </>
