@@ -6,8 +6,18 @@ export type Message = {
   conversation_id: string;
   sender_id: string;
   body: string;
+  image_path: string | null;
+  image_color: string | null;
   created_at: string;
 };
+
+export const MESSAGE_COLS = "id, conversation_id, sender_id, body, image_path, image_color, created_at";
+
+// Flýtisvör sem birtast meðan ekkert er skrifað
+export const QUICK_REPLIES = {
+  buyer: ["Er þetta enn til?", "Hvað er lægsta verð?", "Hvar get ég sótt?", "Passar þetta í bílinn minn?"],
+  seller: ["Já, enn til!", "Því miður selt.", "Hvenær viltu sækja?", "Ég get sent mynd."],
+} as const;
 
 const timeFmt = new Intl.DateTimeFormat("is-IS", { hour: "2-digit", minute: "2-digit", timeZone: "Atlantic/Reykjavik" });
 const dayFmt = new Intl.DateTimeFormat("is-IS", { day: "numeric", month: "short", timeZone: "Atlantic/Reykjavik" });

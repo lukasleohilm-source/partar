@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import type { Message } from "@/lib/chat";
+import { MESSAGE_COLS, type Message } from "@/lib/chat";
 import { IMAGE_COLS, coverOf, type ImageRef } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/server";
 import { ChatThread } from "./chat-thread";
@@ -42,7 +42,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
       .maybeSingle<Conversation>(),
     supabase
       .from("messages")
-      .select("id, conversation_id, sender_id, body, created_at")
+      .select(MESSAGE_COLS)
       .eq("conversation_id", id)
       .order("created_at", { ascending: false })
       .limit(200)
@@ -52,12 +52,10 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
 
   const iAmBuyer = conv.buyer_id === user.id;
   const otherId = iAmBuyer ? conv.seller_id : conv.buyer_id;
-  const { data: block } = await supabase
-    .from("blocks")
-    .select("blocked_id")
-    .eq("blocker_id", user.id)
-    .eq("blocked_id", otherId)
-    .maybeSingle();
+  const [{ data: block }, { data: review }] = await Promise.all([
+    supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id).eq("blocked_id", otherId).maybeSingle(),
+    supabase.from("reviews").select("stars").eq("conversation_id", conv.id).eq("reviewer_id", user.id).maybeSingle(),
+  ]);
   const cover = coverOf(conv.listings?.listing_images);
 
   return (
@@ -66,6 +64,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
       userId={user.id}
       otherId={otherId}
       iBlocked={Boolean(block)}
+      myReview={review?.stars ?? null}
       otherName={iAmBuyer ? conv.seller.display_name : conv.buyer.display_name}
       role={iAmBuyer ? "buyer" : "seller"}
       listing={

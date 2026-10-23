@@ -368,6 +368,30 @@ describe("spjall og aðgangsreglur", () => {
     expect(await t.q(`select * from admin_errors()`)).toHaveLength(1);
   });
 
+  it("myndir í spjalli: aðeins aðilar samtals, og myndskeyti án texta", async () => {
+    await t.as(buyer);
+    await t.q(`insert into storage.objects (bucket_id, name) values ('chat-images', $1)`, [`${conv}/mynd.webp`]);
+    await t.q(`insert into messages (conversation_id, sender_id, body, image_path) values ($1, $2, '', $3)`, [
+      conv,
+      buyer,
+      `${conv}/mynd.webp`,
+    ]);
+    const [c] = await t.q<{ last_message_body: string }>(`select last_message_body from conversations where id = $1`, [conv]);
+    expect(c.last_message_body).toBe("📷 Mynd");
+    // Mynd úr öðru samtali má ekki tengja
+    await expect(
+      t.q(`insert into messages (conversation_id, sender_id, body, image_path) values ($1, $2, '', 'annad/x.webp')`, [conv, buyer]),
+    ).rejects.toThrow();
+    // Tóm skilaboð án myndar eru ekki leyfð
+    await expect(t.q(`insert into messages (conversation_id, sender_id, body) values ($1, $2, '')`, [conv, buyer])).rejects.toThrow();
+
+    await t.as(stranger);
+    await expect(
+      t.q(`insert into storage.objects (bucket_id, name) values ('chat-images', $1)`, [`${conv}/hakk.webp`]),
+    ).rejects.toThrow();
+    expect(await t.q(`select * from storage.objects where bucket_id = 'chat-images'`)).toHaveLength(0);
+  });
+
   it("eyðing aðgangs fjarlægir prófíl, auglýsingar og samtöl", async () => {
     await t.as(seller);
     await t.q(`select delete_my_account()`);
@@ -389,9 +413,9 @@ describe("spjall og aðgangsreglur", () => {
       `${seller}/x/a.webp`,
       `${buyer}/y/b.webp`,
     ]);
-    await t.db.exec(`grant select on storage.objects to authenticated; grant usage on schema storage to authenticated;`);
     await t.as(seller);
     const rows = await t.q<{ name: string }>(`select name from storage.objects`);
     expect(rows.map((r) => r.name)).toEqual([`${seller}/x/a.webp`]);
   });
+
 });

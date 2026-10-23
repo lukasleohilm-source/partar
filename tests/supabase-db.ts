@@ -23,6 +23,8 @@ export async function createTestDb() {
     create schema storage;
     create table storage.buckets (id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);
     create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text, name text);
+    grant usage on schema storage to authenticated;
+    grant select, insert on storage.objects to authenticated;
     create function storage.foldername(name text) returns text[] language sql as $$ select string_to_array(name, '/') $$;
     alter table storage.objects enable row level security;
     create publication supabase_realtime;
