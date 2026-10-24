@@ -240,7 +240,7 @@ function EmailNotifications({ compact }: { compact: boolean }) {
           <p className="mt-0.5 text-sm text-stone-600">
             Vistaðu aðganginn með Google eða netfangi til að fá póst þegar þú færð skilaboð eða auglýsing passar við ósk.
           </p>
-          <Link href="/profill#vista" className="mt-2 inline-block text-sm font-semibold text-orange-700 underline">
+          <Link href="/profill/vista" className="mt-2 inline-block text-sm font-semibold text-orange-700 underline">
             Vista aðgang
           </Link>
         </>

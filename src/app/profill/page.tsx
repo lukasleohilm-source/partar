@@ -1,15 +1,13 @@
-import { ChevronRight, Heart, Package, Shield } from "lucide-react";
+import { Bell, FileText, Heart, LogOut, Package, Pencil, Search, Shield, ShieldCheck, Star, Trash2, UserRoundPlus } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Avatar } from "@/components/avatar";
+import { REGIONS, isRegion } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
-import { LegalLinks } from "@/components/legal-links";
-import { PushToggle } from "@/components/push-toggle";
-import { DeleteAccount } from "./delete-account";
-import { ProfileForm } from "./profile-form";
-import { SaveAccount } from "./save-account";
 import { logout } from "./actions";
+import { ActionRow, Group, Row } from "./ui";
 
-export const metadata = { title: "Prófíll – Partar" };
+export const metadata = { title: "Ég – Partar" };
 
 export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ vistad?: string }> }) {
   const { vistad } = await searchParams;
@@ -19,84 +17,128 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
-  const [{ data: profile }, { data: contact }, { data: isAdmin }] = await Promise.all([
+  const count = { count: "exact" as const, head: true };
+  const [{ data: profile }, { data: contact }, { data: isAdmin }, listings, favorites, wants, { data: rating }] = await Promise.all([
     supabase.from("profiles").select("display_name, region").eq("id", user.id).single(),
     supabase.from("profile_contacts").select("phone, show_phone").eq("id", user.id).single(),
     supabase.rpc("is_admin"),
+    supabase.from("listings").select("id", count).eq("seller_id", user.id).eq("status", "active"),
+    supabase.from("favorites").select("listing_id", count).eq("user_id", user.id),
+    supabase.from("wanted_requests").select("id", count).eq("user_id", user.id),
+    supabase.rpc("seller_rating", { p_seller: user.id }).single<{ average: number | null; total: number }>(),
   ]);
+
+  const guest = user.is_anonymous || !user.email;
+  const name = profile?.display_name || "Notandi";
+  const region = profile?.region && isRegion(profile.region) ? REGIONS[profile.region] : null;
+  const pending = user.new_email ? `Bíður staðfestingar: ${user.new_email}` : null;
 
   return (
     <div className="mx-auto max-w-md px-4 pt-6">
-      <h1 className="text-2xl font-bold">Prófíll</h1>
-      <p className="mb-4 break-all text-sm text-stone-500">
-        {user.email || (user.new_email ? `Bíður staðfestingar: ${user.new_email}` : "Gestur")}
-      </p>
+      <h1 className="sr-only">Ég</h1>
 
-      {vistad && !user.is_anonymous && (
-        <p role="status" className="mb-4 rounded-xl bg-green-50 p-3 text-sm text-green-800">
-          Aðgangurinn er vistaður. Þú getur nú skráð þig inn með netfanginu á hvaða tæki sem er.
+      {/* Haus: hver ég er og yfirlit */}
+      <section className="mb-5 rounded-3xl bg-surface p-5">
+        <div className="flex items-center gap-4">
+          <Avatar name={name} size={64} />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xl font-bold tracking-tight">{name}</p>
+            {region && <p className="text-sm text-stone-600">{region}</p>}
+            {guest ? (
+              <p className="mt-1 flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">Gestur</span>
+                {pending && <span className="truncate text-xs text-stone-500">{pending}</span>}
+              </p>
+            ) : (
+              <p className="truncate text-sm text-stone-500">{user.email}</p>
+            )}
+          </div>
+          <Link
+            href="/profill/breyta"
+            aria-label="Breyta prófíl"
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-stone-100 text-stone-700 active:bg-stone-200"
+          >
+            <Pencil size={18} />
+          </Link>
+        </div>
+
+        <div className="mt-5 grid grid-cols-3 divide-x divide-line rounded-2xl bg-canvas py-3 text-center">
+          <Link href="/minar-auglysingar" className="block">
+            <span className="block text-lg font-bold tabular-nums">{listings.count ?? 0}</span>
+            <span className="block text-xs text-stone-500">Virkar auglýsingar</span>
+          </Link>
+          <Link href="/uppahalds" className="block">
+            <span className="block text-lg font-bold tabular-nums">{favorites.count ?? 0}</span>
+            <span className="block text-xs text-stone-500">Uppáhalds</span>
+          </Link>
+          <div>
+            <span className="flex items-center justify-center gap-1 text-lg font-bold tabular-nums">
+              {rating?.total ? (
+                <>
+                  <Star size={16} className="fill-amber-400 text-amber-400" aria-hidden />
+                  {Number(rating.average).toLocaleString("is-IS")}
+                </>
+              ) : (
+                <span className="text-stone-400">–</span>
+              )}
+            </span>
+            <span className="block text-xs text-stone-500">{rating?.total ? `${rating.total} einkunnir` : "Engin einkunn"}</span>
+          </div>
+        </div>
+      </section>
+
+      {vistad && !guest && (
+        <p role="status" className="mb-5 rounded-2xl bg-green-50 p-3 text-sm text-green-800">
+          Aðgangurinn er vistaður. Þú getur nú skráð þig inn með honum á hvaða tæki sem er.
         </p>
       )}
-      {user.is_anonymous && (
-        <div id="vista" className="scroll-mt-4">
-          <SaveAccount />
-        </div>
-      )}
 
-      <div className="mb-4">
-        <PushToggle />
-      </div>
-
-      {isAdmin && (
-        <Link
-          href="/stjorn"
-          className="mb-2 flex items-center justify-between rounded-2xl bg-stone-900 p-4 font-medium text-white active:opacity-90"
-        >
-          <span className="flex items-center gap-2.5">
-            <Shield size={20} /> Stjórnborð
+      {guest && (
+        <Link href="/profill/vista" className="mb-5 flex items-center gap-3 rounded-2xl bg-orange-600 p-4 text-white active:bg-orange-700">
+          <UserRoundPlus size={24} className="shrink-0" />
+          <span className="flex-1">
+            <span className="block font-semibold">Vistaðu aðganginn</span>
+            <span className="block text-sm text-orange-100">Annars tapast auglýsingar og skilaboð ef þú skiptir um síma.</span>
           </span>
-          <ChevronRight size={20} className="opacity-60" aria-hidden />
         </Link>
       )}
 
-      <Link
-        href="/uppahalds"
-        className="mb-2 flex items-center justify-between rounded-2xl bg-surface p-4 font-medium active:bg-stone-50"
-      >
-        <span className="flex items-center gap-2.5">
-          <Heart size={20} className="text-red-500" /> Uppáhalds
-        </span>
-        <ChevronRight size={20} className="text-stone-400" aria-hidden />
-      </Link>
+      <Group title="Mitt á Partar">
+        <Row href="/minar-auglysingar" icon={Package} tone="orange" label="Mínar auglýsingar" value={listings.count ?? 0} />
+        <Row href="/uppahalds" icon={Heart} tone="red" label="Uppáhalds" value={favorites.count ?? 0} />
+        <Row href="/oska-eftir" icon={Search} tone="violet" label="Óskir" hint="Láttu vita þegar hluturinn kemur" value={wants.count ?? 0} />
+      </Group>
 
-      <Link
-        href="/minar-auglysingar"
-        className="mb-6 flex items-center justify-between rounded-2xl bg-surface p-4 font-medium active:bg-stone-50"
-      >
-        <span className="flex items-center gap-2.5">
-          <Package size={20} className="text-orange-600" /> Mínar auglýsingar
-        </span>
-        <ChevronRight size={20} className="text-stone-400" aria-hidden />
-      </Link>
+      <Group title="Stillingar">
+        <Row
+          href="/profill/breyta"
+          icon={Pencil}
+          tone="blue"
+          label="Prófíll og sími"
+          hint={contact?.phone ? (contact.show_phone ? "Sími sýnilegur á auglýsingum" : "Sími falinn") : "Nafn, landshluti og símanúmer"}
+        />
+        <Row
+          href="/profill/tilkynningar"
+          icon={Bell}
+          tone="green"
+          label="Tilkynningar"
+          hint={guest ? "Vistaðu aðganginn til að fá tölvupóst" : "Í tölvupósti"}
+        />
+        {isAdmin && <Row href="/stjorn" icon={Shield} tone="dark" label="Stjórnborð" />}
+      </Group>
 
-      <ProfileForm
-        displayName={profile?.display_name ?? ""}
-        region={profile?.region ?? null}
-        phone={contact?.phone ?? null}
-        showPhone={contact?.show_phone ?? false}
-      />
+      <Group title="Annað">
+        <Row href="/skilmalar" icon={FileText} label="Skilmálar" />
+        <Row href="/personuvernd" icon={ShieldCheck} label="Persónuvernd" />
+      </Group>
 
-      {/* Nafnlaus notandi myndi tapa auglýsingum sínum við útskráningu */}
-      {!user.is_anonymous && (
-        <form action={logout} className="mt-8">
-          <button type="submit" className="w-full rounded-xl border border-stone-300 py-3 font-medium text-stone-700">
-            Skrá út
-          </button>
-        </form>
-      )}
+      <Group>
+        {/* Gestur myndi tapa öllu við útskráningu, svo hann fær ekki þann hnapp */}
+        {!guest && <ActionRow action={logout} icon={LogOut} label="Skrá út" />}
+        <Row href="/profill/eyda" icon={Trash2} label="Eyða aðgangi" danger />
+      </Group>
 
-      <DeleteAccount />
-      <LegalLinks />
+      <p className="pb-4 text-center text-xs text-stone-400">Partar · notaðir varahlutir og bílar</p>
     </div>
   );
 }

@@ -75,7 +75,7 @@ export function PushPrompt({ reason }: { reason: string }) {
         <>
           <p className="flex-1">{mode === "save" ? `${reason} Vistaðu aðganginn og við sendum þér tölvupóst.` : reason}</p>
           {mode === "save" ? (
-            <Link href="/profill#vista" className={action}>
+            <Link href="/profill/vista" className={action}>
               Vista
             </Link>
           ) : (
