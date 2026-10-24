@@ -46,7 +46,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
             {region && <p className="text-sm text-stone-600">{region}</p>}
             {guest ? (
               <p className="mt-1 flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">Gestur</span>
+                <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-semibold text-amber-600">Gestur</span>
                 {pending && <span className="truncate text-xs text-stone-500">{pending}</span>}
               </p>
             ) : (

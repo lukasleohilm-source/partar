@@ -12,13 +12,14 @@ export function Group({ title, children }: { title?: string; children: React.Rea
   );
 }
 
+// Hálfgegnsæir litir svo táknin passi bæði í ljósu og dökku útliti
 const TONES = {
-  orange: "bg-orange-100 text-orange-700",
-  red: "bg-red-100 text-red-600",
-  blue: "bg-sky-100 text-sky-700",
-  green: "bg-emerald-100 text-emerald-700",
-  violet: "bg-violet-100 text-violet-700",
-  stone: "bg-stone-100 text-stone-600",
+  orange: "bg-orange-500/15 text-orange-600",
+  red: "bg-red-500/15 text-red-500",
+  blue: "bg-sky-500/15 text-sky-500",
+  green: "bg-emerald-500/15 text-emerald-500",
+  violet: "bg-violet-500/15 text-violet-500",
+  stone: "bg-stone-500/15 text-stone-500",
   dark: "bg-stone-900 text-white",
 };
 
