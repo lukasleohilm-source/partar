@@ -2,7 +2,6 @@
 
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { startGoogle } from "@/lib/google";
 import { createClient } from "@/lib/supabase/client";
 
 // Opinbert Google „G“-merki (litir samkvæmt leiðbeiningum Google)
@@ -46,12 +45,21 @@ export function GoogleButton({ next = "/", mode = "auto", label }: { next?: stri
       localStorage.setItem(MERGE_TOKEN_KEY, token as string);
       target = `/sameina?next=${encodeURIComponent(next)}`;
     }
-    // Vafrinn fer til Google og kemur aftur á /auth/google
-    try {
-      await startGoogle({ link: mode === "auto" && Boolean(session?.user.is_anonymous), next, target });
-    } catch {
+    const redirectTo = `${window.location.origin}/auth/confirm?next=${encodeURIComponent(target)}`;
+
+    const { error } =
+      mode === "auto" && session?.user.is_anonymous
+        ? await supabase.auth.linkIdentity({ provider: "google", options: { redirectTo } })
+        : await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo } });
+
+    // Ef allt gengur upp fer vafrinn til Google og þessi kóði keyrir ekki lengra
+    if (error) {
       setPending(false);
-      setError("Ekki tókst að tengjast Google. Reyndu aftur.");
+      setError(
+        /provider is not enabled|Unsupported provider/i.test(error.message)
+          ? "Google-innskráning er ekki komin í gagnið enn."
+          : "Ekki tókst að tengjast Google. Reyndu aftur.",
+      );
     }
   }
 
