@@ -12,7 +12,7 @@ const ASK_AGAIN_MS = 14 * 24 * 60 * 60 * 1000;
 
 // Spyr um tilkynningar þegar þær skipta máli (t.d. eftir að maður sendir skilaboð),
 // ekki um leið og síðan opnast. Vafrar fela leyfisglugga sem birtast án ástæðu.
-// Í síma koma tilkynningar í tölvupósti: gestir án netfangs eru beðnir að vista aðganginn.
+// Tilkynningar koma í tölvupósti: gestir án netfangs eru beðnir að vista aðganginn.
 export function PushPrompt({ reason }: { reason: string }) {
   const [mode, setMode] = useState<"push" | "save" | null>(null);
   const [busy, setBusy] = useState(false);
@@ -27,7 +27,7 @@ export function PushPrompt({ reason }: { reason: string }) {
     getPushState()
       .then(async (s) => {
         if (s === "off") return setMode("push");
-        if (s !== "mobile") return;
+        if (s !== "email") return;
         const {
           data: { user },
         } = await createClient().auth.getUser();

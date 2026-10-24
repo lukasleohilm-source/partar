@@ -20,7 +20,7 @@ const PREFS: { key: PrefKey; label: string; hint: string }[] = [
 const ALL_ON: Prefs = { messages: true, wanted: true, price_drop: true, reviews: true, email: true };
 
 const TEXT: Record<PushState, string> = {
-  mobile: "",
+  email: "",
   unsupported: "Þessi vafri styður ekki tilkynningar. Prófaðu Chrome á Android eða Safari á iPhone.",
   "in-app":
     "Þú ert í vafra inni í Facebook eða öðru appi og hann styður ekki tilkynningar. Ýttu á ⋯ og veldu „Opna í vafra“ (Chrome eða Safari).",
@@ -58,7 +58,7 @@ export function PushToggle({ compact = false }: { compact?: boolean }) {
       });
   }, []);
 
-  if (state === "mobile") return <EmailNotifications compact={compact} />;
+  if (state === "email") return <EmailNotifications compact={compact} />;
   if (!state || (compact && (state === "on" || state === "unsupported"))) return null;
 
   async function toggle() {
@@ -182,7 +182,7 @@ function NotificationPrefs({ pushOn, emailMode = false }: { pushOn: boolean; ema
   // Gestir án netfangs fá hvorki póst né stillingar fyrr en kveikt er á tilkynningum
   if (!prefs || (!pushOn && !email)) return null;
 
-  // Í síma er pósturinn eina leiðin: aðalrofinn fyrst, svo tegundirnar
+  // Pósturinn er eina leiðin: aðalrofinn fyrst, svo tegundirnar
   const rows = emailMode
     ? [{ key: "email" as const, label: "Senda mér tölvupóst", hint: `Á ${email}` }, ...PREFS.filter((p) => p.key !== "email")]
     : PREFS.filter((p) => p.key !== "email" || email).map((p) => (p.key === "email" ? { ...p, hint: `${p.hint} (${email})` } : p));
@@ -213,7 +213,7 @@ function NotificationPrefs({ pushOn, emailMode = false }: { pushOn: boolean; ema
   );
 }
 
-// Í síma: tilkynningar koma í tölvupósti. Gestir án netfangs eru beðnir að vista aðganginn.
+// Tilkynningar koma í tölvupósti. Gestir án netfangs eru beðnir að vista aðganginn.
 function EmailNotifications({ compact }: { compact: boolean }) {
   const [email, setEmail] = useState<string | null | undefined>(undefined);
 

@@ -5,15 +5,15 @@ import { createClient } from "@/lib/supabase/client";
 
 export const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
 
-export type PushState = "mobile" | "unsupported" | "in-app" | "ios-install" | "ios-old" | "denied" | "off" | "on";
+export type PushState = "email" | "unsupported" | "in-app" | "ios-install" | "ios-old" | "denied" | "off" | "on";
 
 export function isIos(): boolean {
   return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 }
 
-// Í símum notum við tölvupóst í stað ýtitilkynninga (enginn heimaskjár). Sett upp sem app → ýtitilkynningar.
-export function isMobileWeb(): boolean {
-  return (/Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent) || isIos()) && !isStandalone();
+// Tilkynningar fara í tölvupósti (sími og tölva). Ýtitilkynningar aðeins ef Partar er sett upp sem app.
+export function emailOnly(): boolean {
+  return !isStandalone();
 }
 
 function isStandalone(): boolean {
@@ -43,7 +43,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
 }
 
 export async function getPushState(): Promise<PushState> {
-  if (isMobileWeb()) return "mobile";
+  if (emailOnly()) return "email";
   if (isInAppBrowser()) return "in-app";
   if (!VAPID_PUBLIC_KEY || !("serviceWorker" in navigator)) return "unsupported";
   // iPhone styður Web Push aðeins þegar appið hefur verið sett á heimaskjá
