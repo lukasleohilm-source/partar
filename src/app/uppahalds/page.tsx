@@ -34,7 +34,7 @@ export default async function FavoritesPage() {
         <h1 className="text-2xl font-bold tracking-tight">Uppáhalds</h1>
       </header>
 
-      {listings.length > 0 && <PushPrompt reason="Fáðu tilkynningu þegar verðið lækkar á auglýsingu í uppáhaldi." />}
+      {listings.length > 0 && <PushPrompt reason="Viltu vita þegar verðið lækkar á uppáhaldi?" />}
       {listings.length ? (
         <ul className="grid grid-cols-2 gap-3">
           {listings.map((l, i) => (

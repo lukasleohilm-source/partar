@@ -36,7 +36,7 @@ export function renderEmail(kind: string, m: EmailMessage, siteUrl: string) {
 <tr><td><a href="${link}" style="display:inline-block;background:#ea580c;color:#ffffff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:12px">${action}</a></td></tr>
 </table>
 <p style="max-width:480px;font-size:12px;line-height:1.5;color:#78716c;padding:16px 8px 0;margin:0">
-Þú færð þennan póst af því þú ert með aðgang á Partar og ert ekki með tilkynningar í síma.
+Þú færð þennan póst af því þú ert með aðgang á Partar.
 <a href="${settings}" style="color:#78716c">Breyta eða slökkva á pósti</a>.</p>
 </td></tr></table></body></html>`;
 

@@ -309,7 +309,7 @@ export function ChatThread(props: Props) {
             </div>
           );
         })}
-        {messages.some((m) => m.sender_id === userId) && <PushPrompt reason={`Fáðu tilkynningu í símann þegar ${otherName} svarar.`} />}
+        {messages.some((m) => m.sender_id === userId) && <PushPrompt reason={`Viltu vita þegar ${otherName} svarar?`} />}
         <div ref={endRef} />
       </div>
 

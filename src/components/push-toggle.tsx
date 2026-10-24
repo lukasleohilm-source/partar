@@ -1,6 +1,7 @@
 "use client";
 
-import { Bell, Share, SquarePlus } from "lucide-react";
+import { Bell, Mail, Share, SquarePlus } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { disablePush, enablePush, getPushState, isIos, type PushState } from "@/lib/push-client";
 import { reportError } from "@/lib/report-error";
@@ -14,18 +15,19 @@ const PREFS: { key: PrefKey; label: string; hint: string }[] = [
   { key: "wanted", label: "Óskir", hint: "Þegar ný auglýsing passar við ósk þína" },
   { key: "price_drop", label: "Verðlækkun", hint: "Þegar verð lækkar á auglýsingu í uppáhaldi" },
   { key: "reviews", label: "Umsagnir", hint: "Þegar kaupandi gefur þér einkunn" },
-  { key: "email", label: "Líka í tölvupósti", hint: "Ef tilkynningar í síma eru ekki virkar" },
+  { key: "email", label: "Líka í tölvupósti", hint: "Ef tilkynningar í vafra eru ekki virkar" },
 ];
 const ALL_ON: Prefs = { messages: true, wanted: true, price_drop: true, reviews: true, email: true };
 
 const TEXT: Record<PushState, string> = {
+  mobile: "",
   unsupported: "Þessi vafri styður ekki tilkynningar. Prófaðu Chrome á Android eða Safari á iPhone.",
   "in-app":
     "Þú ert í vafra inni í Facebook eða öðru appi og hann styður ekki tilkynningar. Ýttu á ⋯ og veldu „Opna í vafra“ (Chrome eða Safari).",
   "ios-install": "Á iPhone virka tilkynningar aðeins ef Partar er sett á heimaskjáinn:",
   "ios-old": "Tilkynningar á iPhone þurfa iOS 16.4 eða nýrra. Uppfærðu símann í Stillingar → Almennt → Hugbúnaðaruppfærsla.",
   denied: "",
-  off: "Fáðu tilkynningu í símann þegar þú færð skilaboð eða auglýsing passar við ósk.",
+  off: "Fáðu tilkynningu þegar þú færð skilaboð eða auglýsing passar við ósk.",
   on: "Kveikt. Þú færð tilkynningu um ný skilaboð og auglýsingar sem passa við óskir.",
 };
 
@@ -56,6 +58,7 @@ export function PushToggle({ compact = false }: { compact?: boolean }) {
       });
   }, []);
 
+  if (state === "mobile") return <EmailNotifications compact={compact} />;
   if (!state || (compact && (state === "on" || state === "unsupported"))) return null;
 
   async function toggle() {
@@ -94,7 +97,7 @@ export function PushToggle({ compact = false }: { compact?: boolean }) {
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="flex items-center gap-2 font-semibold">
-            <Bell size={18} className="text-orange-600" /> Tilkynningar í síma
+            <Bell size={18} className="text-orange-600" /> Tilkynningar
           </p>
           <p className="mt-0.5 text-sm text-stone-600">{state === "denied" ? deniedText() : TEXT[state]}</p>
         </div>
@@ -103,7 +106,7 @@ export function PushToggle({ compact = false }: { compact?: boolean }) {
             type="button"
             role="switch"
             aria-checked={state === "on"}
-            aria-label="Tilkynningar í síma"
+            aria-label="Tilkynningar"
             disabled={busy}
             onClick={toggle}
             className={`relative h-7 w-12 shrink-0 rounded-full transition-colors disabled:opacity-60 ${
@@ -143,7 +146,7 @@ export function PushToggle({ compact = false }: { compact?: boolean }) {
 }
 
 // Hvaða tilkynningar notandinn vill fá. Engin vistuð röð = allt kveikt.
-function NotificationPrefs({ pushOn }: { pushOn: boolean }) {
+function NotificationPrefs({ pushOn, emailMode = false }: { pushOn: boolean; emailMode?: boolean }) {
   const [supabase] = useState(createClient);
   const [prefs, setPrefs] = useState<Prefs | null>(null);
   const [failed, setFailed] = useState(false);
@@ -176,17 +179,22 @@ function NotificationPrefs({ pushOn }: { pushOn: boolean }) {
     }
   }
 
-  // Gestir án netfangs fá hvorki póst né stillingar fyrr en kveikt er á tilkynningum í síma
+  // Gestir án netfangs fá hvorki póst né stillingar fyrr en kveikt er á tilkynningum
   if (!prefs || (!pushOn && !email)) return null;
+
+  // Í síma er pósturinn eina leiðin: aðalrofinn fyrst, svo tegundirnar
+  const rows = emailMode
+    ? [{ key: "email" as const, label: "Senda mér tölvupóst", hint: `Á ${email}` }, ...PREFS.filter((p) => p.key !== "email")]
+    : PREFS.filter((p) => p.key !== "email" || email).map((p) => (p.key === "email" ? { ...p, hint: `${p.hint} (${email})` } : p));
 
   return (
     <fieldset className="mt-4 border-t border-line pt-3">
       <legend className="mb-1 text-sm font-semibold text-stone-800">Láta mig vita um</legend>
-      {PREFS.filter((p) => p.key !== "email" || email).map((p) => (
+      {rows.map((p) => (
         <label key={p.key} className="flex cursor-pointer items-center justify-between gap-3 py-2">
           <span>
             <span className="block text-[15px] font-medium text-stone-900">{p.label}</span>
-            <span className="block text-xs text-stone-500">{p.key === "email" ? `${p.hint} (${email})` : p.hint}</span>
+            <span className="block break-all text-xs text-stone-500">{p.hint}</span>
           </span>
           <input
             type="checkbox"
@@ -202,5 +210,41 @@ function NotificationPrefs({ pushOn }: { pushOn: boolean }) {
         </p>
       )}
     </fieldset>
+  );
+}
+
+// Í síma: tilkynningar koma í tölvupósti. Gestir án netfangs eru beðnir að vista aðganginn.
+function EmailNotifications({ compact }: { compact: boolean }) {
+  const [email, setEmail] = useState<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    createClient()
+      .auth.getUser()
+      .then(({ data: { user } }) => setEmail(user?.email || null));
+  }, []);
+
+  if (email === undefined || (compact && email)) return null;
+
+  return (
+    <section className="rounded-2xl bg-surface p-4">
+      <p className="flex items-center gap-2 font-semibold">
+        <Mail size={18} className="text-orange-600" /> Tilkynningar í tölvupósti
+      </p>
+      {email ? (
+        <>
+          <p className="mt-0.5 text-sm text-stone-600">Við sendum þér póst þegar þú færð skilaboð eða eitthvað passar við óskir þínar.</p>
+          <NotificationPrefs pushOn={false} emailMode />
+        </>
+      ) : (
+        <>
+          <p className="mt-0.5 text-sm text-stone-600">
+            Vistaðu aðganginn með Google eða netfangi til að fá póst þegar þú færð skilaboð eða auglýsing passar við ósk.
+          </p>
+          <Link href="/profill#vista" className="mt-2 inline-block text-sm font-semibold text-orange-700 underline">
+            Vista aðgang
+          </Link>
+        </>
+      )}
+    </section>
   );
 }

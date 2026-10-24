@@ -37,7 +37,11 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           Aðgangurinn er vistaður. Þú getur nú skráð þig inn með netfanginu á hvaða tæki sem er.
         </p>
       )}
-      {user.is_anonymous && <SaveAccount />}
+      {user.is_anonymous && (
+        <div id="vista" className="scroll-mt-4">
+          <SaveAccount />
+        </div>
+      )}
 
       <div className="mb-4">
         <PushToggle />
