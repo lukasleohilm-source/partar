@@ -249,19 +249,18 @@ otp_expiry = 3600
 
 # Töfrahlekkir á íslensku. Hlekkurinn notar token_hash svo hann virkar
 # líka þegar hann opnast í öðrum vafra en þeim sem bað um hann (algengt í síma).
-# ÓVIRKT: ókeypis Supabase-ský leyfir ekki eigin sniðmát án eigin SMTP-þjóns.
-# Virkja aftur ásamt [auth.email.smtp] (t.d. Resend) þegar innskráning kemur inn.
-# [auth.email.template.magic_link]
-# subject = "Innskráning í Partar"
-# content_path = "./supabase/templates/magic_link.html"
-#
-# [auth.email.template.confirmation]
-# subject = "Velkomin(n) í Partar – staðfestu netfangið"
-# content_path = "./supabase/templates/magic_link.html"
-#
-# [auth.email.template.email_change]
-# subject = "Staðfestu netfangið þitt á Pörtum"
-# content_path = "./supabase/templates/email_change.html"
+# SMTP er Resend (smtp.resend.com), stillt í mælaborði Supabase svo lykillinn sé ekki í kóðanum.
+[auth.email.template.magic_link]
+subject = "Innskráning í Partar"
+content_path = "./supabase/templates/magic_link.html"
+
+[auth.email.template.confirmation]
+subject = "Velkomin(n) í Partar – staðfestu netfangið"
+content_path = "./supabase/templates/magic_link.html"
+
+[auth.email.template.email_change]
+subject = "Staðfestu netfangið þitt á Pörtum"
+content_path = "./supabase/templates/email_change.html"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
