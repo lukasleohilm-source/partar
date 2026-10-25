@@ -25,5 +25,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     { url: `${SITE}/skilmalar`, priority: 0.2 },
     { url: `${SITE}/personuvernd`, priority: 0.2 },
+    { url: `${SITE}/gagnaeyding`, priority: 0.1 },
   ];
 }
