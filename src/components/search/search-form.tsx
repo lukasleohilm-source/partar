@@ -9,7 +9,6 @@ import { inputClass, labelClass, primaryButton, secondaryButton } from "@/compon
 import { CONDITIONS, KINDS, REGIONS, formatNumber, type Condition, type Kind } from "@/lib/i18n";
 import { SORTS, searchHref, type Filters, type Sort } from "@/lib/search";
 import type { Category } from "@/lib/vehicles";
-import { useT } from "@/components/lang-provider";
 
 type Props = {
   filters: Filters;
@@ -18,7 +17,6 @@ type Props = {
 };
 
 export function SearchForm({ filters, categories, activeCount }: Props) {
-  const { t } = useT();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(filters);
@@ -51,7 +49,7 @@ export function SearchForm({ filters, categories, activeCount }: Props) {
           setDraft({ ...draft, [key]: digits ? Number(digits) : undefined });
         }}
         inputMode="numeric"
-        placeholder={t("kr.")}
+        placeholder="kr."
         className={inputClass}
       />
     </label>
@@ -64,7 +62,7 @@ export function SearchForm({ filters, categories, activeCount }: Props) {
         <button
           type="button"
           onClick={openSheet}
-          aria-label={activeCount ? `Síur (${activeCount} virkar)` : t("Síur")}
+          aria-label={activeCount ? `Síur (${activeCount} virkar)` : "Síur"}
           className="relative flex size-[52px] shrink-0 items-center justify-center rounded-2xl border border-stone-200 bg-surface shadow-sm active:scale-95"
         >
           <SlidersHorizontal size={21} />
@@ -79,7 +77,7 @@ export function SearchForm({ filters, categories, activeCount }: Props) {
       <BottomSheet
         open={open}
         onClose={() => setOpen(false)}
-        title={t("Síur")}
+        title="Síur"
         footer={
           <div className="flex gap-2">
             <button
@@ -89,17 +87,17 @@ export function SearchForm({ filters, categories, activeCount }: Props) {
               }
               className={`${secondaryButton} flex-1`}
             >
-              {t("Hreinsa")}
+              Hreinsa
             </button>
             <button type="button" onClick={() => go(draft)} className={`${primaryButton} flex-[2]`}>
-              {t("Sýna niðurstöður")}
+              Sýna niðurstöður
             </button>
           </div>
         }
       >
         <div className="space-y-5">
           <fieldset>
-            <legend className={labelClass}>{t("Tegund auglýsingar")}</legend>
+            <legend className={labelClass}>Tegund auglýsingar</legend>
             <div className="grid grid-cols-4 gap-1 rounded-xl bg-stone-200 p-1">
               {([undefined, ...(Object.keys(KINDS) as Kind[])] as (Kind | undefined)[]).map((k) => (
                 <button
@@ -109,7 +107,7 @@ export function SearchForm({ filters, categories, activeCount }: Props) {
                   aria-pressed={draft.kind === k}
                   className={`rounded-lg py-2 text-sm font-medium ${draft.kind === k ? "bg-surface shadow-sm" : "text-stone-600"}`}
                 >
-                  {k ? t(KINDS[k]) : t("Allt")}
+                  {k ? KINDS[k] : "Allt"}
                 </button>
               ))}
             </div>
@@ -117,21 +115,21 @@ export function SearchForm({ filters, categories, activeCount }: Props) {
 
           {(!draft.kind || draft.kind === "part") && (
             <label className="block">
-              <span className={labelClass}>{t("Flokkur")}</span>
+              <span className={labelClass}>Flokkur</span>
               <select
                 value={draft.category ?? ""}
                 onChange={(e) => setDraft({ ...draft, category: e.target.value ? Number(e.target.value) : undefined })}
                 className={inputClass}
               >
-                <option value="">{t("Allir flokkar")}</option>
+                <option value="">Allir flokkar</option>
                 {parents.map((p) => (
-                  <optgroup key={p.id} label={t(p.name)}>
-                    <option value={p.id}>{t("Allt í")}{" "}{p.name.toLowerCase()}</option>
+                  <optgroup key={p.id} label={p.name}>
+                    <option value={p.id}>Allt í {p.name.toLowerCase()}</option>
                     {categories
                       .filter((c) => c.parent_id === p.id)
                       .map((c) => (
                         <option key={c.id} value={c.id}>
-                          {t(c.name)}
+                          {c.name}
                         </option>
                       ))}
                   </optgroup>
@@ -146,7 +144,7 @@ export function SearchForm({ filters, categories, activeCount }: Props) {
           </div>
 
           <fieldset>
-            <legend className={labelClass}>{t("Ástand")}</legend>
+            <legend className={labelClass}>Ástand</legend>
             <div className="flex flex-wrap gap-2">
               {(Object.keys(CONDITIONS) as Condition[]).map((c) => {
                 const on = draft.conditions?.includes(c) ?? false;
@@ -158,7 +156,7 @@ export function SearchForm({ filters, categories, activeCount }: Props) {
                     aria-pressed={on}
                     className={`rounded-full border px-4 py-2 text-sm ${on ? "border-orange-600 bg-orange-600 text-white" : "border-stone-300 bg-surface"}`}
                   >
-                    {t(CONDITIONS[c])}
+                    {CONDITIONS[c]}
                   </button>
                 );
               })}
@@ -166,23 +164,23 @@ export function SearchForm({ filters, categories, activeCount }: Props) {
           </fieldset>
 
           <label className="block">
-            <span className={labelClass}>{t("Landshluti")}</span>
+            <span className={labelClass}>Landshluti</span>
             <select
               value={draft.region ?? ""}
               onChange={(e) => setDraft({ ...draft, region: (e.target.value || undefined) as Filters["region"] })}
               className={inputClass}
             >
-              <option value="">{t("Allt landið")}</option>
+              <option value="">Allt landið</option>
               {Object.entries(REGIONS).map(([value, label]) => (
                 <option key={value} value={value}>
-                  {t(label)}
+                  {label}
                 </option>
               ))}
             </select>
           </label>
 
           <label className="block">
-            <span className={labelClass}>{t("Röðun")}</span>
+            <span className={labelClass}>Röðun</span>
             <select
               value={draft.sort}
               onChange={(e) => setDraft({ ...draft, sort: e.target.value as Sort })}
@@ -190,7 +188,7 @@ export function SearchForm({ filters, categories, activeCount }: Props) {
             >
               {Object.entries(SORTS).map(([value, label]) => (
                 <option key={value} value={value}>
-                  {t(label)}
+                  {label}
                 </option>
               ))}
             </select>

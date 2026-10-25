@@ -6,12 +6,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { MERGE_TOKEN_KEY } from "@/components/oauth-buttons";
 import { createClient } from "@/lib/supabase/client";
-import { useT } from "@/components/lang-provider";
 
 type State = { status: "working" } | { status: "done"; listings: number } | { status: "error" };
 
 export function MergeRunner({ next }: { next: string }) {
-  const { t } = useT();
   const router = useRouter();
   const [state, setState] = useState<State>({ status: "working" });
   const started = useRef(false);
@@ -42,30 +40,30 @@ export function MergeRunner({ next }: { next: string }) {
       {state.status === "working" && (
         <>
           <Loader2 size={40} className="animate-spin text-orange-600" />
-          <h1 className="mt-4 text-xl font-extrabold">{t("Flyt gögnin þín…")}</h1>
-          <p className="mt-2 text-stone-600">{t("Auglýsingar, skilaboð og óskir færast yfir á aðganginn þinn.")}</p>
+          <h1 className="mt-4 text-xl font-extrabold">Flyt gögnin þín…</h1>
+          <p className="mt-2 text-stone-600">Auglýsingar, skilaboð og óskir færast yfir á aðganginn þinn.</p>
         </>
       )}
       {state.status === "done" && (
         <>
           <CheckCircle2 size={48} className="text-green-600" />
-          <h1 className="mt-4 text-xl font-extrabold">{t("Allt komið!")}</h1>
+          <h1 className="mt-4 text-xl font-extrabold">Allt komið!</h1>
           <p className="mt-2 text-stone-600">
             {state.listings > 0
-              ? t(state.listings === 1 ? "{n} auglýsing og annað frá gestaaðganginum er nú á aðganginum þínum." : "{n} auglýsingar og annað frá gestaaðganginum er nú á aðganginum þínum.", { n: state.listings })
-              : t("Gögn gestaaðgangsins eru nú á aðganginum þínum.")}
+              ? `${state.listings} ${state.listings === 1 ? "auglýsing" : "auglýsingar"} og annað frá gestaaðganginum er nú á aðganginum þínum.`
+              : "Gögn gestaaðgangsins eru nú á aðganginum þínum."}
           </p>
         </>
       )}
       {state.status === "error" && (
         <>
           <TriangleAlert size={48} className="text-orange-600" />
-          <h1 className="mt-4 text-xl font-extrabold">{t("Ekki tókst að flytja gögnin")}</h1>
+          <h1 className="mt-4 text-xl font-extrabold">Ekki tókst að flytja gögnin</h1>
           <p className="mt-2 text-stone-600">
-            {t("Þú ert innskráð(ur), en flutningurinn rann út eða mistókst. Gestaaðgangurinn er óbreyttur.")}
+            Þú ert innskráð(ur), en flutningurinn rann út eða mistókst. Gestaaðgangurinn er óbreyttur.
           </p>
           <Link href={next} className="mt-6 rounded-xl bg-orange-600 px-5 py-3 font-semibold text-white">
-            {t("Halda áfram")}
+            Halda áfram
           </Link>
         </>
       )}

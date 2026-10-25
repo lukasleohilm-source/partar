@@ -29,8 +29,8 @@ export function carLabel(
   return [make, model, car.year].filter(Boolean).join(" ");
 }
 
-export function describeFitment(f: Fitment, makes: Make[], models: Model[], t: (s: string) => string = (s) => s): string {
+export function describeFitment(f: Fitment, makes: Make[], models: Model[]): string {
   const make = makes.find((m) => m.id === f.make_id)?.name ?? "?";
-  const model = f.model_id ? models.find((m) => m.id === f.model_id)?.name : t("allar gerðir");
-  return `${make} ${model} · ${t(yearRange(f.year_from, f.year_to))}`;
+  const model = f.model_id ? models.find((m) => m.id === f.model_id)?.name : "allar gerðir";
+  return `${make} ${model} · ${yearRange(f.year_from, f.year_to)}`;
 }

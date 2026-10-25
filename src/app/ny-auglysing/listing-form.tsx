@@ -11,7 +11,6 @@ import type { PickedImage } from "@/lib/images";
 import { imageUrl, storagePaths } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/client";
 import { YEARS, describeFitment, type Category, type Fitment, type Make, type Model } from "@/lib/vehicles";
-import { useT } from "@/components/lang-provider";
 
 // Auglýsing sem verið er að breyta
 export type ExistingListing = {
@@ -58,7 +57,6 @@ const KIND_HELP: Record<Kind, string> = {
 const STEPS = ["Tegund", "Myndir", "Upplýsingar", "Passar í", "Staðsetning"];
 
 export function ListingForm({ userId, makes, models, categories, defaultRegion, existing: ex }: Props) {
-  const { t, lang } = useT();
   const router = useRouter();
   const editing = Boolean(ex);
   const [step, setStep] = useState(editing ? 1 : 0);
@@ -110,19 +108,19 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
   function validate(s: number): string | null {
     switch (s) {
       case 1:
-        return images.length === 0 ? t("Settu inn að minnsta kosti eina mynd.") : null;
+        return images.length === 0 ? "Settu inn að minnsta kosti eina mynd." : null;
       case 2:
-        if (title.trim().length < 3) return t("Fyrirsögn þarf að vera að minnsta kosti 3 stafir.");
-        if (!isCar && !categoryId) return t("Veldu flokk.");
-        if (!condition) return t("Veldu ástand.");
-        if (priceMode === "verd" && !(priceValue! > 0)) return t("Sláðu inn verð eða veldu „Tilboð“.");
+        if (title.trim().length < 3) return "Fyrirsögn þarf að vera að minnsta kosti 3 stafir.";
+        if (!isCar && !categoryId) return "Veldu flokk.";
+        if (!condition) return "Veldu ástand.";
+        if (priceMode === "verd" && !(priceValue! > 0)) return "Sláðu inn verð eða veldu „Tilboð“.";
         return null;
       case 3:
-        if (isCar) return car.make && car.year ? null : t("Veldu tegund og árgerð bílsins.");
-        return universal || fitments.length > 0 ? null : t("Bættu við að minnsta kosti einum bíl eða hakaðu í „Passar í alla bíla“.");
+        if (isCar) return car.make && car.year ? null : "Veldu tegund og árgerð bílsins.";
+        return universal || fitments.length > 0 ? null : "Bættu við að minnsta kosti einum bíl eða hakaðu í „Passar í alla bíla“.";
       case 4:
-        if (!region) return t("Veldu landshluta.");
-        if (postalCode && !/^\d{3}$/.test(postalCode)) return t("Póstnúmer er þrír tölustafir.");
+        if (!region) return "Veldu landshluta.";
+        if (postalCode && !/^\d{3}$/.test(postalCode)) return "Póstnúmer er þrír tölustafir.";
         return null;
       default:
         return null;
@@ -237,7 +235,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
       // Hreinsa hálfkláraða auglýsingu
       if (uploaded.length) await supabase.storage.from("listing-images").remove(uploaded);
       if (listingId) await supabase.from("listings").delete().eq("id", listingId);
-      setError(t("Ekki tókst að birta auglýsinguna. Athugaðu nettenginguna og reyndu aftur."));
+      setError("Ekki tókst að birta auglýsinguna. Athugaðu nettenginguna og reyndu aftur.");
       setSubmitting(false);
     }
   }
@@ -288,7 +286,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
       router.refresh();
     } catch {
       if (uploaded.length) await supabase.storage.from("listing-images").remove(uploaded);
-      setError(t("Ekki tókst að vista breytingarnar. Athugaðu nettenginguna og reyndu aftur."));
+      setError("Ekki tókst að vista breytingarnar. Athugaðu nettenginguna og reyndu aftur.");
       setSubmitting(false);
     }
   }
@@ -298,12 +296,12 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
       <header className="mb-5">
         <div className="mb-3 flex items-center gap-3">
           {step > 0 && (
-            <button type="button" onClick={back} aria-label={t("Til baka")} className="-ml-2 px-2 text-2xl text-stone-600">
+            <button type="button" onClick={back} aria-label="Til baka" className="-ml-2 px-2 text-2xl text-stone-600">
               <ChevronLeft size={26} />
             </button>
           )}
           <h1 className="text-xl font-bold">
-            {editing ? `${t("Breyta")}: ${t(STEPS[step]).toLowerCase()}` : step === 0 ? t("Hvað ertu að selja?") : t(STEPS[step])}
+            {editing ? `Breyta: ${STEPS[step].toLowerCase()}` : step === 0 ? "Hvað ertu að selja?" : STEPS[step]}
           </h1>
           <span className="ml-auto text-sm text-stone-500">
             {step + 1}/{STEPS.length}
@@ -330,8 +328,8 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
                 kind === k ? "border-orange-500" : "border-transparent"
               }`}
             >
-              <span className="block text-lg font-semibold">{t(KINDS[k])}</span>
-              <span className="text-sm text-stone-500">{t(KIND_HELP[k])}</span>
+              <span className="block text-lg font-semibold">{KINDS[k]}</span>
+              <span className="text-sm text-stone-500">{KIND_HELP[k]}</span>
             </button>
           ))}
         </div>
@@ -342,38 +340,38 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
       {step === 2 && (
         <div className="space-y-4">
           <label className="block">
-            <span className={labelClass}>{t("Fyrirsögn")}</span>
+            <span className={labelClass}>Fyrirsögn</span>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               maxLength={120}
-              placeholder={isCar ? t("t.d. Toyota Yaris 2008, keyrður 180 þús.") : t("t.d. Framljós vinstra megin")}
+              placeholder={isCar ? "t.d. Toyota Yaris 2008, keyrður 180 þús." : "t.d. Framljós vinstra megin"}
               className={inputClass}
             />
           </label>
 
           {!isCar && (
             <label className="block">
-              <span className={labelClass}>{t("Flokkur")}</span>
+              <span className={labelClass}>Flokkur</span>
               <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={inputClass}>
-                <option value="">{t("Veldu flokk…")}</option>
+                <option value="">Veldu flokk…</option>
                 {parents.map((p) => {
                   const children = categories.filter((c) => c.parent_id === p.id);
                   if (!children.length) {
                     return (
                       <option key={p.id} value={p.id}>
-                        {t(p.name)}
+                        {p.name}
                       </option>
                     );
                   }
                   return (
-                    <optgroup key={p.id} label={t(p.name)}>
+                    <optgroup key={p.id} label={p.name}>
                       {children.map((c) => (
                         <option key={c.id} value={c.id}>
-                          {t(c.name)}
+                          {c.name}
                         </option>
                       ))}
-                      <option value={p.id}>{t(p.name)}{" "}{t("– annað")}</option>
+                      <option value={p.id}>{p.name} – annað</option>
                     </optgroup>
                   );
                 })}
@@ -382,7 +380,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
           )}
 
           <fieldset>
-            <legend className={labelClass}>{t("Ástand")}</legend>
+            <legend className={labelClass}>Ástand</legend>
             <div className="flex flex-wrap gap-2">
               {(Object.keys(CONDITIONS) as Condition[]).map((c) => (
                 <button
@@ -394,14 +392,14 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
                     condition === c ? "border-orange-600 bg-orange-600 text-white" : "border-stone-300 bg-surface"
                   }`}
                 >
-                  {t(CONDITIONS[c])}
+                  {CONDITIONS[c]}
                 </button>
               ))}
             </div>
           </fieldset>
 
           <fieldset>
-            <legend className={labelClass}>{t("Verð")}</legend>
+            <legend className={labelClass}>Verð</legend>
             <div className="mb-2 grid grid-cols-3 gap-1 rounded-xl bg-stone-200 p-1">
               {(
                 [
@@ -417,7 +415,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
                   aria-pressed={priceMode === mode}
                   className={`rounded-lg py-2 text-sm font-medium ${priceMode === mode ? "bg-surface shadow-sm" : "text-stone-600"}`}
                 >
-                  {t(label)}
+                  {label}
                 </button>
               ))}
             </div>
@@ -428,10 +426,10 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
                   onChange={(e) => setPrice(e.target.value.replace(/\D/g, "").slice(0, 9))}
                   inputMode="numeric"
                   placeholder="0"
-                  aria-label={t("Verð í krónum")}
+                  aria-label="Verð í krónum"
                   className={`${inputClass} pr-12`}
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-500">{t("kr.")}</span>
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-500">kr.</span>
               </div>
             )}
           </fieldset>
@@ -439,7 +437,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
           {isCar && (
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
-                <span className={labelClass}>{t("Akstur (km)")}</span>
+                <span className={labelClass}>Akstur (km)</span>
                 <input
                   value={mileage}
                   onChange={(e) => setMileage(e.target.value.replace(/\D/g, "").slice(0, 7))}
@@ -448,11 +446,11 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
                 />
               </label>
               <label className="block">
-                <span className={labelClass}>{t("Bílnúmer")}</span>
+                <span className={labelClass}>Bílnúmer</span>
                 <input
                   value={plate}
                   onChange={(e) => setPlate(e.target.value.toUpperCase().slice(0, 8))}
-                  placeholder={t("AB123")}
+                  placeholder="AB123"
                   autoCapitalize="characters"
                   className={inputClass}
                 />
@@ -462,25 +460,25 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
 
           {!isCar && (
             <label className="block">
-              <span className={labelClass}>{t("Vörunúmer (valfrjálst)")}</span>
+              <span className={labelClass}>Vörunúmer (valfrjálst)</span>
               <input
                 value={partNumber}
                 onChange={(e) => setPartNumber(e.target.value)}
                 maxLength={60}
-                placeholder={t("OEM-númer ef það er þekkt")}
+                placeholder="OEM-númer ef það er þekkt"
                 className={inputClass}
               />
             </label>
           )}
 
           <label className="block">
-            <span className={labelClass}>{t("Lýsing")}</span>
+            <span className={labelClass}>Lýsing</span>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               maxLength={5000}
               rows={5}
-              placeholder={t("Ástand, gallar, hvað fylgir, hvar er hægt að sækja…")}
+              placeholder="Ástand, gallar, hvað fylgir, hvar er hægt að sækja…"
               className={inputClass}
             />
           </label>
@@ -491,13 +489,13 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
         (isCar ? (
           <div className="space-y-3 rounded-xl bg-surface p-4">
             <label className="block">
-              <span className={labelClass}>{t("Tegund")}</span>
+              <span className={labelClass}>Tegund</span>
               <select
                 value={car.make}
                 onChange={(e) => setCar({ make: e.target.value, model: "", year: car.year })}
                 className={inputClass}
               >
-                <option value="">{t("Veldu tegund…")}</option>
+                <option value="">Veldu tegund…</option>
                 {makes.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.name}
@@ -506,14 +504,14 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
               </select>
             </label>
             <label className="block">
-              <span className={labelClass}>{t("Gerð")}</span>
+              <span className={labelClass}>Gerð</span>
               <select
                 value={car.model}
                 onChange={(e) => setCar({ ...car, model: e.target.value })}
                 disabled={!car.make}
                 className={inputClass}
               >
-                <option value="">{t("Önnur / óþekkt")}</option>
+                <option value="">Önnur / óþekkt</option>
                 {models
                   .filter((m) => String(m.make_id) === car.make)
                   .map((m) => (
@@ -524,9 +522,9 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
               </select>
             </label>
             <label className="block">
-              <span className={labelClass}>{t("Árgerð")}</span>
+              <span className={labelClass}>Árgerð</span>
               <select value={car.year} onChange={(e) => setCar({ ...car, year: e.target.value })} className={inputClass}>
-                <option value="">{t("Veldu…")}</option>
+                <option value="">Veldu…</option>
                 {YEARS.map((y) => (
                   <option key={y} value={y}>
                     {y}
@@ -538,7 +536,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
         ) : (
           <>
             <p className="mb-4 text-sm text-stone-600">
-              {t("Í hvaða bíla passar hluturinn? Þú getur bætt við mörgum. Kaupendur sem velja sinn bíl sjá auglýsinguna.")}
+              Í hvaða bíla passar hluturinn? Þú getur bætt við mörgum. Kaupendur sem velja sinn bíl sjá auglýsinguna.
             </p>
             <FitmentPicker
               makes={makes}
@@ -554,18 +552,18 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
       {step === 4 && (
         <div className="space-y-4">
           <label className="block">
-            <span className={labelClass}>{t("Landshluti")}</span>
+            <span className={labelClass}>Landshluti</span>
             <select value={region} onChange={(e) => setRegion(e.target.value as Region)} className={inputClass}>
-              <option value="">{t("Veldu…")}</option>
+              <option value="">Veldu…</option>
               {Object.entries(REGIONS).map(([value, label]) => (
                 <option key={value} value={value}>
-                  {t(label)}
+                  {label}
                 </option>
               ))}
             </select>
           </label>
           <label className="block">
-            <span className={labelClass}>{t("Póstnúmer (valfrjálst)")}</span>
+            <span className={labelClass}>Póstnúmer (valfrjálst)</span>
             <input
               value={postalCode}
               onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, "").slice(0, 3))}
@@ -576,7 +574,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
           </label>
 
           <section className="rounded-2xl bg-surface p-4">
-            <h2 className="mb-3 font-semibold">{t("Yfirlit")}</h2>
+            <h2 className="mb-3 font-semibold">Yfirlit</h2>
             <div className="flex gap-3">
               {images[0] && (
                 // eslint-disable-next-line @next/next/no-img-element -- object URL
@@ -584,19 +582,19 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
               )}
               <div className="min-w-0">
                 <p className="truncate font-medium">{title}</p>
-                <p className="text-lg font-bold text-orange-600">{formatPrice(priceValue, lang)}</p>
+                <p className="text-lg font-bold text-orange-600">{formatPrice(priceValue)}</p>
                 <p className="text-sm text-stone-500">
-                  {t(KINDS[kind])} · {condition && t(CONDITIONS[condition])} · {images.length}{" "}{t("myndir")}
+                  {KINDS[kind]} · {condition && CONDITIONS[condition]} · {images.length} myndir
                 </p>
               </div>
             </div>
             <p className="mt-3 text-sm text-stone-600">
-              <span className="font-medium">{t("Passar í:")}{" "}</span>
+              <span className="font-medium">Passar í: </span>
               {isCar
-                ? carFitment() && describeFitment(carFitment()!, makes, models, t)
+                ? carFitment() && describeFitment(carFitment()!, makes, models)
                 : universal
-                  ? t("Alla bíla")
-                  : fitments.map((f) => describeFitment(f, makes, models, t)).join("; ")}
+                  ? "Alla bíla"
+                  : fitments.map((f) => describeFitment(f, makes, models)).join("; ")}
             </p>
           </section>
         </div>
@@ -614,25 +612,25 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
             // Við breytingu má vista úr hvaða skrefi sem er
             <>
               <button type="button" onClick={saveChanges} disabled={submitting} className={primaryButton}>
-                {submitting ? t("Vista…") : t("Vista breytingar")}
+                {submitting ? "Vista…" : "Vista breytingar"}
               </button>
               {step < STEPS.length - 1 && (
                 <button type="button" onClick={next} disabled={submitting} className={secondaryButton}>
-                  {t("Áfram í")}{" "}{t(STEPS[step + 1]).toLowerCase()}
+                  Áfram í {STEPS[step + 1].toLowerCase()}
                 </button>
               )}
             </>
           ) : step < STEPS.length - 1 ? (
             <button type="button" onClick={next} className={primaryButton}>
-              {t("Áfram")}
+              Áfram
             </button>
           ) : (
             <button type="button" onClick={publish} disabled={submitting} className={primaryButton}>
-              {submitting ? t("Birti auglýsingu…") : t("Birta auglýsingu")}
+              {submitting ? "Birti auglýsingu…" : "Birta auglýsingu"}
             </button>
           )}
           <button type="button" onClick={back} disabled={submitting} className={secondaryButton}>
-            {t("Til baka")}
+            Til baka
           </button>
         </div>
       )}

@@ -3,7 +3,6 @@
 import { BellRing, MessageCircle, Plus, Search, User, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useT } from "./lang-provider";
 import { useUnreadCounts, type UnreadCounts } from "./use-unread-counts";
 
 type Item = {
@@ -34,12 +33,11 @@ const HIDDEN = [/^\/skilabod\/.+/, /^\/byrja/];
 export function BottomNav() {
   const pathname = usePathname();
   const unread = useUnreadCounts();
-  const { t } = useT();
   if (HIDDEN.some((r) => r.test(pathname))) return null;
 
   return (
     <nav
-      aria-label={t("Aðalvalmynd")}
+      aria-label="Aðalvalmynd"
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
     >
       <ul className="mx-auto grid max-w-md grid-cols-5">
@@ -52,7 +50,7 @@ export function BottomNav() {
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                aria-label={count ? t("{label} ({count} ólesið)", { label: t(item.label), count }) : undefined}
+                aria-label={count ? `${item.label} (${count} ólesið)` : undefined}
                 className={`flex flex-col items-center gap-1 pb-1.5 pt-2 text-[11px] font-medium transition-colors ${
                   active ? "text-orange-600" : "text-stone-500"
                 }`}
@@ -71,7 +69,7 @@ export function BottomNav() {
                     )}
                   </span>
                 )}
-                {t(item.label)}
+                {item.label}
               </Link>
             </li>
           );

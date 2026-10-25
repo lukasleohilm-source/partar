@@ -27,25 +27,3 @@ describe("íslenskar dagsetningar án Intl", () => {
     expect(formatDecimal(5)).toBe("5");
   });
 });
-
-describe("enska", () => {
-  const d = new Date("2026-10-24T14:05:00Z");
-  it("verð, dagsetningar og afstæður tími", async () => {
-    const { formatPrice } = await import("@/lib/i18n");
-    expect(formatPrice(14900, "en")).toBe("14,900 kr.");
-    expect(formatPrice(0, "en")).toBe("Free");
-    expect(formatPrice(null, "en")).toBe("Make an offer");
-    expect(formatDate(d, { weekday: true }, "en")).toBe("Saturday, 24 October");
-    const now = d.getTime();
-    expect(timeAgo(new Date(now - 3600_000).toISOString(), now, "en")).toBe("1 hour ago");
-    expect(timeAgo(new Date(now - 3 * 86400_000).toISOString(), now, "en")).toBe("3 days ago");
-    expect(formatDecimal(4.5, "en")).toBe("4.5");
-  });
-  it("t() þýðir, setur inn breytur og fellur aftur á íslensku", async () => {
-    const { translate } = await import("@/lib/lang");
-    expect(translate("en", "Leita")).toBe("Search");
-    expect(translate("is", "Leita")).toBe("Leita");
-    expect(translate("en", "Óþýddur texti")).toBe("Óþýddur texti");
-    expect(translate("en", "{label} ({count} ólesið)", { label: "Messages", count: 2 })).toBe("Messages (2 unread)");
-  });
-});

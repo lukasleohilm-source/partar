@@ -6,7 +6,6 @@ import { Thumb } from "@/components/listing/thumb";
 import { IMAGE_COLS, coverOf, type ImageRef } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/server";
 import { LiveRefresh } from "@/components/live-refresh";
-import { getT } from "@/lib/lang-server";
 
 export const metadata = { title: "Skilaboð – Partar" };
 
@@ -25,7 +24,6 @@ type Row = {
 };
 
 export default async function ConversationsPage() {
-  const { t, lang } = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -48,15 +46,15 @@ export default async function ConversationsPage() {
 
   return (
     <div className="mx-auto max-w-md md:max-w-2xl md:pt-10 px-4 pt-6">
-      <h1 className="mb-4 text-2xl font-bold">{t("Skilaboð")}</h1>
+      <h1 className="mb-4 text-2xl font-bold">Skilaboð</h1>
       <LiveRefresh channel={`samtalalisti:${user.id}`} table="conversations" event="UPDATE" />
 
       {rows.length === 0 ? (
         <div className="rounded-2xl bg-surface p-6 text-center">
-          <p className="font-medium">{t("Engin skilaboð enn")}</p>
-          <p className="mt-1 text-sm text-stone-500">{t("Þegar þú hefur samband við seljanda birtist samtalið hér.")}</p>
+          <p className="font-medium">Engin skilaboð enn</p>
+          <p className="mt-1 text-sm text-stone-500">Þegar þú hefur samband við seljanda birtist samtalið hér.</p>
           <Link href="/leit" className="mt-3 inline-block font-semibold text-orange-600">
-            {t("Leita að hlutum →")}
+            Leita að hlutum →
           </Link>
         </div>
       ) : (
@@ -78,18 +76,18 @@ export default async function ConversationsPage() {
                     <div className="flex items-baseline justify-between gap-2">
                       <p className={`truncate ${unread ? "font-bold" : "font-medium"}`}>{other}</p>
                       <span className={`shrink-0 text-xs ${unread ? "font-semibold text-orange-600" : "text-stone-500"}`}>
-                        {c.last_message_at && shortTime(c.last_message_at, new Date(), lang)}
+                        {c.last_message_at && shortTime(c.last_message_at)}
                       </span>
                     </div>
                     <p className="truncate text-xs text-stone-500">
-                      {c.listings ? `${c.listings.title} · ${formatPrice(c.listings.price_isk, lang)}` : t("Auglýsing ekki lengur til")}
+                      {c.listings ? `${c.listings.title} · ${formatPrice(c.listings.price_isk)}` : "Auglýsing ekki lengur til"}
                     </p>
                     <div className="flex items-center gap-2">
                       <p className={`truncate text-sm ${unread ? "font-semibold text-stone-900" : "text-stone-600"}`}>
-                        {c.last_sender_id === user.id && t("Þú: ")}
+                        {c.last_sender_id === user.id && "Þú: "}
                         {c.last_message_body}
                       </p>
-                      {unread && <span className="ml-auto size-2.5 shrink-0 rounded-full bg-orange-600" aria-label={t("Ólesið")} />}
+                      {unread && <span className="ml-auto size-2.5 shrink-0 rounded-full bg-orange-600" aria-label="Ólesið" />}
                     </div>
                   </div>
                 </Link>

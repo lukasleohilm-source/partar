@@ -23,7 +23,6 @@ import {
 } from "@/lib/search";
 import { createClient } from "@/lib/supabase/server";
 import { carLabel } from "@/lib/vehicles";
-import { getT } from "@/lib/lang-server";
 
 export const metadata = { title: "Leit – Partar" };
 
@@ -34,7 +33,6 @@ export default async function SearchPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { t, lang } = await getT();
   const filters = parseFilters(await searchParams);
   const jar = await cookies();
   const myCar = parseMyCar(jar.get(MY_CAR_COOKIE)?.value);
@@ -91,32 +89,32 @@ export default async function SearchPage({
   // Virkar síur sem merki sem hægt er að fjarlægja
   const chips: { label: string; href: string }[] = [];
   if (filters.q) chips.push({ label: `„${filters.q}“`, href: searchHref(filters, { q: undefined }) });
-  if (filters.kind) chips.push({ label: t(KINDS[filters.kind]), href: searchHref(filters, { kind: undefined }) });
+  if (filters.kind) chips.push({ label: KINDS[filters.kind], href: searchHref(filters, { kind: undefined }) });
   if (filters.category) {
     const name = allCategories.find((c) => c.id === filters.category)?.name ?? "Flokkur";
-    chips.push({ label: t(name), href: searchHref(filters, { category: undefined }) });
+    chips.push({ label: name, href: searchHref(filters, { category: undefined }) });
   }
   if (filters.minPrice != null || filters.maxPrice != null) {
     const label =
       filters.minPrice != null && filters.maxPrice != null
-        ? `${formatPrice(filters.minPrice, lang)} – ${formatPrice(filters.maxPrice, lang)}`
+        ? `${formatPrice(filters.minPrice)} – ${formatPrice(filters.maxPrice)}`
         : filters.minPrice != null
-          ? t("Frá {verd}", { verd: formatPrice(filters.minPrice, lang) })
-          : t("Upp að {verd}", { verd: formatPrice(filters.maxPrice!, lang) });
+          ? `Frá ${formatPrice(filters.minPrice)}`
+          : `Upp að ${formatPrice(filters.maxPrice!)}`;
     chips.push({ label, href: searchHref(filters, { minPrice: undefined, maxPrice: undefined }) });
   }
   if (filters.conditions) {
     chips.push({
-      label: filters.conditions.map((c) => t(CONDITIONS[c])).join(", "),
+      label: filters.conditions.map((c) => CONDITIONS[c]).join(", "),
       href: searchHref(filters, { conditions: undefined }),
     });
   }
-  if (filters.region) chips.push({ label: t(REGIONS[filters.region]), href: searchHref(filters, { region: undefined }) });
-  if (filters.maxKm && myPlace) chips.push({ label: t("Innan {km} km", { km: filters.maxKm }), href: searchHref(filters, { maxKm: undefined }) });
-  if (filters.sort !== "newest") chips.push({ label: t(SORTS[filters.sort]), href: searchHref(filters, { sort: "newest" }) });
+  if (filters.region) chips.push({ label: REGIONS[filters.region], href: searchHref(filters, { region: undefined }) });
+  if (filters.maxKm && myPlace) chips.push({ label: `Innan ${filters.maxKm} km`, href: searchHref(filters, { maxKm: undefined }) });
+  if (filters.sort !== "newest") chips.push({ label: SORTS[filters.sort], href: searchHref(filters, { sort: "newest" }) });
   if (urlCar) {
     chips.push({
-      label: t(carLabel(urlCar, allMakes, allModels)),
+      label: carLabel(urlCar, allMakes, allModels),
       href: searchHref(filters, { make: undefined, model: undefined, year: undefined }),
     });
   }
@@ -127,7 +125,7 @@ export default async function SearchPage({
 
   return (
     <div className="mx-auto max-w-md md:max-w-6xl md:px-6 md:pt-8 space-y-3 px-4 pt-4">
-      <h1 className="sr-only">{t("Leit")}</h1>
+      <h1 className="sr-only">Leit</h1>
       <SearchForm key={searchHref(filters)} filters={filters} categories={allCategories} activeCount={activeCount} />
 
       {!urlCar && (
@@ -152,7 +150,7 @@ export default async function SearchPage({
               <Link
                 href={c.href}
                 className="flex items-center gap-1.5 rounded-full bg-stone-900 py-1.5 pl-3 pr-2.5 text-sm text-white"
-                aria-label={t("Fjarlægja síu: {sia}", { sia: c.label })}
+                aria-label={`Fjarlægja síu: ${c.label}`}
               >
                 {c.label} <X size={14} aria-hidden />
               </Link>
@@ -163,7 +161,7 @@ export default async function SearchPage({
 
       {results.error ? (
         <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">
-          {t("Leit mistókst. Reyndu aftur eftir smá stund.")}
+          Leit mistókst. Reyndu aftur eftir smá stund.
         </p>
       ) : listings.length ? (
         <>
@@ -179,15 +177,15 @@ export default async function SearchPage({
             ))}
           </ul>
           {(filters.page > 1 || hasMore) && (
-            <nav aria-label={t("Síður")} className="flex gap-2 pt-2">
+            <nav aria-label="Síður" className="flex gap-2 pt-2">
               {filters.page > 1 && (
                 <Link href={pageHref(filters.page - 1)} className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-stone-300 bg-surface py-3 font-medium">
-                  <ChevronLeft size={18} />{" "}{t("Fyrri")}
+                  <ChevronLeft size={18} /> Fyrri
                 </Link>
               )}
               {hasMore && (
                 <Link href={pageHref(filters.page + 1)} className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-stone-300 bg-surface py-3 font-medium">
-                  {t("Næsta")}{" "}<ChevronRight size={18} />
+                  Næsta <ChevronRight size={18} />
                 </Link>
               )}
             </nav>
@@ -196,18 +194,18 @@ export default async function SearchPage({
       ) : (
         <div className="rounded-2xl bg-surface p-8 text-center shadow-sm">
           <SearchX size={36} className="mx-auto mb-2 text-stone-400" />
-          <p className="font-semibold">{t("Ekkert fannst")}</p>
-          <p className="mt-1 text-sm text-stone-500">{t("Prófaðu færri síur eða önnur leitarorð.")}</p>
+          <p className="font-semibold">Ekkert fannst</p>
+          <p className="mt-1 text-sm text-stone-500">Prófaðu færri síur eða önnur leitarorð.</p>
           {car && !urlCar && (
             <Link href={searchHref(filters, noCarFilters)} className="mt-3 block font-semibold text-orange-600">
-              {t("Leita í öllum bílum")}
+              Leita í öllum bílum
             </Link>
           )}
           <Link
             href={searchHref(filters).replace(/^\/leit/, "/oska-eftir/ny")}
             className="mt-3 block font-semibold text-orange-600"
           >
-            {t("Skráðu ósk og fáðu tilkynningu →")}
+            Skráðu ósk og fáðu tilkynningu →
           </Link>
         </div>
       )}

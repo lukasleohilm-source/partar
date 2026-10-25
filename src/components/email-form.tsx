@@ -5,7 +5,6 @@ import { useActionState, useCallback, useEffect, useState } from "react";
 import { TURNSTILE_SITE_KEY, Turnstile } from "@/components/turnstile";
 import { inputClass, primaryButton } from "@/components/ui/styles";
 import type { LoginState } from "@/app/innskraning/actions";
-import { useT } from "@/components/lang-provider";
 
 type Props = {
   action: (prev: LoginState, formData: FormData) => Promise<LoginState>;
@@ -18,7 +17,6 @@ type Props = {
 
 // Netfangsform fyrir töfrahlekk og tengingu netfangs, með CAPTCHA ef lykill er stilltur
 export function EmailForm({ action, submitLabel, sentText, hidden, captcha, footer }: Props) {
-  const { t } = useT();
   const [state, formAction, pending] = useActionState<LoginState, FormData>(action, { status: "idle" });
   const needsCaptcha = Boolean(captcha && TURNSTILE_SITE_KEY);
   const [token, setToken] = useState("");
@@ -40,7 +38,7 @@ export function EmailForm({ action, submitLabel, sentText, hidden, captcha, foot
         <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-orange-50 text-orange-600" aria-hidden>
           <MailCheck size={28} />
         </div>
-        <h2 className="text-lg font-semibold">{t("Athugaðu tölvupóstinn")}</h2>
+        <h2 className="text-lg font-semibold">Athugaðu tölvupóstinn</h2>
         <p className="mt-2 text-stone-600">{sentText(state.email ?? "")}</p>
       </div>
     );
@@ -53,7 +51,7 @@ export function EmailForm({ action, submitLabel, sentText, hidden, captcha, foot
       ))}
       <input type="hidden" name="captcha" value={token} />
       <label className="block">
-        <span className="mb-1 block text-sm font-medium text-stone-700">{t("Netfang")}</span>
+        <span className="mb-1 block text-sm font-medium text-stone-700">Netfang</span>
         <input
           type="email"
           name="email"
@@ -61,18 +59,18 @@ export function EmailForm({ action, submitLabel, sentText, hidden, captcha, foot
           autoComplete="email"
           inputMode="email"
           defaultValue={state.email}
-          placeholder={t("nafn@dæmi.is")}
+          placeholder="nafn@dæmi.is"
           className={inputClass}
         />
       </label>
       {needsCaptcha && <Turnstile key={captchaKey} onToken={onToken} onError={onError} />}
       {state.status === "error" && (
         <p role="alert" className="text-sm text-red-600">
-          {t(state.message ?? "")}
+          {state.message}
         </p>
       )}
       <button type="submit" disabled={pending || (needsCaptcha && !token)} className={primaryButton}>
-        {pending ? t("Sendi…") : submitLabel}
+        {pending ? "Sendi…" : submitLabel}
       </button>
       {footer}
     </form>

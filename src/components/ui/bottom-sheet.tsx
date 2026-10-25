@@ -2,7 +2,6 @@
 
 import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { useT } from "@/components/lang-provider";
 
 type Props = {
   open: boolean;
@@ -14,7 +13,6 @@ type Props = {
 
 // Neðsta-skjás gluggi byggður á <dialog> (aðgengilegur, lokast með Esc og bakgrunnssmelli)
 export function BottomSheet({ open, onClose, title, children, footer }: Props) {
-  const { t } = useT();
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -35,7 +33,7 @@ export function BottomSheet({ open, onClose, title, children, footer }: Props) {
       <div className="flex max-h-[88dvh] flex-col">
         <header className="flex items-center justify-between border-b border-stone-200 px-4 py-3">
           <h2 className="text-lg font-semibold">{title}</h2>
-          <button type="button" onClick={onClose} aria-label={t("Loka")} className="-mr-2 px-2 text-xl text-stone-500">
+          <button type="button" onClick={onClose} aria-label="Loka" className="-mr-2 px-2 text-xl text-stone-500">
             <X size={22} />
           </button>
         </header>

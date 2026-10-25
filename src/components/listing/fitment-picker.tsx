@@ -4,7 +4,6 @@ import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import { inputClass, labelClass, secondaryButton } from "@/components/ui/styles";
 import { YEARS, describeFitment, type Fitment, type Make, type Model } from "@/lib/vehicles";
-import { useT } from "@/components/lang-provider";
 
 export const MAX_FITMENTS = 20;
 
@@ -20,16 +19,15 @@ type Props = {
 const empty = { make: "", model: "", from: "", to: "" };
 
 export function FitmentPicker({ makes, models, fitments, onChange, universal, onUniversalChange }: Props) {
-  const { t } = useT();
   const [draft, setDraft] = useState(empty);
   const [error, setError] = useState<string | null>(null);
   const makeModels = models.filter((m) => String(m.make_id) === draft.make);
 
   function add() {
-    if (!draft.make) return setError(t("Veldu tegund."));
+    if (!draft.make) return setError("Veldu tegund.");
     const from = draft.from ? Number(draft.from) : null;
     const to = draft.to ? Number(draft.to) : null;
-    if (from && to && from > to) return setError(t("Árgerð frá má ekki vera hærri en árgerð til."));
+    if (from && to && from > to) return setError("Árgerð frá má ekki vera hærri en árgerð til.");
 
     const fitment: Fitment = {
       make_id: Number(draft.make),
@@ -60,8 +58,8 @@ export function FitmentPicker({ makes, models, fitments, onChange, universal, on
           className="mt-0.5 size-5 accent-orange-600"
         />
         <span>
-          <span className="block font-medium">{t("Passar í alla bíla")}</span>
-          <span className="text-sm text-stone-500">{t("T.d. aukahlutir, verkfæri eða alhliða dekk")}</span>
+          <span className="block font-medium">Passar í alla bíla</span>
+          <span className="text-sm text-stone-500">T.d. aukahlutir, verkfæri eða alhliða dekk</span>
         </span>
       </label>
 
@@ -71,11 +69,11 @@ export function FitmentPicker({ makes, models, fitments, onChange, universal, on
             <ul className="space-y-2">
               {fitments.map((f, i) => (
                 <li key={i} className="flex items-center justify-between gap-2 rounded-xl bg-orange-50 px-4 py-3">
-                  <span className="text-sm font-medium">{describeFitment(f, makes, models, t)}</span>
+                  <span className="text-sm font-medium">{describeFitment(f, makes, models)}</span>
                   <button
                     type="button"
                     onClick={() => onChange(fitments.filter((_, j) => j !== i))}
-                    aria-label={t("Fjarlægja")}
+                    aria-label="Fjarlægja"
                     className="text-stone-500"
                   >
                     <X size={18} />
@@ -87,15 +85,15 @@ export function FitmentPicker({ makes, models, fitments, onChange, universal, on
 
           {fitments.length < MAX_FITMENTS && (
             <fieldset className="space-y-3 rounded-xl bg-surface p-4">
-              <legend className="sr-only">{t("Bæta við bíl")}</legend>
+              <legend className="sr-only">Bæta við bíl</legend>
               <label className="block">
-                <span className={labelClass}>{t("Tegund")}</span>
+                <span className={labelClass}>Tegund</span>
                 <select
                   value={draft.make}
                   onChange={(e) => setDraft({ ...empty, make: e.target.value })}
                   className={inputClass}
                 >
-                  <option value="">{t("Veldu tegund…")}</option>
+                  <option value="">Veldu tegund…</option>
                   {makes.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name}
@@ -105,14 +103,14 @@ export function FitmentPicker({ makes, models, fitments, onChange, universal, on
               </label>
 
               <label className="block">
-                <span className={labelClass}>{t("Gerð")}</span>
+                <span className={labelClass}>Gerð</span>
                 <select
                   value={draft.model}
                   onChange={(e) => setDraft({ ...draft, model: e.target.value })}
                   disabled={!draft.make}
                   className={inputClass}
                 >
-                  <option value="">{t("Allar gerðir")}</option>
+                  <option value="">Allar gerðir</option>
                   {makeModels.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name}
@@ -123,7 +121,7 @@ export function FitmentPicker({ makes, models, fitments, onChange, universal, on
 
               <div className="grid grid-cols-2 gap-3">
                 <label className="block">
-                  <span className={labelClass}>{t("Árgerð frá")}</span>
+                  <span className={labelClass}>Árgerð frá</span>
                   <select
                     value={draft.from}
                     onChange={(e) => setDraft({ ...draft, from: e.target.value })}
@@ -139,7 +137,7 @@ export function FitmentPicker({ makes, models, fitments, onChange, universal, on
                   </select>
                 </label>
                 <label className="block">
-                  <span className={labelClass}>{t("Árgerð til")}</span>
+                  <span className={labelClass}>Árgerð til</span>
                   <select
                     value={draft.to}
                     onChange={(e) => setDraft({ ...draft, to: e.target.value })}
@@ -163,7 +161,7 @@ export function FitmentPicker({ makes, models, fitments, onChange, universal, on
               )}
 
               <button type="button" onClick={add} className={secondaryButton}>
-                <Plus size={18} className="-mt-0.5 mr-1 inline" />{" "}{t("Bæta við bíl")}
+                <Plus size={18} className="-mt-0.5 mr-1 inline" /> Bæta við bíl
               </button>
             </fieldset>
           )}

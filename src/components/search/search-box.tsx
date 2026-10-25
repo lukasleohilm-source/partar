@@ -3,7 +3,6 @@
 import { CarFront, LayoutGrid, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
-import { useT } from "@/components/lang-provider";
 import { createClient } from "@/lib/supabase/client";
 
 type Suggestion = {
@@ -41,7 +40,6 @@ export function SearchBox({
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const [supabase] = useState(createClient);
-  const { t } = useT();
   const seq = useRef(0);
 
   useEffect(() => {
@@ -51,11 +49,11 @@ export function SearchBox({
       return;
     }
     const n = ++seq.current;
-    const timer = setTimeout(async () => {
+    const t = setTimeout(async () => {
       const { data } = await supabase.rpc("search_suggestions", { p_q: term });
       if (n === seq.current) setItems((data as Suggestion[] | null) ?? []);
     }, 160);
-    return () => clearTimeout(timer);
+    return () => clearTimeout(t);
   }, [q, supabase]);
 
   function go(href: string) {
@@ -108,8 +106,8 @@ export function SearchBox({
             setOpen(false);
           }
         }}
-        placeholder={t("Hvað vantar þig? t.d. framljós")}
-        aria-label={t("Leita")}
+        placeholder="Hvað vantar þig? t.d. framljós"
+        aria-label="Leita"
         role="combobox"
         aria-autocomplete="list"
         aria-expanded={showList}
@@ -124,7 +122,7 @@ export function SearchBox({
             setQ("");
             setItems([]);
           }}
-          aria-label={t("Hreinsa")}
+          aria-label="Hreinsa"
           className="absolute right-3 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-stone-200 text-stone-600"
         >
           <X size={15} />
@@ -148,8 +146,8 @@ export function SearchBox({
                   className={`flex w-full items-center gap-3 px-4 py-2.5 text-left ${i === active ? "bg-stone-100" : "active:bg-stone-100"}`}
                 >
                   <Icon size={18} className="shrink-0 text-stone-400" />
-                  <span className="min-w-0 flex-1 truncate">{s.kind === "category" ? t(s.label) : s.label}</span>
-                  {HINT[s.kind] && <span className="shrink-0 text-xs text-stone-400">{t(HINT[s.kind])}</span>}
+                  <span className="min-w-0 flex-1 truncate">{s.label}</span>
+                  {HINT[s.kind] && <span className="shrink-0 text-xs text-stone-400">{HINT[s.kind]}</span>}
                 </button>
               </li>
             );

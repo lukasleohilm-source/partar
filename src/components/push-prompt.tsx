@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { enablePush, getPushState } from "@/lib/push-client";
 import { reportError } from "@/lib/report-error";
 import { createClient } from "@/lib/supabase/client";
-import { useT } from "@/components/lang-provider";
 
 const DISMISSED_KEY = "partar_push_spurt";
 const ASK_AGAIN_MS = 14 * 24 * 60 * 60 * 1000;
@@ -15,7 +14,6 @@ const ASK_AGAIN_MS = 14 * 24 * 60 * 60 * 1000;
 // ekki um leið og síðan opnast. Vafrar fela leyfisglugga sem birtast án ástæðu.
 // Tilkynningar koma í tölvupósti: gestir án netfangs eru beðnir að vista aðganginn.
 export function PushPrompt({ reason }: { reason: string }) {
-  const { t } = useT();
   const [mode, setMode] = useState<"push" | "save" | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -72,20 +70,20 @@ export function PushPrompt({ reason }: { reason: string }) {
     <div className="my-3 flex items-center gap-3 rounded-2xl border border-orange-200 bg-orange-50 p-3 text-sm text-orange-900">
       <Icon size={20} className="shrink-0 text-orange-600" />
       {done ? (
-        <p className="flex-1 font-medium">{t("Kveikt á tilkynningum ✓")}</p>
+        <p className="flex-1 font-medium">Kveikt á tilkynningum ✓</p>
       ) : (
         <>
-          <p className="flex-1">{mode === "save" ? `${reason} ${t("Vistaðu aðganginn og við sendum þér tölvupóst.")}` : reason}</p>
+          <p className="flex-1">{mode === "save" ? `${reason} Vistaðu aðganginn og við sendum þér tölvupóst.` : reason}</p>
           {mode === "save" ? (
             <Link href="/profill/vista" className={action}>
-              {t("Vista")}
+              Vista
             </Link>
           ) : (
             <button type="button" onClick={enable} disabled={busy} className={action}>
-              {t("Kveikja")}
+              Kveikja
             </button>
           )}
-          <button type="button" onClick={dismiss} aria-label={t("Ekki núna")} className="-mr-1 shrink-0 p-1 text-orange-700">
+          <button type="button" onClick={dismiss} aria-label="Ekki núna" className="-mr-1 shrink-0 p-1 text-orange-700">
             <X size={18} />
           </button>
         </>

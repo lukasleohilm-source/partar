@@ -7,7 +7,6 @@ import { useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/logo";
 import { FacebookButton, GoogleButton } from "@/components/oauth-buttons";
 import { createClient } from "@/lib/supabase/client";
-import { useT } from "@/components/lang-provider";
 
 const SEEN_KEY = "partar_velkomin";
 // Síður þar sem glugginn á ekki við
@@ -16,7 +15,6 @@ const SKIP = [/^\/innskraning/, /^\/byrja/, /^\/auth/, /^\/sameina/, /^\/skilmal
 // Velkomugluggi við fyrstu heimsókn: skrá inn með Google, netfangi eða skoða sem gestur.
 // Birtist aðeins einu sinni og aldrei hjá þeim sem eru þegar með lotu (notendur eða gestir).
 export function WelcomeGate() {
-  const { t } = useT();
   const pathname = usePathname();
   const ref = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
@@ -63,9 +61,9 @@ export function WelcomeGate() {
       <div className="px-6 pb-6 pt-7 text-center">
         <Logo className="justify-center" />
         <h2 id="velkomin-titill" className="mt-5 text-[22px] font-extrabold leading-tight tracking-tight text-stone-900">
-          {t("Velkomin(n) á Partar")}
+          Velkomin(n) á Partar
         </h2>
-        <p className="mt-2 text-stone-600">{t("Notaðir varahlutir, partabílar og ódýrir bílar, beint frá fólki.")}</p>
+        <p className="mt-2 text-stone-600">Notaðir varahlutir, partabílar og ódýrir bílar, beint frá fólki.</p>
 
         <div className="mt-6 space-y-2.5 text-left">
           <GoogleButton next={pathname} />
@@ -75,27 +73,27 @@ export function WelcomeGate() {
             onClick={close}
             className="flex w-full items-center justify-center gap-3 rounded-xl border border-stone-300 bg-surface py-3 text-base font-semibold text-stone-800 shadow-sm active:scale-[0.98]"
           >
-            <Mail size={20} className="text-stone-500" />{" "}{t("Skrá inn með netfangi")}
+            <Mail size={20} className="text-stone-500" /> Skrá inn með netfangi
           </Link>
           <button
             type="button"
             onClick={close}
             className="flex w-full items-center justify-center gap-3 rounded-xl py-3 text-base font-semibold text-orange-700 active:bg-orange-50"
           >
-            <UserRound size={20} />{" "}{t("Skoða sem gestur")}
+            <UserRound size={20} /> Skoða sem gestur
           </button>
         </div>
 
         <p className="mt-4 text-xs leading-relaxed text-stone-500">
-          {t("Gestir geta skoðað, leitað og selt. Þú getur alltaf vistað aðganginn síðar.")}
+          Gestir geta skoðað, leitað og selt. Þú getur alltaf vistað aðganginn síðar.
           <br />
-          {t("Með því að halda áfram samþykkir þú")}{" "}
+          Með því að halda áfram samþykkir þú{" "}
           <Link href="/skilmalar" onClick={close} className="underline">
-            {t("skilmála")}
+            skilmála
           </Link>{" "}
-          {t("og")}{" "}
+          og{" "}
           <Link href="/personuvernd" onClick={close} className="underline">
-            {t("persónuvernd")}
+            persónuvernd
           </Link>
           .
         </p>

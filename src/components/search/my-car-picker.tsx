@@ -7,7 +7,6 @@ import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { inputClass, labelClass, primaryButton, secondaryButton } from "@/components/ui/styles";
 import { serializeMyCar, type MyCar } from "@/lib/search";
 import { YEARS, carLabel, type Make, type Model } from "@/lib/vehicles";
-import { useT } from "@/components/lang-provider";
 
 type Props = {
   makes: Make[];
@@ -41,7 +40,6 @@ function writeGarage(cars: MyCar[]) {
 }
 
 export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
-  const { t } = useT();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [garage, setGarage] = useState<MyCar[]>([]);
@@ -98,16 +96,16 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
             <CarFront size={22} />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-xs text-stone-500">{active ? t("Sýni bara það sem passar í") : t("Minn bíll")}</p>
+            <p className="text-xs text-stone-500">{active ? "Sýni bara það sem passar í" : "Minn bíll"}</p>
             <p className="truncate font-semibold">{carLabel(car, makes, models)}</p>
           </div>
           {toggleHref && (
             <a href={toggleHref} className="shrink-0 text-sm font-medium text-orange-700 underline-offset-2 active:underline">
-              {active ? t("Sýna allt") : t("Bara það sem passar")}
+              {active ? "Sýna allt" : "Bara það sem passar"}
             </a>
           )}
           <button type="button" onClick={() => setOpen(true)} className="shrink-0 text-sm font-medium text-stone-600">
-            {t("Breyta")}
+            Breyta
           </button>
         </div>
       ) : (
@@ -120,8 +118,8 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
             <CarFront size={22} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block font-semibold">{t("Veldu þinn bíl")}</span>
-            <span className="text-sm text-stone-500">{t("Sjáðu bara hluti sem passa")}</span>
+            <span className="block font-semibold">Veldu þinn bíl</span>
+            <span className="text-sm text-stone-500">Sjáðu bara hluti sem passa</span>
           </span>
           <ChevronRight size={20} className="text-stone-400" aria-hidden />
         </button>
@@ -130,15 +128,15 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
       <BottomSheet
         open={open}
         onClose={() => setOpen(false)}
-        title={t("Minn bíll")}
+        title="Minn bíll"
         footer={
           <div className="space-y-2">
             <button type="button" onClick={save} disabled={!draft.make} className={primaryButton}>
-              {t("Vista og nota bíl")}
+              Vista og nota bíl
             </button>
             {car && (
               <button type="button" onClick={() => apply(null)} className={secondaryButton}>
-                {t("Fjarlægja bíl")}
+                Fjarlægja bíl
               </button>
             )}
           </div>
@@ -147,7 +145,7 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
         <div className="space-y-3">
           {garage.length > 0 && (
             <section className="mb-2">
-              <h3 className={labelClass}>{t("Mínir bílar")}</h3>
+              <h3 className={labelClass}>Mínir bílar</h3>
               <ul className="space-y-1.5">
                 {garage.map((g) => {
                   const isActive = car ? sameCar(car, g) : false;
@@ -162,24 +160,24 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
                         <span className="flex-1 truncate font-medium">{carLabel(g, makes, models)}</span>
                         {isActive && <Check size={18} className="text-orange-600" />}
                       </button>
-                      <button type="button" onClick={() => forget(g)} aria-label={t("Fjarlægja bíl")} className="flex size-10 items-center justify-center rounded-xl text-stone-400 active:bg-stone-100">
+                      <button type="button" onClick={() => forget(g)} aria-label="Fjarlægja bíl" className="flex size-10 items-center justify-center rounded-xl text-stone-400 active:bg-stone-100">
                         <X size={18} />
                       </button>
                     </li>
                   );
                 })}
               </ul>
-              <h3 className={`${labelClass} mt-4`}>{t("Bæta við bíl")}</h3>
+              <h3 className={`${labelClass} mt-4`}>Bæta við bíl</h3>
             </section>
           )}
           <label className="block">
-            <span className={labelClass}>{t("Tegund")}</span>
+            <span className={labelClass}>Tegund</span>
             <select
               value={draft.make}
               onChange={(e) => setDraft({ make: e.target.value, model: "", year: draft.year })}
               className={inputClass}
             >
-              <option value="">{t("Veldu tegund…")}</option>
+              <option value="">Veldu tegund…</option>
               {makes.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.name}
@@ -188,14 +186,14 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
             </select>
           </label>
           <label className="block">
-            <span className={labelClass}>{t("Gerð")}</span>
+            <span className={labelClass}>Gerð</span>
             <select
               value={draft.model}
               onChange={(e) => setDraft({ ...draft, model: e.target.value })}
               disabled={!draft.make}
               className={inputClass}
             >
-              <option value="">{t("Allar gerðir")}</option>
+              <option value="">Allar gerðir</option>
               {models
                 .filter((m) => String(m.make_id) === draft.make)
                 .map((m) => (
@@ -206,13 +204,13 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
             </select>
           </label>
           <label className="block">
-            <span className={labelClass}>{t("Árgerð")}</span>
+            <span className={labelClass}>Árgerð</span>
             <select
               value={draft.year}
               onChange={(e) => setDraft({ ...draft, year: e.target.value })}
               className={inputClass}
             >
-              <option value="">{t("Allar árgerðir")}</option>
+              <option value="">Allar árgerðir</option>
               {YEARS.map((y) => (
                 <option key={y} value={y}>
                   {y}
@@ -220,7 +218,7 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
               ))}
             </select>
           </label>
-          <p className="text-sm text-stone-500">{t("Bílarnir eru vistaðir í þessum vafra. Leit eftir bílnúmeri kemur síðar.")}</p>
+          <p className="text-sm text-stone-500">Bílarnir eru vistaðir í þessum vafra. Leit eftir bílnúmeri kemur síðar.</p>
         </div>
       </BottomSheet>
     </>

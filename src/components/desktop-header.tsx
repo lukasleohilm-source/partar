@@ -3,7 +3,6 @@
 import { BellRing, Heart, MessageCircle, Plus, Search, User, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LangSwitch, useT } from "./lang-provider";
 import { Logo } from "./logo";
 import { useUnreadCounts, type UnreadCounts } from "./use-unread-counts";
 
@@ -21,7 +20,6 @@ const HIDDEN = [/^\/byrja/];
 export function DesktopHeader() {
   const pathname = usePathname();
   const unread = useUnreadCounts("efst");
-  const { t } = useT();
   if (HIDDEN.some((r) => r.test(pathname))) return null;
 
   const me = pathname.startsWith("/profill") || pathname.startsWith("/minar-auglysingar");
@@ -33,15 +31,15 @@ export function DesktopHeader() {
   return (
     <header className="sticky top-0 z-40 hidden border-b border-line bg-surface/85 backdrop-blur-xl md:block">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-6">
-        <Link href="/" aria-label={t("Partar forsíða")} className="mr-4 shrink-0">
+        <Link href="/" aria-label="Partar forsíða" className="mr-4 shrink-0">
           <Logo />
         </Link>
-        <nav aria-label={t("Aðalvalmynd")} className="flex items-center gap-1">
+        <nav aria-label="Aðalvalmynd" className="flex items-center gap-1">
           {items.map(({ href, label, icon: Icon, badge, match }) => {
             const count = badge ? unread[badge] : 0;
             return (
               <Link key={href} href={href} aria-current={match(pathname) ? "page" : undefined} className={link(match(pathname))}>
-                <Icon size={18} /> {t(label)}
+                <Icon size={18} /> {label}
                 {count > 0 && (
                   <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-600 px-1.5 text-[11px] font-bold text-white">
                     {count > 9 ? "9+" : count}
@@ -52,18 +50,17 @@ export function DesktopHeader() {
           })}
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <LangSwitch className="mr-1" />
-          <Link href="/uppahalds" aria-label={t("Uppáhalds")} className={`${link(pathname.startsWith("/uppahalds"))} px-2.5`}>
+          <Link href="/uppahalds" aria-label="Uppáhalds" className={`${link(pathname.startsWith("/uppahalds"))} px-2.5`}>
             <Heart size={19} />
           </Link>
           <Link href="/profill" aria-current={me ? "page" : undefined} className={link(me)}>
-            <User size={18} /> {t("Ég")}
+            <User size={18} /> Ég
           </Link>
           <Link
             href="/ny-auglysing"
             className="ml-2 flex items-center gap-1.5 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 px-4 py-2 text-[15px] font-bold text-white shadow-md shadow-orange-600/25 transition hover:brightness-105 active:scale-95"
           >
-            <Plus size={18} strokeWidth={2.6} /> {t("Selja")}
+            <Plus size={18} strokeWidth={2.6} /> Selja
           </Link>
         </div>
       </div>

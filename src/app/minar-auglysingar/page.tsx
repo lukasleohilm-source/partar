@@ -7,7 +7,6 @@ import { Thumb } from "@/components/listing/thumb";
 import { IMAGE_COLS, coverOf, timeAgo, type ImageRef } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteListingButton } from "./delete-button";
-import { getT } from "@/lib/lang-server";
 
 export const metadata = { title: "Mínar auglýsingar – Partar" };
 
@@ -29,7 +28,6 @@ const TABS = {
 type Tab = keyof typeof TABS;
 
 export default async function MyListingsPage({ searchParams }: { searchParams: Promise<{ flipi?: string }> }) {
-  const { t, lang } = await getT();
   const { flipi } = await searchParams;
   const tab: Tab = flipi === "seldar" ? "seldar" : "virkar";
 
@@ -56,31 +54,31 @@ export default async function MyListingsPage({ searchParams }: { searchParams: P
   return (
     <div className="mx-auto max-w-md md:max-w-2xl md:pt-10 px-4 pt-6">
       <header className="mb-4 flex items-center gap-2">
-        <Link href="/profill" aria-label={t("Til baka")} className="-ml-2 px-2 text-2xl text-stone-600">
+        <Link href="/profill" aria-label="Til baka" className="-ml-2 px-2 text-2xl text-stone-600">
           <ChevronLeft size={26} />
         </Link>
-        <h1 className="text-2xl font-bold">{t("Mínar auglýsingar")}</h1>
+        <h1 className="text-2xl font-bold">Mínar auglýsingar</h1>
       </header>
 
-      <nav aria-label={t("Staða")} className="mb-4 grid grid-cols-2 gap-1 rounded-xl bg-stone-200 p-1">
-        {(Object.keys(TABS) as Tab[]).map((k) => (
+      <nav aria-label="Staða" className="mb-4 grid grid-cols-2 gap-1 rounded-xl bg-stone-200 p-1">
+        {(Object.keys(TABS) as Tab[]).map((t) => (
           <Link
-            key={k}
-            href={k === "virkar" ? "/minar-auglysingar" : "/minar-auglysingar?flipi=seldar"}
-            aria-current={k === tab ? "page" : undefined}
-            className={`rounded-lg py-2 text-center text-sm font-medium ${k === tab ? "bg-surface shadow-sm" : "text-stone-600"}`}
+            key={t}
+            href={t === "virkar" ? "/minar-auglysingar" : "/minar-auglysingar?flipi=seldar"}
+            aria-current={t === tab ? "page" : undefined}
+            className={`rounded-lg py-2 text-center text-sm font-medium ${t === tab ? "bg-surface shadow-sm" : "text-stone-600"}`}
           >
-            {t(TABS[k].label)} ({counts[k]})
+            {TABS[t].label} ({counts[t]})
           </Link>
         ))}
       </nav>
 
       {rows.length === 0 ? (
         <div className="rounded-2xl bg-surface p-6 text-center">
-          <p className="font-medium">{tab === "virkar" ? t("Engar auglýsingar til sölu") : t("Ekkert selt enn")}</p>
+          <p className="font-medium">{tab === "virkar" ? "Engar auglýsingar til sölu" : "Ekkert selt enn"}</p>
           {tab === "virkar" && (
             <Link href="/ny-auglysing" className="mt-3 inline-block font-semibold text-orange-600">
-              {t("Setja inn auglýsingu →")}
+              Setja inn auglýsingu →
             </Link>
           )}
         </div>
@@ -97,25 +95,25 @@ export default async function MyListingsPage({ searchParams }: { searchParams: P
                   />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">{l.title}</p>
-                    <p className="font-bold text-orange-600">{formatPrice(l.price_isk, lang)}</p>
+                    <p className="font-bold text-orange-600">{formatPrice(l.price_isk)}</p>
                     <p className="text-xs text-stone-500">
                       {l.status === "draft" ? (
-                        <span className="font-medium text-stone-700">{t("Óbirt")}</span>
+                        <span className="font-medium text-stone-700">Óbirt</span>
                       ) : (
-                        `${t("Birt")} ${timeAgo(l.published_at ?? l.created_at, Date.now(), lang)}`
+                        `Birt ${timeAgo(l.published_at ?? l.created_at)}`
                       )}
-                      {chats > 0 && ` · ${chats} ${t(chats === 1 ? "samtal" : "samtöl")}`}
+                      {chats > 0 && ` · ${chats} ${chats === 1 ? "samtal" : "samtöl"}`}
                     </p>
                   </div>
                 </Link>
                 <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-stone-100 pt-2 text-sm font-medium">
                   <Link href={`/auglysing/${l.id}/breyta`} className="text-orange-700">
-                    {t("Breyta")}
+                    Breyta
                   </Link>
                   {l.status !== "draft" && (
                     <form action={setListingStatus.bind(null, l.id, l.status === "sold" ? "active" : "sold")}>
                       <button type="submit" className="text-stone-700">
-                        {l.status === "sold" ? t("Setja aftur í sölu") : t("Merkja selt")}
+                        {l.status === "sold" ? "Setja aftur í sölu" : "Merkja selt"}
                       </button>
                     </form>
                   )}
