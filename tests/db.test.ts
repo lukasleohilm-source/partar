@@ -256,6 +256,26 @@ describe("spjall og aðgangsreglur", () => {
     await expect(t.q(`insert into favorites (user_id, listing_id) values ($1, $2)`, [buyer, l.id])).rejects.toThrow();
   });
 
+  it("tölfræði: skoðanir annarra teljast, seljandinn sér bara sínar tölur", async () => {
+    // Afturljós Yaris: seljandi á hana og kaupandi hefur samtal um hana
+    const [l] = await t.q<{ id: string }>(`select id from listings where title = 'Afturljós Yaris'`);
+    await t.as(buyer);
+    await t.q(`select record_view($1)`, [l.id]);
+    await t.as(null);
+    await t.q(`select record_view($1)`, [l.id]);
+    await t.as(seller);
+    await t.q(`select record_view($1)`, [l.id]); // seljandinn sjálfur telst ekki
+    const stats = await t.q<{ listing_id: string; views: number; favorites: number; chats: number }>(`select * from my_listing_stats()`);
+    const s = stats.find((x) => x.listing_id === l.id)!;
+    expect(s.views).toBe(2);
+    expect(s.chats).toBe(1);
+    // Kaupandinn sér enga tölfræði fyrir auglýsingar annarra, og nafnlaus má ekki kalla á fallið
+    await t.as(buyer);
+    expect((await t.q(`select * from my_listing_stats()`)).find((x: { listing_id?: string }) => x.listing_id === l.id)).toBeUndefined();
+    await t.as(null);
+    await expect(t.q(`select * from my_listing_stats()`)).rejects.toThrow();
+  });
+
   it("ýta upp: aðeins seljandi, einu sinni á 7 dögum", async () => {
     const [l] = await t.q<{ id: string }>(`select id from listings where title = 'Ljós tilboð'`);
     await t.as(buyer);

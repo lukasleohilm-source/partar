@@ -3,9 +3,12 @@ import {
   BadgeCheck,
   CarFront,
   CheckCircle2,
+  ChevronRight,
   Clock,
+  Eye,
   Gauge,
   Hash,
+  Heart,
   LayoutGrid,
   MapPin,
   MessageCircle,
@@ -21,6 +24,8 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { Avatar } from "@/components/avatar";
 import { ImageGallery } from "@/components/listing/image-gallery";
+import { RelatedListings } from "@/components/listing/related-listings";
+import { ViewTracker } from "@/components/listing/view-tracker";
 import { BackButton, BumpButton, FavoriteButton, ShareButton } from "@/components/listing/listing-actions";
 import { SellerRating } from "@/components/stars";
 import { primaryButton, secondaryButton } from "@/components/ui/styles";
@@ -47,6 +52,8 @@ type ListingDetail = {
   license_plate: string | null;
   mileage_km: number | null;
   universal_fit: boolean;
+  category_id: number | null;
+  view_count: number;
   published_at: string | null;
   bumped_at: string | null;
   created_at: string;
@@ -74,7 +81,7 @@ const getListing = cache(async (id: string) => {
     .from("listings")
     .select(
       `id, seller_id, kind, status, title, description, price_isk, condition, region, postal_code,
-       part_number, license_plate, mileage_km, universal_fit, published_at, bumped_at, created_at,
+       part_number, license_plate, mileage_km, universal_fit, category_id, view_count, published_at, bumped_at, created_at,
        categories(name),
        listing_images(${IMAGE_COLS}),
        listing_fitments(make_id, model_id, year_from, year_to, makes(name), models(name)),
@@ -126,6 +133,13 @@ export default async function ListingPage({
       : Promise.resolve({ data: null }),
   ]);
   const isFavorite = Boolean(fav);
+  // Seljandinn sér hve margir hafa skoðað, sett í uppáhald og haft samband
+  const stats =
+    user?.id === listing.seller_id
+      ? ((await supabase.rpc("my_listing_stats")).data as { listing_id: string; views: number; favorites: number; chats: number }[] | null)?.find(
+          (s) => s.listing_id === listing.id,
+        )
+      : undefined;
 
   // Vörugögn fyrir Google (schema.org/Product)
   const cover = coverOf(listing.listing_images);
@@ -255,14 +269,37 @@ export default async function ListingPage({
           </section>
         )}
 
+        {stats && (
+          <section aria-label="Tölfræði" className="grid grid-cols-3 divide-x divide-line rounded-2xl bg-orange-500/10 py-3 text-center">
+            {[
+              [Eye, stats.views, stats.views === 1 ? "skoðun" : "skoðanir"],
+              [Heart, stats.favorites, "í uppáhaldi"],
+              [MessageCircle, stats.chats, stats.chats === 1 ? "samtal" : "samtöl"],
+            ].map(([Icon, n, label]) => {
+              const I = Icon as LucideIcon;
+              return (
+                <div key={label as string}>
+                  <p className="flex items-center justify-center gap-1.5 text-lg font-bold tabular-nums text-orange-700">
+                    <I size={17} /> {formatNumber(n as number)}
+                  </p>
+                  <p className="text-xs text-stone-600">{label as string}</p>
+                </div>
+              );
+            })}
+          </section>
+        )}
+
         <section className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-black/5">
-          <div className="flex items-center gap-3">
+          <Link href={`/seljandi/${listing.seller_id}`} className="-m-1 flex items-center gap-3 rounded-xl p-1 active:bg-stone-100">
             <Avatar name={listing.profiles.display_name} />
             <div className="min-w-0 flex-1">
               <p className="truncate font-bold">{listing.profiles.display_name}</p>
               <p className="text-sm text-stone-500">Á Pörtum síðan {formatDate(new Date(listing.profiles.created_at), { day: false, year: true })}</p>
             </div>
-          </div>
+            <span className="flex shrink-0 items-center text-sm font-semibold text-orange-600">
+              Allar auglýsingar <ChevronRight size={16} />
+            </span>
+          </Link>
           <SellerRating sellerId={listing.seller_id} />
         </section>
 
@@ -310,6 +347,15 @@ export default async function ListingPage({
           )}
         </div>
       </div>
+      <RelatedListings
+        listingId={listing.id}
+        sellerId={listing.seller_id}
+        sellerName={listing.profiles.display_name}
+        kind={listing.kind}
+        categoryId={listing.category_id}
+        makeId={listing.universal_fit ? null : (listing.listing_fitments[0]?.make_id ?? null)}
+      />
+      <ViewTracker listingId={listing.id} isOwner={isOwner} />
     </article>
   );
 }

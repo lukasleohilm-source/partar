@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { LegalLinks } from "@/components/legal-links";
 import { ListingCard } from "@/components/listing/listing-card";
+import { RecentlyViewed } from "@/components/listing/recently-viewed";
 import { FavoriteButton } from "@/components/listing/listing-actions";
 import { Logo } from "@/components/logo";
 import { MyCarPicker } from "@/components/search/my-car-picker";
@@ -137,6 +138,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
             })}
         </ul>
       </section>
+
+      <RecentlyViewed />
 
       <section className="mt-7 px-4">
         <div className="mb-3 flex items-baseline justify-between">

@@ -1,4 +1,4 @@
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Eye, Heart, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { setListingStatus } from "@/app/auglysing/[id]/actions";
@@ -37,14 +37,18 @@ export default async function MyListingsPage({ searchParams }: { searchParams: P
   } = await supabase.auth.getUser();
   if (!user) redirect("/?villa=tenging");
 
-  const { data } = await supabase
+  const [{ data }, { data: statRows }] = await Promise.all([
+    supabase
     .from("listings")
     .select(`id, title, status, price_isk, published_at, created_at, listing_images(${IMAGE_COLS}), conversations(count)`)
     .eq("seller_id", user.id)
     .neq("status", "removed")
     .order("created_at", { ascending: false })
-    .returns<Row[]>();
+    .returns<Row[]>(),
+    supabase.rpc("my_listing_stats"),
+  ]);
   const all = data ?? [];
+  const stats = new Map(((statRows ?? []) as { listing_id: string; views: number; favorites: number; chats: number }[]).map((s) => [s.listing_id, s]));
   const counts = {
     virkar: all.filter((l) => l.status !== "sold").length,
     seldar: all.filter((l) => l.status === "sold").length,
@@ -85,7 +89,8 @@ export default async function MyListingsPage({ searchParams }: { searchParams: P
       ) : (
         <ul className="space-y-2">
           {rows.map((l) => {
-            const chats = l.conversations[0]?.count ?? 0;
+            const s = stats.get(l.id);
+            const chats = s?.chats ?? l.conversations[0]?.count ?? 0;
             return (
               <li key={l.id} className="rounded-2xl bg-surface p-3">
                 <Link href={`/auglysing/${l.id}`} className="flex gap-3">
@@ -102,7 +107,18 @@ export default async function MyListingsPage({ searchParams }: { searchParams: P
                       ) : (
                         `Birt ${timeAgo(l.published_at ?? l.created_at)}`
                       )}
-                      {chats > 0 && ` · ${chats} ${chats === 1 ? "samtal" : "samtöl"}`}
+                    </p>
+                    {/* Tölfræði: skoðanir, uppáhald og samtöl */}
+                    <p className="mt-1 flex items-center gap-3 text-xs font-medium text-stone-600">
+                      <span className="flex items-center gap-1" title="Skoðanir">
+                        <Eye size={13} /> {s?.views ?? 0}
+                      </span>
+                      <span className="flex items-center gap-1" title="Í uppáhaldi">
+                        <Heart size={13} /> {s?.favorites ?? 0}
+                      </span>
+                      <span className="flex items-center gap-1" title="Samtöl">
+                        <MessageCircle size={13} /> {chats}
+                      </span>
                     </p>
                   </div>
                 </Link>
