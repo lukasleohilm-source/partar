@@ -3,6 +3,7 @@
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useT } from "@/components/lang-provider";
 
 // Opinbert Google „G“-merki (litir samkvæmt leiðbeiningum Google)
 function GoogleLogo() {
@@ -53,6 +54,7 @@ type ButtonProps = { next?: string; mode?: Mode; label?: string };
 // „Halda áfram með Google/Facebook“. Gestur tengir aðganginn við núverandi aðgang (gögn haldast);
 // annars er skráð inn. `mode="signin"` skráir alltaf inn (t.d. ef aðgangurinn er þegar til).
 function OAuthButton({ provider, next = "/", mode = "auto", label }: ButtonProps & { provider: Provider }) {
+  const { t } = useT();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { name, logo: Logo, className } = PROVIDERS[provider];
@@ -71,7 +73,7 @@ function OAuthButton({ provider, next = "/", mode = "auto", label }: ButtonProps
       const { data: token, error: tokenError } = await supabase.rpc("create_merge_token");
       if (tokenError || !token) {
         setPending(false);
-        return setError("Ekki tókst að undirbúa flutning gagna. Reyndu aftur.");
+        return setError(t("Ekki tókst að undirbúa flutning gagna. Reyndu aftur."));
       }
       localStorage.setItem(MERGE_TOKEN_KEY, token as string);
       target = `/sameina?next=${encodeURIComponent(next)}`;
@@ -90,8 +92,8 @@ function OAuthButton({ provider, next = "/", mode = "auto", label }: ButtonProps
       setPending(false);
       setError(
         /provider is not enabled|Unsupported provider/i.test(error.message)
-          ? `${name}-innskráning er ekki komin í gagnið enn.`
-          : `Ekki tókst að tengjast ${name}. Reyndu aftur.`,
+          ? t("{nafn}-innskráning er ekki komin í gagnið enn.", { nafn: name })
+          : t("Ekki tókst að tengjast {nafn}. Reyndu aftur.", { nafn: name }),
       );
     }
   }
@@ -105,7 +107,7 @@ function OAuthButton({ provider, next = "/", mode = "auto", label }: ButtonProps
         className={`flex w-full items-center justify-center gap-3 rounded-xl py-3 text-base font-semibold shadow-sm transition active:scale-[0.98] disabled:opacity-60 ${className}`}
       >
         {pending ? <Loader2 size={20} className="animate-spin" /> : <Logo />}
-        {label ?? `Halda áfram með ${name}`}
+        {label ?? t("Halda áfram með {nafn}", { nafn: name })}
       </button>
       {error && (
         <p role="alert" className="mt-2 text-center text-sm text-red-600">
@@ -125,10 +127,11 @@ export function FacebookButton(props: ButtonProps) {
 }
 
 export function OrDivider() {
+  const { t } = useT();
   return (
     <div className="my-4 flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-stone-400">
       <span className="h-px flex-1 bg-stone-200" />
-      eða
+      {t("eða")}
       <span className="h-px flex-1 bg-stone-200" />
     </div>
   );

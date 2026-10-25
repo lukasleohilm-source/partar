@@ -2,10 +2,12 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "../profile-form";
 import { SubpageHeader } from "../ui";
+import { getT } from "@/lib/lang-server";
 
 export const metadata = { title: "Prófíll og sími – Partar" };
 
 export default async function EditProfilePage() {
+  const { t } = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -19,7 +21,7 @@ export default async function EditProfilePage() {
 
   return (
     <div className="mx-auto max-w-md md:max-w-xl md:pt-10 px-4 pt-6">
-      <SubpageHeader title="Prófíll og sími" />
+      <SubpageHeader title={t("Prófíll og sími")} />
       <div className="rounded-2xl bg-surface p-4">
         <ProfileForm
           displayName={profile?.display_name ?? ""}
@@ -28,7 +30,7 @@ export default async function EditProfilePage() {
           showPhone={contact?.show_phone ?? false}
         />
       </div>
-      <p className="mt-3 px-1 text-sm text-stone-500">Nafnið og landshlutinn sjást á auglýsingum þínum og í skilaboðum.</p>
+      <p className="mt-3 px-1 text-sm text-stone-500">{t("Nafnið og landshlutinn sjást á auglýsingum þínum og í skilaboðum.")}</p>
     </div>
   );
 }

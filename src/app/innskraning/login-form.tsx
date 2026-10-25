@@ -2,18 +2,19 @@
 
 import { EmailForm } from "@/components/email-form";
 import { sendMagicLink } from "./actions";
+import { useT } from "@/components/lang-provider";
 
 export function LoginForm({ next }: { next: string }) {
+  const { t } = useT();
   return (
     <EmailForm
       action={sendMagicLink}
       captcha
       hidden={{ next }}
-      submitLabel="Senda innskráningarhlekk"
+      submitLabel={t("Senda innskráningarhlekk")}
       sentText={(email) => (
         <>
-          Við sendum innskráningarhlekk á <strong className="break-all">{email}</strong>. Opnaðu hann í þessu tæki til að
-          halda áfram.
+          {t("Við sendum innskráningarhlekk á")}{" "}<strong className="break-all">{email}</strong>{t(". Opnaðu hann í þessu tæki til að halda áfram.")}
         </>
       )}
     />

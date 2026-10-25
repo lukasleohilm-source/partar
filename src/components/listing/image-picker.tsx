@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight, ImagePlus, Loader2, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { processImage, type PickedImage } from "@/lib/images";
+import { useT } from "@/components/lang-provider";
 
 export const MAX_IMAGES = 10;
 
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export function ImagePicker({ images, onChange }: Props) {
+  const { t } = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,10 +29,10 @@ export function ImagePicker({ images, onChange }: Props) {
       try {
         added.push(await processImage(file));
       } catch {
-        setError(`Ekki tókst að lesa ${file.name}. Prófaðu aðra mynd.`);
+        setError(t("Ekki tókst að lesa {skra}. Prófaðu aðra mynd.", { skra: file.name }));
       }
     }
-    if (files.length > room) setError(`Hámark ${MAX_IMAGES} myndir.`);
+    if (files.length > room) setError(t("Hámark {n} myndir.", { n: MAX_IMAGES }));
     onChange([...images, ...added]);
     setBusy(false);
     if (inputRef.current) inputRef.current.value = "";
@@ -58,13 +60,13 @@ export function ImagePicker({ images, onChange }: Props) {
             <img src={img.url} alt={`Mynd ${i + 1}`} className="size-full object-cover" />
             {i === 0 && (
               <span className="absolute left-1 top-1 rounded-full bg-orange-600 px-2 py-0.5 text-[10px] font-semibold text-white">
-                Forsíðumynd
+                {t("Forsíðumynd")}
               </span>
             )}
             <button
               type="button"
               onClick={() => remove(img.id)}
-              aria-label={`Eyða mynd ${i + 1}`}
+              aria-label={t("Eyða mynd {n}", { n: i + 1 })}
               className="absolute right-1 top-1 flex size-7 items-center justify-center rounded-full bg-black/60 text-white"
             >
               <X size={16} />
@@ -74,7 +76,7 @@ export function ImagePicker({ images, onChange }: Props) {
                 type="button"
                 onClick={() => move(i, -1)}
                 disabled={i === 0}
-                aria-label="Færa framar"
+                aria-label={t("Færa framar")}
                 className="flex size-7 items-center justify-center rounded-full bg-black/60 text-white disabled:invisible"
               >
                 <ChevronLeft size={18} />
@@ -83,7 +85,7 @@ export function ImagePicker({ images, onChange }: Props) {
                 type="button"
                 onClick={() => move(i, 1)}
                 disabled={i === images.length - 1}
-                aria-label="Færa aftar"
+                aria-label={t("Færa aftar")}
                 className="flex size-7 items-center justify-center rounded-full bg-black/60 text-white disabled:invisible"
               >
                 <ChevronRight size={18} />
@@ -101,7 +103,7 @@ export function ImagePicker({ images, onChange }: Props) {
               className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-stone-300 bg-surface text-stone-500 active:bg-stone-100"
             >
               {busy ? <Loader2 size={28} className="animate-spin" /> : <ImagePlus size={30} strokeWidth={1.8} />}
-              <span className="text-xs">{busy ? "Vinn myndir" : "Bæta við"}</span>
+              <span className="text-xs">{busy ? t("Vinn myndir") : t("Bæta við")}</span>
             </button>
           </li>
         )}
@@ -117,7 +119,7 @@ export function ImagePicker({ images, onChange }: Props) {
       />
 
       <p className="mt-2 text-sm text-stone-500">
-        {images.length}/{MAX_IMAGES} myndir. Fyrsta myndin birtist í leitarniðurstöðum.
+        {images.length}/{MAX_IMAGES}{" "}{t("myndir. Fyrsta myndin birtist í leitarniðurstöðum.")}
       </p>
       {error && (
         <p role="alert" className="mt-1 text-sm text-red-600">

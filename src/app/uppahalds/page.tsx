@@ -6,10 +6,12 @@ import { FavoriteButton } from "@/components/listing/listing-actions";
 import { PushPrompt } from "@/components/push-prompt";
 import { LISTING_SUMMARY_SELECT, type ListingSummary } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/server";
+import { getT } from "@/lib/lang-server";
 
 export const metadata = { title: "Uppáhalds – Partar" };
 
 export default async function FavoritesPage() {
+  const { t } = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -28,13 +30,13 @@ export default async function FavoritesPage() {
   return (
     <div className="mx-auto max-w-md md:max-w-6xl md:px-6 md:pt-8 px-4 pt-6">
       <header className="mb-4 flex items-center gap-2">
-        <Link href="/profill" aria-label="Til baka" className="-ml-2 px-2 text-stone-600">
+        <Link href="/profill" aria-label={t("Til baka")} className="-ml-2 px-2 text-stone-600">
           <ChevronLeft size={26} />
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight">Uppáhalds</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("Uppáhalds")}</h1>
       </header>
 
-      {listings.length > 0 && <PushPrompt reason="Viltu vita þegar verðið lækkar á uppáhaldi?" />}
+      {listings.length > 0 && <PushPrompt reason={t("Viltu vita þegar verðið lækkar á uppáhaldi?")} />}
       {listings.length ? (
         <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4">
           {listings.map((l, i) => (
@@ -48,10 +50,10 @@ export default async function FavoritesPage() {
           <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-red-50 text-red-500">
             <Heart size={28} />
           </div>
-          <p className="font-semibold">Ekkert í uppáhalds enn</p>
-          <p className="mt-1 text-sm text-stone-500">Ýttu á hjartað á auglýsingu til að vista hana hér.</p>
+          <p className="font-semibold">{t("Ekkert í uppáhalds enn")}</p>
+          <p className="mt-1 text-sm text-stone-500">{t("Ýttu á hjartað á auglýsingu til að vista hana hér.")}</p>
           <Link href="/leit" className="mt-4 inline-block font-semibold text-orange-600">
-            Skoða auglýsingar →
+            {t("Skoða auglýsingar →")}
           </Link>
         </div>
       )}

@@ -14,6 +14,7 @@ import { processImage } from "@/lib/images";
 import type { ImageRef } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/client";
 import { setBlocked } from "./actions";
+import { useT } from "@/components/lang-provider";
 
 type Props = {
   conversationId: string;
@@ -31,6 +32,7 @@ type Props = {
 type ChatMessage = Message & { state?: "sending" | "failed"; localUrl?: string };
 
 export function ChatThread(props: Props) {
+  const { t, lang } = useT();
   const { conversationId, userId, otherId, iBlocked, otherName, role, listing, initialMessages } = props;
   const [blockPending, startBlock] = useTransition();
   const [supabase] = useState(createClient);
@@ -204,7 +206,7 @@ export function ChatThread(props: Props) {
   return (
     <div className="fixed inset-0 z-50 mx-auto flex max-w-md flex-col bg-canvas md:top-16 md:max-w-3xl md:border-x md:border-line">
       <header className="flex items-center gap-2 border-b border-line bg-surface/95 px-2 py-2 backdrop-blur">
-        <Link href="/skilabod" aria-label="Til baka" className="flex size-10 items-center justify-center text-stone-600">
+        <Link href="/skilabod" aria-label={t("Til baka")} className="flex size-10 items-center justify-center text-stone-600">
           <ChevronLeft size={26} />
         </Link>
         <Avatar name={otherName} size={38} />
@@ -212,8 +214,8 @@ export function ChatThread(props: Props) {
           <p className="truncate font-bold">{otherName}</p>
           <p className="flex items-center gap-1.5 text-xs text-stone-500">
             <span className={`size-1.5 rounded-full ${live ? "bg-green-500" : "bg-stone-400"}`} />
-            {role === "buyer" ? "Seljandi" : "Kaupandi"}
-            {!live && " · tengist…"}
+            {role === "buyer" ? t("Seljandi") : t("Kaupandi")}
+            {!live && t(" · tengist…")}
           </p>
         </div>
         <button
@@ -221,19 +223,19 @@ export function ChatThread(props: Props) {
           disabled={blockPending}
           onClick={() => {
             const msg = iBlocked
-              ? `Opna aftur fyrir ${otherName}?`
-              : `Loka á ${otherName}? Viðkomandi getur ekki sent þér skilaboð og þú sérð ekki auglýsingar viðkomandi í leit.`;
+              ? t("Opna aftur fyrir {nafn}?", { nafn: otherName })
+              : t("Loka á {nafn}? Viðkomandi getur ekki sent þér skilaboð og þú sérð ekki auglýsingar viðkomandi í leit.", { nafn: otherName });
             if (window.confirm(msg)) startBlock(() => setBlocked(conversationId, otherId, !iBlocked));
           }}
-          aria-label={iBlocked ? "Opna fyrir notanda" : "Loka á notanda"}
+          aria-label={iBlocked ? t("Opna fyrir notanda") : t("Loka á notanda")}
           className="flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium text-stone-600 active:bg-stone-100 disabled:opacity-50"
         >
-          <Ban size={16} /> {iBlocked ? "Opna" : "Loka á"}
+          <Ban size={16} /> {iBlocked ? t("Opna") : t("Loka á")}
         </button>
       </header>
 
       {iBlocked && (
-        <p className="bg-stone-800 px-4 py-2 text-center text-sm text-white">Þú hefur lokað á {otherName}. Hvorugt ykkar getur sent skilaboð.</p>
+        <p className="bg-stone-800 px-4 py-2 text-center text-sm text-white">{t("Þú hefur lokað á")}{" "}{otherName}{t(". Hvorugt ykkar getur sent skilaboð.")}</p>
       )}
 
       {listing && (
@@ -242,7 +244,7 @@ export function ChatThread(props: Props) {
             <Thumb image={listing.cover} className="size-11 shrink-0 rounded-xl" />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold">{listing.title}</p>
-              <p className="text-sm font-extrabold text-orange-600">{listing.sold ? "SELT" : formatPrice(listing.price)}</p>
+              <p className="text-sm font-extrabold text-orange-600">{listing.sold ? t("SELT") : formatPrice(listing.price, lang)}</p>
             </div>
           </Link>
           {canReview && (
@@ -252,7 +254,7 @@ export function ChatThread(props: Props) {
               className="flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-900"
             >
               <Star size={15} className={myReview ? "fill-amber-400 text-amber-400" : "text-amber-500"} />
-              {myReview ? `${myReview}/5` : "Gefa einkunn"}
+              {myReview ? `${myReview}/5` : t("Gefa einkunn")}
             </button>
           )}
         </div>
@@ -263,7 +265,7 @@ export function ChatThread(props: Props) {
           <div className="mt-10 text-center">
             <Avatar name={otherName} size={56} />
             <p className="mt-3 font-semibold">{otherName}</p>
-            <p className="mt-1 text-sm text-stone-500">{role === "buyer" ? "Spurðu seljandann um hlutinn." : "Engin skilaboð enn."}</p>
+            <p className="mt-1 text-sm text-stone-500">{role === "buyer" ? t("Spurðu seljandann um hlutinn.") : t("Engin skilaboð enn.")}</p>
           </div>
         )}
         {messages.map((m, i) => {
@@ -272,7 +274,7 @@ export function ChatThread(props: Props) {
           const src = m.localUrl ?? (m.image_path ? urls[m.image_path] : undefined);
           return (
             <div key={m.id}>
-              {newDay && <p className="my-3 text-center text-xs font-semibold text-stone-500">{dayLabel(m.created_at)}</p>}
+              {newDay && <p className="my-3 text-center text-xs font-semibold text-stone-500">{dayLabel(m.created_at, new Date(), lang)}</p>}
               <div className={`mb-1.5 flex ${mine ? "justify-end" : "justify-start"}`}>
                 <div
                   className={`max-w-[80%] overflow-hidden rounded-[20px] ${
@@ -283,7 +285,7 @@ export function ChatThread(props: Props) {
                     <a href={src} target="_blank" rel="noreferrer" className="block" style={{ backgroundColor: m.image_color ?? "#78716c" }}>
                       {src ? (
                         // eslint-disable-next-line @next/next/no-img-element -- undirrituð slóð úr lokaðri geymslu
-                        <img src={src} alt="Mynd í spjalli" className="max-h-72 w-full min-w-48 object-cover" />
+                        <img src={src} alt={t("Mynd í spjalli")} className="max-h-72 w-full min-w-48 object-cover" />
                       ) : (
                         <div className="flex h-48 w-56 items-center justify-center">
                           <Loader2 className="animate-spin text-white/80" />
@@ -293,7 +295,7 @@ export function ChatThread(props: Props) {
                   )}
                   {(m.body || !m.image_path) && <p className="whitespace-pre-wrap break-words px-3.5 pt-2">{m.body}</p>}
                   <p className={`px-3.5 pb-1.5 pt-0.5 text-right text-[10px] ${mine ? "text-orange-100" : "text-stone-400"}`}>
-                    {m.state === "sending" ? "Sendi…" : messageTime(m.created_at)}
+                    {m.state === "sending" ? t("Sendi…") : messageTime(m.created_at)}
                   </p>
                 </div>
               </div>
@@ -303,13 +305,13 @@ export function ChatThread(props: Props) {
                   onClick={() => void insert({ ...m, state: "sending" }, true)}
                   className="mb-2 ml-auto block text-xs font-medium text-red-600"
                 >
-                  Ekki sent – ýttu til að reyna aftur. Ef það gengur ekki hefur viðtakandinn lokað á skilaboð.
+                  {t("Ekki sent – ýttu til að reyna aftur. Ef það gengur ekki hefur viðtakandinn lokað á skilaboð.")}
                 </button>
               )}
             </div>
           );
         })}
-        {messages.some((m) => m.sender_id === userId) && <PushPrompt reason={`Viltu vita þegar ${otherName} svarar?`} />}
+        {messages.some((m) => m.sender_id === userId) && <PushPrompt reason={t("Viltu vita þegar {nafn} svarar?", { nafn: otherName })} />}
         <div ref={endRef} />
       </div>
 
@@ -317,7 +319,7 @@ export function ChatThread(props: Props) {
         <div className="border-t border-line bg-surface pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
           {!draft && (
             <div className="flex gap-2 overflow-x-auto px-3 pt-2 [scrollbar-width:none]">
-              {QUICK_REPLIES[role].map((r) => (
+              {QUICK_REPLIES[role].map((r) => t(r)).map((r) => (
                 <button
                   key={r}
                   type="button"
@@ -340,7 +342,7 @@ export function ChatThread(props: Props) {
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              aria-label="Senda mynd"
+              aria-label={t("Senda mynd")}
               className="flex size-11 shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-600 active:bg-stone-200 disabled:opacity-60"
             >
               {uploading ? <Loader2 size={20} className="animate-spin" /> : <Camera size={21} />}
@@ -363,14 +365,14 @@ export function ChatThread(props: Props) {
                 }
               }}
               rows={1}
-              placeholder="Skrifaðu skilaboð…"
-              aria-label="Skilaboð"
+              placeholder={t("Skrifaðu skilaboð…")}
+              aria-label={t("Skilaboð")}
               className="max-h-32 min-h-11 flex-1 resize-none rounded-[22px] border border-stone-300 bg-canvas px-4 py-2.5 text-base outline-none [field-sizing:content] focus:border-orange-500"
             />
             <button
               type="submit"
               disabled={!draft.trim()}
-              aria-label="Senda"
+              aria-label={t("Senda")}
               className="flex size-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white transition active:scale-90 disabled:from-stone-300 disabled:to-stone-300"
             >
               <SendHorizontal size={20} />
@@ -405,6 +407,7 @@ function ReviewSheet(props: {
   initial: number | null;
   onSaved: (stars: number) => void;
 }) {
+  const { t } = useT();
   const [stars, setStars] = useState(props.initial ?? 0);
   const [comment, setComment] = useState("");
   const [saving, setSaving] = useState(false);
@@ -438,14 +441,14 @@ function ReviewSheet(props: {
       title={`Einkunn fyrir ${props.sellerName}`}
       footer={
         <button type="button" disabled={!stars || saving} onClick={save} className={primaryButton}>
-          {saving ? "Vista…" : "Vista einkunn"}
+          {saving ? t("Vista…") : t("Vista einkunn")}
         </button>
       }
     >
       <div className="space-y-4">
-        <div className="flex justify-center gap-2" role="radiogroup" aria-label="Stjörnur">
+        <div className="flex justify-center gap-2" role="radiogroup" aria-label={t("Stjörnur")}>
           {[1, 2, 3, 4, 5].map((n) => (
-            <button key={n} type="button" role="radio" aria-checked={stars === n} aria-label={`${n} stjörnur`} onClick={() => setStars(n)}>
+            <button key={n} type="button" role="radio" aria-checked={stars === n} aria-label={t("{n} stjörnur", { n })} onClick={() => setStars(n)}>
               <Star size={40} className={n <= stars ? "fill-amber-400 text-amber-400" : "text-stone-300"} />
             </button>
           ))}
@@ -454,11 +457,11 @@ function ReviewSheet(props: {
           value={comment}
           onChange={(e) => setComment(e.target.value.slice(0, 500))}
           rows={3}
-          placeholder="Hvernig gengu viðskiptin? (valfrjálst)"
+          placeholder={t("Hvernig gengu viðskiptin? (valfrjálst)")}
           className={inputClass}
         />
-        {error && <p className="text-sm text-red-600">Ekki tókst að vista einkunnina.</p>}
-        <p className="text-xs text-stone-500">Einkunnin birtist á auglýsingum seljandans.</p>
+        {error && <p className="text-sm text-red-600">{t("Ekki tókst að vista einkunnina.")}</p>}
+        <p className="text-xs text-stone-500">{t("Einkunnin birtist á auglýsingum seljandans.")}</p>
       </div>
     </BottomSheet>
   );

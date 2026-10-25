@@ -31,6 +31,7 @@ import { createClient } from "@/lib/supabase/server";
 import { yearRange } from "@/lib/vehicles";
 import { contactSeller, setListingStatus } from "./actions";
 import { ReportListing } from "./report-listing";
+import { getT } from "@/lib/lang-server";
 
 type ListingDetail = {
   id: string;
@@ -109,6 +110,7 @@ export default async function ListingPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ villa?: string }>;
 }) {
+  const { t, lang } = await getT();
   const { id } = await params;
   const { villa } = await searchParams;
   const listing = await getListing(id);
@@ -154,17 +156,17 @@ export default async function ListingPage({
   const phone = contact?.phone ?? null;
 
   const facts: { icon: LucideIcon; label: string; value: string }[] = [
-    { icon: Tag, label: "Tegund", value: KINDS[listing.kind] },
-    { icon: Sparkles, label: "Ástand", value: CONDITIONS[listing.condition] },
-    ...(listing.categories ? [{ icon: LayoutGrid, label: "Flokkur", value: listing.categories.name }] : []),
+    { icon: Tag, label: t("Tegund"), value: t(KINDS[listing.kind]) },
+    { icon: Sparkles, label: t("Ástand"), value: t(CONDITIONS[listing.condition]) },
+    ...(listing.categories ? [{ icon: LayoutGrid, label: t("Flokkur"), value: t(listing.categories.name) }] : []),
     {
       icon: MapPin,
-      label: "Staðsetning",
-      value: listing.postal_code ? `${listing.postal_code} ${placeLabel(listing.postal_code, listing.region)}` : REGIONS[listing.region],
+      label: t("Staðsetning"),
+      value: listing.postal_code ? `${listing.postal_code} ${t(placeLabel(listing.postal_code, listing.region))}` : t(REGIONS[listing.region]),
     },
-    ...(listing.mileage_km != null ? [{ icon: Gauge, label: "Akstur", value: `${formatNumber(listing.mileage_km)} km` }] : []),
-    ...(listing.license_plate ? [{ icon: Hash, label: "Bílnúmer", value: listing.license_plate }] : []),
-    ...(listing.part_number ? [{ icon: Hash, label: "Vörunúmer", value: listing.part_number }] : []),
+    ...(listing.mileage_km != null ? [{ icon: Gauge, label: t("Akstur"), value: `${formatNumber(listing.mileage_km, lang)} km` }] : []),
+    ...(listing.license_plate ? [{ icon: Hash, label: t("Bílnúmer"), value: listing.license_plate }] : []),
+    ...(listing.part_number ? [{ icon: Hash, label: t("Vörunúmer"), value: listing.part_number }] : []),
   ];
 
   return (
@@ -175,7 +177,7 @@ export default async function ListingPage({
         <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-between p-3">
           <BackButton />
           <div className="pointer-events-auto flex gap-2">
-            <ShareButton title={listing.title} text={`${listing.title} – ${formatPrice(listing.price_isk)}`} />
+            <ShareButton title={listing.title} text={`${listing.title} – ${formatPrice(listing.price_isk, lang)}`} />
             {!isOwner && <FavoriteButton listingId={listing.id} initial={isFavorite} variant="overlay" />}
           </div>
         </div>
@@ -184,27 +186,27 @@ export default async function ListingPage({
       <div className="-mt-4 space-y-5 rounded-t-3xl bg-canvas px-4 pt-5 [position:relative] md:mt-0 md:rounded-none md:bg-transparent md:px-0 md:pt-0">
         {villa && (
           <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
-            {villa === "lokad" ? "Seljandinn tekur ekki við skilaboðum frá þér." : "Ekki tókst að hefja spjall. Reyndu aftur."}
+            {villa === "lokad" ? t("Seljandinn tekur ekki við skilaboðum frá þér.") : t("Ekki tókst að hefja spjall. Reyndu aftur.")}
           </p>
         )}
         <header>
           <div className="mb-2 flex flex-wrap gap-1.5">
             {listing.status === "sold" && (
-              <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold text-white">SELT</span>
+              <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold text-white">{t("SELT")}</span>
             )}
             {listing.status === "draft" && (
-              <span className="rounded-full bg-stone-300 px-2.5 py-0.5 text-xs font-bold">Óbirt</span>
+              <span className="rounded-full bg-stone-300 px-2.5 py-0.5 text-xs font-bold">{t("Óbirt")}</span>
             )}
             {listing.bumped_at && listing.published_at && listing.bumped_at > listing.published_at && (
               <span className="flex items-center gap-1 rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-semibold text-orange-700">
-                <ArrowUp size={12} /> Ýtt upp
+                <ArrowUp size={12} />{" "}{t("Ýtt upp")}
               </span>
             )}
           </div>
           <h1 className="text-[22px] font-extrabold leading-tight tracking-tight md:text-3xl">{listing.title}</h1>
-          <p className="mt-1 text-[28px] font-black tracking-tight text-orange-600">{formatPrice(listing.price_isk)}</p>
+          <p className="mt-1 text-[28px] font-black tracking-tight text-orange-600">{formatPrice(listing.price_isk, lang)}</p>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-stone-500">
-            <Clock size={14} /> Birt {timeAgo(listing.published_at ?? listing.created_at)}
+            <Clock size={14} />{" "}{t("Birt")}{" "}{timeAgo(listing.published_at ?? listing.created_at, Date.now(), lang)}
           </p>
         </header>
 
@@ -221,10 +223,10 @@ export default async function ListingPage({
         </dl>
 
         <section>
-          <h2 className="mb-2 text-lg font-bold tracking-tight">{isCar ? "Bíllinn" : "Passar í"}</h2>
+          <h2 className="mb-2 text-lg font-bold tracking-tight">{isCar ? t("Bíllinn") : t("Passar í")}</h2>
           {listing.universal_fit ? (
             <p className="flex items-center gap-2 rounded-2xl bg-orange-50 px-4 py-3 text-sm font-medium text-orange-900">
-              <CheckCircle2 size={18} className="text-orange-600" /> Passar í alla bíla
+              <CheckCircle2 size={18} className="text-orange-600" />{" "}{t("Passar í alla bíla")}
             </p>
           ) : listing.listing_fitments.length ? (
             <ul className="flex flex-wrap gap-2">
@@ -236,21 +238,21 @@ export default async function ListingPage({
                   >
                     <CarFront size={16} className="text-orange-600" />
                     <span className="font-semibold">
-                      {f.makes.name} {f.models?.name ?? (isCar ? "" : "– allar gerðir")}
+                      {f.makes.name} {f.models?.name ?? (isCar ? "" : t("– allar gerðir"))}
                     </span>
-                    <span className="text-orange-700">{yearRange(f.year_from, f.year_to)}</span>
+                    <span className="text-orange-700">{t(yearRange(f.year_from, f.year_to))}</span>
                   </Link>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-stone-500">Ekki tilgreint.</p>
+            <p className="text-sm text-stone-500">{t("Ekki tilgreint.")}</p>
           )}
         </section>
 
         {listing.description && (
           <section>
-            <h2 className="mb-2 text-lg font-bold tracking-tight">Lýsing</h2>
+            <h2 className="mb-2 text-lg font-bold tracking-tight">{t("Lýsing")}</h2>
             <p className="whitespace-pre-line break-words leading-relaxed text-stone-800">{listing.description}</p>
           </section>
         )}
@@ -260,7 +262,7 @@ export default async function ListingPage({
             <Avatar name={listing.profiles.display_name} />
             <div className="min-w-0 flex-1">
               <p className="truncate font-bold">{listing.profiles.display_name}</p>
-              <p className="text-sm text-stone-500">Á Pörtum síðan {formatDate(new Date(listing.profiles.created_at), { day: false, year: true })}</p>
+              <p className="text-sm text-stone-500">{t("Á Pörtum síðan")}{" "}{formatDate(new Date(listing.profiles.created_at), { day: false, year: true }, lang)}</p>
             </div>
           </div>
           <SellerRating sellerId={listing.seller_id} />
@@ -279,12 +281,12 @@ export default async function ListingPage({
           {isOwner ? (
             <>
               <Link href={`/auglysing/${listing.id}/breyta`} className={`${primaryButton} flex flex-1 items-center justify-center gap-2`}>
-                <Pencil size={18} /> Breyta
+                <Pencil size={18} />{" "}{t("Breyta")}
               </Link>
               {listing.status === "active" && <BumpButton listingId={listing.id} bumpedAt={listing.bumped_at} publishedAt={listing.published_at} />}
               <form action={setListingStatus.bind(null, listing.id, listing.status === "sold" ? "active" : "sold")} className="flex-1">
                 <button type="submit" className={`${secondaryButton} flex items-center justify-center gap-2`}>
-                  <BadgeCheck size={18} /> {listing.status === "sold" ? "Í sölu" : "Selt"}
+                  <BadgeCheck size={18} /> {listing.status === "sold" ? t("Í sölu") : t("Selt")}
                 </button>
               </form>
             </>
@@ -292,21 +294,21 @@ export default async function ListingPage({
             <>
               <form action={contactSeller.bind(null, listing.id)} className="flex-[2]">
                 <button type="submit" className={`${primaryButton} flex items-center justify-center gap-2`}>
-                  <MessageCircle size={19} /> Senda skilaboð
+                  <MessageCircle size={19} />{" "}{t("Senda skilaboð")}
                 </button>
               </form>
               {phone && (
                 <a
                   href={`tel:${phone.replace(/\s/g, "")}`}
-                  aria-label="Hringja í seljanda"
+                  aria-label={t("Hringja í seljanda")}
                   className={`${secondaryButton} flex flex-1 items-center justify-center gap-2`}
                 >
-                  <Phone size={18} /> Hringja
+                  <Phone size={18} />{" "}{t("Hringja")}
                 </a>
               )}
             </>
           ) : (
-            <p className="w-full py-3 text-center text-stone-500">Þessi auglýsing er ekki lengur virk.</p>
+            <p className="w-full py-3 text-center text-stone-500">{t("Þessi auglýsing er ekki lengur virk.")}</p>
           )}
         </div>
       </div>

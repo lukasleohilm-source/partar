@@ -51,11 +51,11 @@ export function SearchBox({
       return;
     }
     const n = ++seq.current;
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       const { data } = await supabase.rpc("search_suggestions", { p_q: term });
       if (n === seq.current) setItems((data as Suggestion[] | null) ?? []);
     }, 160);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [q, supabase]);
 
   function go(href: string) {

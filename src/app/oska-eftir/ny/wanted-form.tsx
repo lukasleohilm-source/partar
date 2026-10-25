@@ -8,6 +8,7 @@ import { KINDS, REGIONS, formatNumber, type Kind, type Region } from "@/lib/i18n
 import type { MyCar } from "@/lib/search";
 import { createClient } from "@/lib/supabase/client";
 import { YEARS, type Category, type Make, type Model } from "@/lib/vehicles";
+import { useT } from "@/components/lang-provider";
 
 type Props = {
   userId: string;
@@ -25,6 +26,7 @@ type Props = {
 };
 
 export function WantedForm({ userId, makes, models, categories, initial }: Props) {
+  const { t } = useT();
   const router = useRouter();
   const [query, setQuery] = useState(initial.query);
   const [kind, setKind] = useState<Kind | null>(initial.kind);
@@ -44,7 +46,7 @@ export function WantedForm({ userId, makes, models, categories, initial }: Props
   async function save(e: React.FormEvent) {
     e.preventDefault();
     if (!query.trim() && !category && !car.make) {
-      return setError("Skrifaðu hvað þig vantar, eða veldu flokk eða bíl.");
+      return setError(t("Skrifaðu hvað þig vantar, eða veldu flokk eða bíl."));
     }
     setError(null);
     setSaving(true);
@@ -63,7 +65,7 @@ export function WantedForm({ userId, makes, models, categories, initial }: Props
       });
     if (err) {
       setSaving(false);
-      return setError("Ekki tókst að vista óskina. Reyndu aftur.");
+      return setError(t("Ekki tókst að vista óskina. Reyndu aftur."));
     }
     router.push("/oska-eftir");
     router.refresh();
@@ -72,27 +74,27 @@ export function WantedForm({ userId, makes, models, categories, initial }: Props
   return (
     <form onSubmit={save} className="mx-auto max-w-md md:max-w-xl md:pt-10 space-y-5 px-4 pt-4">
       <header className="flex items-center gap-2">
-        <button type="button" onClick={() => router.back()} aria-label="Til baka" className="-ml-2 px-2 text-2xl text-stone-600">
+        <button type="button" onClick={() => router.back()} aria-label={t("Til baka")} className="-ml-2 px-2 text-2xl text-stone-600">
           <ChevronLeft size={26} />
         </button>
-        <h1 className="text-xl font-bold">Ný ósk</h1>
+        <h1 className="text-xl font-bold">{t("Ný ósk")}</h1>
       </header>
       <p className="-mt-2 text-sm text-stone-600">
-        Þú færð tilkynningu í appinu um leið og auglýsing sem passar birtist.
+        {t("Þú færð tilkynningu í appinu um leið og auglýsing sem passar birtist.")}
       </p>
 
       <label className="block">
-        <span className={labelClass}>Hvað vantar þig?</span>
+        <span className={labelClass}>{t("Hvað vantar þig?")}</span>
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value.slice(0, 100))}
-          placeholder="t.d. vinstra framljós, dráttarkrókur"
+          placeholder={t("t.d. vinstra framljós, dráttarkrókur")}
           className={inputClass}
         />
       </label>
 
       <fieldset>
-        <legend className={labelClass}>Tegund</legend>
+        <legend className={labelClass}>{t("Tegund")}</legend>
         <div className="grid grid-cols-4 gap-1 rounded-xl bg-stone-200 p-1">
           {([null, ...(Object.keys(KINDS) as Kind[])] as (Kind | null)[]).map((k) => (
             <button
@@ -102,7 +104,7 @@ export function WantedForm({ userId, makes, models, categories, initial }: Props
               aria-pressed={kind === k}
               className={`rounded-lg py-2 text-sm font-medium ${kind === k ? "bg-surface shadow-sm" : "text-stone-600"}`}
             >
-              {k ? KINDS[k] : "Allt"}
+              {k ? t(KINDS[k]) : t("Allt")}
             </button>
           ))}
         </div>
@@ -110,17 +112,17 @@ export function WantedForm({ userId, makes, models, categories, initial }: Props
 
       {(!kind || kind === "part") && (
         <label className="block">
-          <span className={labelClass}>Flokkur (valfrjálst)</span>
+          <span className={labelClass}>{t("Flokkur (valfrjálst)")}</span>
           <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputClass}>
-            <option value="">Allir flokkar</option>
+            <option value="">{t("Allir flokkar")}</option>
             {parents.map((p) => (
-              <optgroup key={p.id} label={p.name}>
-                <option value={p.id}>Allt í {p.name.toLowerCase()}</option>
+              <optgroup key={p.id} label={t(p.name)}>
+                <option value={p.id}>{t("Allt í")}{" "}{p.name.toLowerCase()}</option>
                 {categories
                   .filter((c) => c.parent_id === p.id)
                   .map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.name}
+                      {t(c.name)}
                     </option>
                   ))}
               </optgroup>
@@ -130,16 +132,16 @@ export function WantedForm({ userId, makes, models, categories, initial }: Props
       )}
 
       <fieldset className="space-y-3 rounded-2xl bg-surface p-4">
-        <legend className="sr-only">Bíll</legend>
-        <p className="font-medium">Fyrir hvaða bíl?</p>
+        <legend className="sr-only">{t("Bíll")}</legend>
+        <p className="font-medium">{t("Fyrir hvaða bíl?")}</p>
         <label className="block">
-          <span className={labelClass}>Tegund</span>
+          <span className={labelClass}>{t("Tegund")}</span>
           <select
             value={car.make}
             onChange={(e) => setCar({ make: e.target.value, model: "", year: car.year })}
             className={inputClass}
           >
-            <option value="">Hvaða bíl sem er</option>
+            <option value="">{t("Hvaða bíl sem er")}</option>
             {makes.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.name}
@@ -149,14 +151,14 @@ export function WantedForm({ userId, makes, models, categories, initial }: Props
         </label>
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
-            <span className={labelClass}>Gerð</span>
+            <span className={labelClass}>{t("Gerð")}</span>
             <select
               value={car.model}
               onChange={(e) => setCar({ ...car, model: e.target.value })}
               disabled={!car.make}
               className={inputClass}
             >
-              <option value="">Allar</option>
+              <option value="">{t("Allar")}</option>
               {models
                 .filter((m) => String(m.make_id) === car.make)
                 .map((m) => (
@@ -167,14 +169,14 @@ export function WantedForm({ userId, makes, models, categories, initial }: Props
             </select>
           </label>
           <label className="block">
-            <span className={labelClass}>Árgerð</span>
+            <span className={labelClass}>{t("Árgerð")}</span>
             <select
               value={car.year}
               onChange={(e) => setCar({ ...car, year: e.target.value })}
               disabled={!car.make}
               className={inputClass}
             >
-              <option value="">Allar</option>
+              <option value="">{t("Allar")}</option>
               {YEARS.map((y) => (
                 <option key={y} value={y}>
                   {y}
@@ -187,25 +189,25 @@ export function WantedForm({ userId, makes, models, categories, initial }: Props
 
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className={labelClass}>Hámarksverð</span>
+          <span className={labelClass}>{t("Hámarksverð")}</span>
           <div className="relative">
             <input
               value={maxPrice ? formatNumber(Number(maxPrice)) : ""}
               onChange={(e) => setMaxPrice(e.target.value.replace(/\D/g, "").slice(0, 9))}
               inputMode="numeric"
-              placeholder="Ekkert"
+              placeholder={t("Ekkert")}
               className={`${inputClass} pr-10`}
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-stone-500">kr.</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-stone-500">{t("kr.")}</span>
           </div>
         </label>
         <label className="block">
-          <span className={labelClass}>Landshluti</span>
+          <span className={labelClass}>{t("Landshluti")}</span>
           <select value={region} onChange={(e) => setRegion(e.target.value as Region | "")} className={inputClass}>
-            <option value="">Allt landið</option>
+            <option value="">{t("Allt landið")}</option>
             {Object.entries(REGIONS).map(([value, label]) => (
               <option key={value} value={value}>
-                {label}
+                {t(label)}
               </option>
             ))}
           </select>
@@ -219,7 +221,7 @@ export function WantedForm({ userId, makes, models, categories, initial }: Props
       )}
 
       <button type="submit" disabled={saving} className={primaryButton}>
-        {saving ? "Vista…" : "Vista ósk"}
+        {saving ? t("Vista…") : t("Vista ósk")}
       </button>
     </form>
   );

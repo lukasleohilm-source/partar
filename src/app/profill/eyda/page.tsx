@@ -1,12 +1,14 @@
 import { DeleteAccount } from "../delete-account";
 import { SubpageHeader } from "../ui";
+import { getT } from "@/lib/lang-server";
 
 export const metadata = { title: "Eyða aðgangi – Partar" };
 
-export default function DeleteAccountPage() {
+export default async function DeleteAccountPage() {
+  const { t } = await getT();
   return (
     <div className="mx-auto max-w-md md:max-w-xl md:pt-10 px-4 pt-6">
-      <SubpageHeader title="Eyða aðgangi" />
+      <SubpageHeader title={t("Eyða aðgangi")} />
       <DeleteAccount />
     </div>
   );
