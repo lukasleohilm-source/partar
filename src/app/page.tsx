@@ -41,14 +41,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
   const listings = (data ?? []) as ListingSummary[];
 
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md md:max-w-6xl md:px-2">
       {/* Haus með litaðri bakgrunnsbylgju */}
-      <section className="relative overflow-hidden px-4 pb-5 pt-5">
+      <section className="relative overflow-hidden px-4 pb-5 pt-5 md:pb-10 md:pt-14">
         <div
           aria-hidden
-          className="absolute inset-x-0 top-0 -z-10 h-56 bg-[radial-gradient(120%_100%_at_100%_0%,rgb(251_146_60/0.35),transparent_60%),radial-gradient(90%_80%_at_0%_0%,rgb(234_88_12/0.18),transparent_60%)]"
+          className="absolute inset-x-0 top-0 -z-10 h-56 md:h-80 bg-[radial-gradient(120%_100%_at_100%_0%,rgb(251_146_60/0.35),transparent_60%),radial-gradient(90%_80%_at_0%_0%,rgb(234_88_12/0.18),transparent_60%)]"
         />
-        <header className="mb-5 flex items-center justify-between">
+        <header className="mb-5 flex items-center justify-between md:hidden">
           <Logo />
           <Link
             href="/uppahalds"
@@ -58,7 +58,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
             <Heart size={20} />
           </Link>
         </header>
-        <h1 className="mb-4 text-[26px] font-extrabold leading-[1.15] tracking-tight text-stone-900">
+        <h1 className="mb-4 text-[26px] font-extrabold leading-[1.15] tracking-tight text-stone-900 md:mb-8 md:text-center md:text-5xl">
           Notaðir varahlutir,
           <br />
           <span className="text-orange-600">beint frá fólki.</span>
@@ -75,32 +75,34 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
           </p>
         )}
 
-        <SearchBox />
+        <div className="md:mx-auto md:max-w-2xl">
+          <SearchBox />
 
-        <div className="relative mt-2">
-          <input
-            disabled
-            aria-label="Leit eftir bílnúmeri (kemur bráðum)"
-            placeholder="Leita eftir bílnúmeri"
-            className="w-full rounded-2xl border border-dashed border-stone-300 bg-transparent py-3 pl-11 pr-4 text-[15px] text-stone-400"
-          />
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" aria-hidden />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-stone-200 px-2 py-0.5 text-[11px] font-medium text-stone-500">
-            Kemur bráðum
-          </span>
-        </div>
+          <div className="relative mt-2">
+            <input
+              disabled
+              aria-label="Leit eftir bílnúmeri (kemur bráðum)"
+              placeholder="Leita eftir bílnúmeri"
+              className="w-full rounded-2xl border border-dashed border-stone-300 bg-transparent py-3 pl-11 pr-4 text-[15px] text-stone-400"
+            />
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" aria-hidden />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-stone-200 px-2 py-0.5 text-[11px] font-medium text-stone-500">
+              Kemur bráðum
+            </span>
+          </div>
 
-        <div className="mt-3">
-          <MyCarPicker key={JSON.stringify(myCar)} makes={makes.data ?? []} models={models.data ?? []} car={myCar} />
-          {myCar && (
-            <Link href="/leit" className="mt-2 flex items-center justify-center gap-1 text-sm font-semibold text-orange-700">
-              Sjá alla hluti sem passa <ChevronRight size={16} />
-            </Link>
-          )}
+          <div className="mt-3">
+            <MyCarPicker key={JSON.stringify(myCar)} makes={makes.data ?? []} models={models.data ?? []} car={myCar} />
+            {myCar && (
+              <Link href="/leit" className="mt-2 flex items-center justify-center gap-1 text-sm font-semibold text-orange-700">
+                Sjá alla hluti sem passa <ChevronRight size={16} />
+              </Link>
+            )}
+          </div>
         </div>
       </section>
 
-      <nav aria-label="Tegundir" className="flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+      <nav aria-label="Tegundir" className="flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:justify-center">
         {KIND_LINKS.map(({ href, label, icon: Icon }) => (
           <Link
             key={href}
@@ -114,7 +116,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
 
       <section className="mt-6 px-4">
         <h2 className="mb-3 text-lg font-bold tracking-tight">Flokkar</h2>
-        <ul className="grid grid-cols-4 gap-2">
+        <ul className="grid grid-cols-4 gap-2 md:grid-cols-8 md:gap-3">
           {(categories.data ?? [])
             .filter((c) => c.slug !== "annad")
             .map((c) => {
@@ -144,7 +146,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
           </Link>
         </div>
         {listings.length ? (
-          <ul className="grid grid-cols-2 gap-3">
+          <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4">
             {listings.map((l, i) => (
               <li key={l.id}>
                 <ListingCard

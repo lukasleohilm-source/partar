@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="mx-auto max-w-md" aria-busy aria-label="Hleð auglýsingu…">
+    <div className="mx-auto max-w-md md:max-w-6xl md:px-6 md:pt-8" aria-busy aria-label="Hleð auglýsingu…">
       <div className="skeleton aspect-[4/3]" />
       <div className="space-y-4 px-4 pt-5">
         <div className="skeleton h-6 w-3/4 rounded" />

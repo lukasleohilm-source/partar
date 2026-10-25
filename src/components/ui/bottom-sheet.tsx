@@ -28,7 +28,7 @@ export function BottomSheet({ open, onClose, title, children, footer }: Props) {
       onClose={onClose}
       onClick={(e) => e.target === ref.current && onClose()}
       aria-label={title}
-      className="mx-auto mb-0 mt-auto max-h-[88dvh] w-full max-w-md rounded-t-2xl bg-stone-50 p-0 backdrop:bg-black/40"
+      className="mx-auto mb-0 mt-auto max-h-[88dvh] w-full max-w-md rounded-t-2xl bg-stone-50 p-0 backdrop:bg-black/40 md:my-auto md:rounded-2xl"
     >
       <div className="flex max-h-[88dvh] flex-col">
         <header className="flex items-center justify-between border-b border-stone-200 px-4 py-3">

@@ -51,7 +51,7 @@ export default async function WantedPage() {
   const c = categories.data ?? [];
 
   return (
-    <div className="mx-auto max-w-md space-y-6 px-4 pt-6">
+    <div className="mx-auto max-w-md md:max-w-2xl md:pt-10 space-y-6 px-4 pt-6">
       <LiveRefresh channel={`tilkynningar:${user.id}`} table="notifications" event="INSERT" filter={`user_id=eq.${user.id}`} />
       <MarkNotificationsRead key={notes[0]?.id} hasUnread={notes.some((n) => !n.read_at)} />
 

@@ -38,7 +38,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Aðalvalmynd"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
     >
       <ul className="mx-auto grid max-w-md grid-cols-5">
         {items.map((item) => {

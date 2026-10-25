@@ -34,7 +34,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   const pending = user.new_email ? `Bíður staðfestingar: ${user.new_email}` : null;
 
   return (
-    <div className="mx-auto max-w-md px-4 pt-6">
+    <div className="mx-auto max-w-md md:max-w-2xl md:pt-10 px-4 pt-6">
       <h1 className="sr-only">Ég</h1>
 
       {/* Haus: hver ég er og yfirlit */}

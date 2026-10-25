@@ -5,7 +5,7 @@ export const metadata = { title: "Eyða aðgangi – Partar" };
 
 export default function DeleteAccountPage() {
   return (
-    <div className="mx-auto max-w-md px-4 pt-6">
+    <div className="mx-auto max-w-md md:max-w-xl md:pt-10 px-4 pt-6">
       <SubpageHeader title="Eyða aðgangi" />
       <DeleteAccount />
     </div>

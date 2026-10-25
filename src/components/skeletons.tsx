@@ -15,7 +15,7 @@ export function CardSkeleton() {
 
 export function GridSkeleton({ count = 6 }: { count?: number }) {
   return (
-    <ul className="grid grid-cols-2 gap-3" aria-busy aria-label="Hleð…">
+    <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4" aria-busy aria-label="Hleð…">
       {Array.from({ length: count }, (_, i) => (
         <li key={i}>
           <CardSkeleton />

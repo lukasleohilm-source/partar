@@ -52,7 +52,7 @@ export default async function MyListingsPage({ searchParams }: { searchParams: P
   const rows = all.filter((l) => (TABS[tab].statuses as readonly string[]).includes(l.status));
 
   return (
-    <div className="mx-auto max-w-md px-4 pt-6">
+    <div className="mx-auto max-w-md md:max-w-2xl md:pt-10 px-4 pt-6">
       <header className="mb-4 flex items-center gap-2">
         <Link href="/profill" aria-label="Til baka" className="-ml-2 px-2 text-2xl text-stone-600">
           <ChevronLeft size={26} />

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { BottomNav } from "@/components/bottom-nav";
+import { DesktopHeader } from "@/components/desktop-header";
 import { ErrorReporter } from "@/components/error-reporter";
 import { ServiceWorker } from "@/components/service-worker";
 import { WelcomeGate } from "@/components/welcome-gate";
@@ -33,7 +34,8 @@ export default function RootLayout({
   return (
     <html lang="is">
       <body className={`${geistSans.variable} antialiased`}>
-        <main className="min-h-dvh pb-24">{children}</main>
+        <DesktopHeader />
+        <main className="min-h-dvh pb-24 md:pb-16">{children}</main>
         <BottomNav />
         <ServiceWorker />
         <ErrorReporter />

@@ -33,7 +33,7 @@ export function GuestStart({ next }: { next: string }) {
   }, [signIn]);
 
   return (
-    <div className="mx-auto max-w-md px-4 pt-16 text-center">
+    <div className="mx-auto max-w-md md:max-w-xl md:pt-10 px-4 pt-16 text-center">
       <h1 className="text-xl font-bold">Augnablik…</h1>
       <p className="mt-2 text-stone-600">Við athugum að þú sért ekki vélmenni.</p>
       <div className="my-6 min-h-16">{TURNSTILE_SITE_KEY && <Turnstile onToken={signIn} onError={onError} />}</div>

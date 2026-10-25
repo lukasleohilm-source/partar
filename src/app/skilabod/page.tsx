@@ -45,7 +45,7 @@ export default async function ConversationsPage() {
   const rows = data ?? [];
 
   return (
-    <div className="mx-auto max-w-md px-4 pt-6">
+    <div className="mx-auto max-w-md md:max-w-2xl md:pt-10 px-4 pt-6">
       <h1 className="mb-4 text-2xl font-bold">Skilaboð</h1>
       <LiveRefresh channel={`samtalalisti:${user.id}`} table="conversations" event="UPDATE" />
 

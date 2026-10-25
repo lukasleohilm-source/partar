@@ -292,7 +292,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
   }
 
   return (
-    <div className="mx-auto max-w-md px-4 pt-4">
+    <div className="mx-auto max-w-md md:max-w-xl md:pt-10 px-4 pt-4">
       <header className="mb-5">
         <div className="mb-3 flex items-center gap-3">
           {step > 0 && (

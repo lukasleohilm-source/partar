@@ -26,7 +26,7 @@ export default async function FavoritesPage() {
   const listings = (data ?? []).flatMap((f) => (f.listings ? [f.listings] : []));
 
   return (
-    <div className="mx-auto max-w-md px-4 pt-6">
+    <div className="mx-auto max-w-md md:max-w-6xl md:px-6 md:pt-8 px-4 pt-6">
       <header className="mb-4 flex items-center gap-2">
         <Link href="/profill" aria-label="Til baka" className="-ml-2 px-2 text-stone-600">
           <ChevronLeft size={26} />
@@ -36,7 +36,7 @@ export default async function FavoritesPage() {
 
       {listings.length > 0 && <PushPrompt reason="Viltu vita þegar verðið lækkar á uppáhaldi?" />}
       {listings.length ? (
-        <ul className="grid grid-cols-2 gap-3">
+        <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4">
           {listings.map((l, i) => (
             <li key={l.id}>
               <ListingCard listing={l} priority={i < 4} favorite={<FavoriteButton listingId={l.id} initial />} />

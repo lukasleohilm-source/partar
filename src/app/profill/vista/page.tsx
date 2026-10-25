@@ -14,7 +14,7 @@ export default async function SaveAccountPage() {
   if (!user.is_anonymous && user.email) redirect("/profill");
 
   return (
-    <div className="mx-auto max-w-md px-4 pt-6">
+    <div className="mx-auto max-w-md md:max-w-xl md:pt-10 px-4 pt-6">
       <SubpageHeader title="Vista aðgang" />
       <SaveAccount />
     </div>

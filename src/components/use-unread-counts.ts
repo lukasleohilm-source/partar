@@ -8,7 +8,8 @@ import { createClient } from "@/lib/supabase/client";
 export type UnreadCounts = { conversations: number; notifications: number };
 
 // Fjöldi ólesinna samtala og tilkynninga; uppfærist í rauntíma
-export function useUnreadCounts(): UnreadCounts {
+// `scope` aðgreinir rauntímarásir þegar fleiri en ein valmynd notar þetta samtímis
+export function useUnreadCounts(scope = "nav"): UnreadCounts {
   const pathname = usePathname();
   const [supabase] = useState(createClient);
   const [counts, setCounts] = useState<UnreadCounts>({ conversations: 0, notifications: 0 });
@@ -37,7 +38,7 @@ export function useUnreadCounts(): UnreadCounts {
     if (!userId) return;
     // RLS sér til þess að aðeins eigin samtöl og tilkynningar berist
     const channel = supabase
-      .channel(`olesid:${userId}`)
+      .channel(`olesid:${scope}:${userId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` }, refresh)
       .subscribe();
@@ -46,7 +47,7 @@ export function useUnreadCounts(): UnreadCounts {
       window.removeEventListener(UNREAD_EVENT, refresh);
       supabase.removeChannel(channel);
     };
-  }, [supabase, userId, refresh]);
+  }, [supabase, userId, refresh, scope]);
 
   return userId ? counts : { conversations: 0, notifications: 0 };
 }

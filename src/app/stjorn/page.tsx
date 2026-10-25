@@ -62,7 +62,7 @@ export default async function AdminPage() {
     : [];
 
   return (
-    <div className="mx-auto max-w-md space-y-6 px-4 pt-6">
+    <div className="mx-auto max-w-md md:max-w-2xl md:pt-10 space-y-6 px-4 pt-6">
       <header>
         <h1 className="text-2xl font-extrabold tracking-tight">Stjórnborð</h1>
         <p className="text-sm text-stone-500">Aðeins sýnilegt stjórnendum.</p>

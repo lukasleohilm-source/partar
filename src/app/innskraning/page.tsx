@@ -27,7 +27,7 @@ export default async function LoginPage({
   if (user && !user.is_anonymous) redirect(next);
 
   return (
-    <div className="mx-auto max-w-md px-4 pt-8">
+    <div className="mx-auto max-w-md md:max-w-xl md:pt-10 px-4 pt-8">
       <Logo className="mb-6" />
       <h1 className="mb-1 text-2xl font-extrabold tracking-tight">Skráðu þig inn</h1>
       <p className="mb-6 text-stone-600">Ekkert lykilorð. Nýir notendur eru skráðir sjálfkrafa.</p>

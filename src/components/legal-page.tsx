@@ -4,7 +4,7 @@ import Link from "next/link";
 // Sameiginlegt útlit fyrir skilmála og persónuverndarstefnu
 export function LegalPage({ title, updated, children }: { title: string; updated: string; children: React.ReactNode }) {
   return (
-    <article className="mx-auto max-w-md px-4 pt-6 text-stone-800">
+    <article className="mx-auto max-w-md md:max-w-2xl md:pt-10 px-4 pt-6 text-stone-800">
       <Link href="/" className="text-sm text-stone-500">
         <ChevronLeft size={16} className="-mt-0.5 inline" /> Forsíða
       </Link>

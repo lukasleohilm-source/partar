@@ -168,9 +168,9 @@ export default async function ListingPage({
   ];
 
   return (
-    <article className="mx-auto max-w-md pb-32">
+    <article className="mx-auto max-w-md pb-32 md:grid md:max-w-6xl md:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] md:items-start md:gap-x-10 md:px-6 md:pb-12 md:pt-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
-      <div className="relative">
+      <div className="relative md:sticky md:top-24 md:row-span-2 md:overflow-hidden md:rounded-3xl">
         <ImageGallery images={[...listing.listing_images].sort((a, b) => a.sort - b.sort)} title={listing.title} />
         <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-between p-3">
           <BackButton />
@@ -181,7 +181,7 @@ export default async function ListingPage({
         </div>
       </div>
 
-      <div className="-mt-4 space-y-5 rounded-t-3xl bg-canvas px-4 pt-5 [position:relative]">
+      <div className="-mt-4 space-y-5 rounded-t-3xl bg-canvas px-4 pt-5 [position:relative] md:mt-0 md:rounded-none md:bg-transparent md:px-0 md:pt-0">
         {villa && (
           <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
             {villa === "lokad" ? "Seljandinn tekur ekki við skilaboðum frá þér." : "Ekki tókst að hefja spjall. Reyndu aftur."}
@@ -201,7 +201,7 @@ export default async function ListingPage({
               </span>
             )}
           </div>
-          <h1 className="text-[22px] font-extrabold leading-tight tracking-tight">{listing.title}</h1>
+          <h1 className="text-[22px] font-extrabold leading-tight tracking-tight md:text-3xl">{listing.title}</h1>
           <p className="mt-1 text-[28px] font-black tracking-tight text-orange-600">{formatPrice(listing.price_isk)}</p>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-stone-500">
             <Clock size={14} /> Birt {timeAgo(listing.published_at ?? listing.created_at)}
@@ -274,8 +274,8 @@ export default async function ListingPage({
       </div>
 
       {/* Aðgerðir fastar neðst, fyrir ofan aðalvalmyndina */}
-      <div className="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-30 px-3">
-        <div className="mx-auto flex max-w-md gap-2 rounded-2xl bg-surface/95 p-2 shadow-xl ring-1 ring-black/10 backdrop-blur-xl">
+      <div className="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-30 px-3 md:sticky md:bottom-6 md:col-start-2 md:mt-6 md:px-0">
+        <div className="mx-auto flex max-w-md gap-2 rounded-2xl bg-surface/95 p-2 shadow-xl ring-1 ring-black/10 backdrop-blur-xl md:max-w-none">
           {isOwner ? (
             <>
               <Link href={`/auglysing/${listing.id}/breyta`} className={`${primaryButton} flex flex-1 items-center justify-center gap-2`}>
