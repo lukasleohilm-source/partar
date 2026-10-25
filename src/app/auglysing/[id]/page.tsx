@@ -24,7 +24,7 @@ import { ImageGallery } from "@/components/listing/image-gallery";
 import { BackButton, BumpButton, FavoriteButton, ShareButton } from "@/components/listing/listing-actions";
 import { SellerRating } from "@/components/stars";
 import { primaryButton, secondaryButton } from "@/components/ui/styles";
-import { CONDITIONS, KINDS, REGIONS, formatNumber, formatPrice, type Condition, type Kind, type Region } from "@/lib/i18n";
+import { CONDITIONS, KINDS, REGIONS, formatDate, formatNumber, formatPrice, type Condition, type Kind, type Region } from "@/lib/i18n";
 import { IMAGE_COLS, coverOf, imageUrl, timeAgo, type ImageRef } from "@/lib/listings";
 import { placeLabel } from "@/lib/places";
 import { createClient } from "@/lib/supabase/server";
@@ -63,7 +63,7 @@ type ListingDetail = {
   profiles: { display_name: string; created_at: string };
 };
 
-const memberSince = new Intl.DateTimeFormat("is-IS", { month: "long", year: "numeric" });
+
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -260,7 +260,7 @@ export default async function ListingPage({
             <Avatar name={listing.profiles.display_name} />
             <div className="min-w-0 flex-1">
               <p className="truncate font-bold">{listing.profiles.display_name}</p>
-              <p className="text-sm text-stone-500">Á Pörtum síðan {memberSince.format(new Date(listing.profiles.created_at))}</p>
+              <p className="text-sm text-stone-500">Á Pörtum síðan {formatDate(new Date(listing.profiles.created_at), { day: false, year: true })}</p>
             </div>
           </div>
           <SellerRating sellerId={listing.seller_id} />

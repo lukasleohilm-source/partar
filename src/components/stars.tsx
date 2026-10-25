@@ -1,9 +1,10 @@
 import { Star } from "lucide-react";
+import { formatDecimal } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 
 export function Stars({ value, size = 16 }: { value: number; size?: number }) {
   return (
-    <span className="inline-flex" aria-label={`${value.toLocaleString("is-IS")} af 5 stjörnum`}>
+    <span className="inline-flex" aria-label={`${formatDecimal(value)} af 5 stjörnum`}>
       {[1, 2, 3, 4, 5].map((i) => (
         <Star
           key={i}
@@ -36,7 +37,7 @@ export async function SellerRating({ sellerId }: { sellerId: string }) {
     <div className="mt-3 space-y-2">
       <p className="flex items-center gap-2 text-sm">
         <Stars value={Number(rating.average)} />
-        <span className="font-semibold">{Number(rating.average).toLocaleString("is-IS")}</span>
+        <span className="font-semibold">{formatDecimal(Number(rating.average))}</span>
         <span className="text-stone-500">
           ({rating.total} {rating.total === 1 ? "einkunn" : "einkunnir"})
         </span>

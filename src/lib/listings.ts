@@ -40,15 +40,5 @@ export type ListingSummary = {
 // Dálkar fyrir auglýsingaspjöld
 export const LISTING_SUMMARY_SELECT = `id, seller_id, title, kind, status, price_isk, condition, region, postal_code, published_at, listing_images(${IMAGE_COLS})`;
 
-const rtf = new Intl.RelativeTimeFormat("is", { numeric: "auto" });
-const dateFmt = new Intl.DateTimeFormat("is-IS", { day: "numeric", month: "long", year: "numeric" });
-
-export function timeAgo(iso: string, now = Date.now()): string {
-  const seconds = Math.round((new Date(iso).getTime() - now) / 1000);
-  const abs = Math.abs(seconds);
-  if (abs < 60) return "rétt í þessu";
-  if (abs < 3600) return rtf.format(Math.round(seconds / 60), "minute");
-  if (abs < 86400) return rtf.format(Math.round(seconds / 3600), "hour");
-  if (abs < 86400 * 30) return rtf.format(Math.round(seconds / 86400), "day");
-  return dateFmt.format(new Date(iso));
-}
+// Íslenskur afstæður tími (sjá i18n.ts)
+export { timeAgo } from "./i18n";

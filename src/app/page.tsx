@@ -116,7 +116,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
 
       <section className="mt-6 px-4">
         <h2 className="mb-3 text-lg font-bold tracking-tight">Flokkar</h2>
-        <ul className="grid grid-cols-4 gap-2 md:grid-cols-8 md:gap-3">
+        <ul className="grid grid-cols-4 gap-2 md:grid-cols-6 md:gap-3 lg:grid-cols-12">
           {(categories.data ?? [])
             .filter((c) => c.slug !== "annad")
             .map((c) => {

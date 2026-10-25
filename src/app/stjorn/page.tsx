@@ -1,6 +1,7 @@
 import { AlertTriangle, Ban, Bell, Bug, Eye, EyeOff, Flag, MessageCircle, Package, Users, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { formatNumber } from "@/lib/i18n";
 import { timeAgo } from "@/lib/listings";
 import { REPORT_REASONS, type ReportReason } from "@/lib/moderation";
 import { createClient } from "@/lib/supabase/server";
@@ -72,7 +73,7 @@ export default async function AdminPage() {
         {tiles.map(({ icon: Icon, label, value, sub, warn }) => (
           <div key={label} className={`rounded-2xl p-3 shadow-sm ring-1 ${warn ? "bg-orange-50 ring-orange-200" : "bg-surface ring-black/5"}`}>
             <Icon size={18} className={warn ? "text-orange-600" : "text-stone-400"} />
-            <p className="mt-1 text-2xl font-extrabold tabular-nums">{value.toLocaleString("is-IS")}</p>
+            <p className="mt-1 text-2xl font-extrabold tabular-nums">{formatNumber(value)}</p>
             <p className="text-xs font-medium text-stone-500">
               {label}
               {sub && <span className="block text-stone-400">{sub}</span>}

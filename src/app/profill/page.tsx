@@ -2,7 +2,7 @@ import { Bell, FileText, Heart, LogOut, Package, Pencil, Search, Shield, ShieldC
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Avatar } from "@/components/avatar";
-import { REGIONS, isRegion } from "@/lib/i18n";
+import { REGIONS, formatDecimal, isRegion } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "./actions";
 import { ActionRow, Group, Row } from "./ui";
@@ -76,7 +76,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
               {rating?.total ? (
                 <>
                   <Star size={16} className="fill-amber-400 text-amber-400" aria-hidden />
-                  {Number(rating.average).toLocaleString("is-IS")}
+                  {formatDecimal(Number(rating.average))}
                 </>
               ) : (
                 <span className="text-stone-400">–</span>
