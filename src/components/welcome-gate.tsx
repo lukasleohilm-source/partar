@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/logo";
-import { GoogleButton } from "@/components/oauth-buttons";
+import { FacebookButton, GoogleButton } from "@/components/oauth-buttons";
 import { createClient } from "@/lib/supabase/client";
 
 const SEEN_KEY = "partar_velkomin";
@@ -67,6 +67,7 @@ export function WelcomeGate() {
 
         <div className="mt-6 space-y-2.5 text-left">
           <GoogleButton next={pathname} />
+          <FacebookButton next={pathname} />
           <Link
             href={`/innskraning?next=${encodeURIComponent(pathname)}`}
             onClick={close}

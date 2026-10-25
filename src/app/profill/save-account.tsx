@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { linkEmail } from "@/app/innskraning/actions";
 import { EmailForm } from "@/components/email-form";
-import { GoogleButton, OrDivider } from "@/components/oauth-buttons";
+import { FacebookButton, GoogleButton, OrDivider } from "@/components/oauth-buttons";
 
 // Fyrir gesti: tengja Google eða netfang við núverandi aðgang svo auglýsingar og spjall haldist
 export function SaveAccount() {
@@ -16,7 +16,10 @@ export function SaveAccount() {
           eða netfang til að geta skráð þig inn hvar sem er.
         </p>
       </div>
-      <GoogleButton next="/profill?vistad=1" label="Vista með Google" />
+      <div className="space-y-2.5">
+        <GoogleButton next="/profill?vistad=1" label="Vista með Google" />
+        <FacebookButton next="/profill?vistad=1" label="Vista með Facebook" />
+      </div>
       <OrDivider />
       <EmailForm
         action={linkEmail}

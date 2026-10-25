@@ -19,6 +19,8 @@ export async function GET(request: NextRequest) {
   if (errorCode) {
     if (errorCode === "identity_already_exists" || errorCode === "email_exists") return back("google_til");
     if (errorCode === "access_denied") return back("haett_vid");
+    // Facebook-aðgangar skráðir með símanúmeri hafa ekkert netfang
+    if (/email/i.test(searchParams.get("error_description") ?? "")) return back("netfang");
     return back("google");
   }
 

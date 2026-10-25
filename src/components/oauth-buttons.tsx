@@ -16,15 +16,46 @@ function GoogleLogo() {
   );
 }
 
+function FacebookLogo() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden>
+      <path
+        fill="#fff"
+        d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.96h-1.51c-1.49 0-1.95.93-1.95 1.88v2.26h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z"
+      />
+    </svg>
+  );
+}
+
 type Mode = "auto" | "signin" | "merge";
+type Provider = "google" | "facebook";
+
+// Kveikt þegar Facebook-appið er tilbúið og stillt í Supabase
+export const FACEBOOK_ENABLED = false;
 
 export const MERGE_TOKEN_KEY = "partar_sameina";
 
-// „Halda áfram með Google“. Gestur tengir Google við núverandi aðgang (gögn haldast);
-// annars er skráð inn. `mode="signin"` skráir alltaf inn (t.d. ef Google-aðgangurinn er þegar til).
-export function GoogleButton({ next = "/", mode = "auto", label }: { next?: string; mode?: Mode; label?: string }) {
+const PROVIDERS: Record<Provider, { name: string; logo: () => React.ReactElement; className: string }> = {
+  google: {
+    name: "Google",
+    logo: GoogleLogo,
+    className: "border border-stone-300 bg-surface text-stone-800",
+  },
+  facebook: {
+    name: "Facebook",
+    logo: FacebookLogo,
+    className: "bg-[#1877F2] text-white hover:bg-[#166FE5]",
+  },
+};
+
+type ButtonProps = { next?: string; mode?: Mode; label?: string };
+
+// „Halda áfram með Google/Facebook“. Gestur tengir aðganginn við núverandi aðgang (gögn haldast);
+// annars er skráð inn. `mode="signin"` skráir alltaf inn (t.d. ef aðgangurinn er þegar til).
+function OAuthButton({ provider, next = "/", mode = "auto", label }: ButtonProps & { provider: Provider }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { name, logo: Logo, className } = PROVIDERS[provider];
 
   async function go() {
     setPending(true);
@@ -46,19 +77,21 @@ export function GoogleButton({ next = "/", mode = "auto", label }: { next?: stri
       target = `/sameina?next=${encodeURIComponent(next)}`;
     }
     const redirectTo = `${window.location.origin}/auth/confirm?next=${encodeURIComponent(target)}`;
+    // Facebook gefur aðeins upp netfang ef beðið er sérstaklega um það
+    const options = { redirectTo, ...(provider === "facebook" ? { scopes: "email" } : {}) };
 
     const { error } =
       mode === "auto" && session?.user.is_anonymous
-        ? await supabase.auth.linkIdentity({ provider: "google", options: { redirectTo } })
-        : await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo } });
+        ? await supabase.auth.linkIdentity({ provider, options })
+        : await supabase.auth.signInWithOAuth({ provider, options });
 
-    // Ef allt gengur upp fer vafrinn til Google og þessi kóði keyrir ekki lengra
+    // Ef allt gengur upp fer vafrinn til Google/Facebook og þessi kóði keyrir ekki lengra
     if (error) {
       setPending(false);
       setError(
         /provider is not enabled|Unsupported provider/i.test(error.message)
-          ? "Google-innskráning er ekki komin í gagnið enn."
-          : "Ekki tókst að tengjast Google. Reyndu aftur.",
+          ? `${name}-innskráning er ekki komin í gagnið enn.`
+          : `Ekki tókst að tengjast ${name}. Reyndu aftur.`,
       );
     }
   }
@@ -69,10 +102,10 @@ export function GoogleButton({ next = "/", mode = "auto", label }: { next?: stri
         type="button"
         onClick={go}
         disabled={pending}
-        className="flex w-full items-center justify-center gap-3 rounded-xl border border-stone-300 bg-surface py-3 text-base font-semibold text-stone-800 shadow-sm transition active:scale-[0.98] disabled:opacity-60"
+        className={`flex w-full items-center justify-center gap-3 rounded-xl py-3 text-base font-semibold shadow-sm transition active:scale-[0.98] disabled:opacity-60 ${className}`}
       >
-        {pending ? <Loader2 size={20} className="animate-spin" /> : <GoogleLogo />}
-        {label ?? "Halda áfram með Google"}
+        {pending ? <Loader2 size={20} className="animate-spin" /> : <Logo />}
+        {label ?? `Halda áfram með ${name}`}
       </button>
       {error && (
         <p role="alert" className="mt-2 text-center text-sm text-red-600">
@@ -81,6 +114,14 @@ export function GoogleButton({ next = "/", mode = "auto", label }: { next?: stri
       )}
     </div>
   );
+}
+
+export function GoogleButton(props: ButtonProps) {
+  return <OAuthButton provider="google" {...props} />;
+}
+
+export function FacebookButton(props: ButtonProps) {
+  return FACEBOOK_ENABLED ? <OAuthButton provider="facebook" {...props} /> : null;
 }
 
 export function OrDivider() {

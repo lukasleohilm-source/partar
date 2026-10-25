@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Logo } from "@/components/logo";
-import { GoogleButton, OrDivider } from "@/components/oauth-buttons";
+import { FacebookButton, GoogleButton, OrDivider } from "@/components/oauth-buttons";
 import { getUser } from "@/lib/supabase/server";
 import { safeNext } from "@/lib/safe-next";
 import { LoginForm } from "./login-form";
@@ -11,8 +11,9 @@ export const metadata = { title: "Innskráning – Partar" };
 
 const ERRORS: Record<string, string> = {
   hlekkur: "Hlekkurinn er útrunninn eða þegar notaður. Biddu um nýjan.",
-  haett_vid: "Hætt var við innskráningu hjá Google.",
-  google: "Ekki tókst að skrá inn með Google. Reyndu aftur.",
+  haett_vid: "Hætt var við innskráninguna.",
+  netfang: "Facebook gaf ekki upp netfang. Notaðu Google eða netfang í staðinn.",
+  google: "Ekki tókst að skrá inn. Reyndu aftur.",
 };
 
 export default async function LoginPage({
@@ -39,7 +40,10 @@ export default async function LoginPage({
         errorText={villa ? ERRORS[villa] : undefined}
       />
 
-      <GoogleButton next={next} />
+      <div className="space-y-2.5">
+        <GoogleButton next={next} />
+        <FacebookButton next={next} />
+      </div>
       {user?.is_anonymous && (
         <p className="mt-2 text-center text-xs text-stone-500">Auglýsingar og skilaboð sem þú átt sem gestur haldast.</p>
       )}
