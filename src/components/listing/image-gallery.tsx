@@ -3,9 +3,11 @@
 import { ChevronLeft, ChevronRight, Expand, Wrench, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { imageUrl, thumbUrl, type ImageRef } from "@/lib/listings";
+import { useT } from "@/components/lang-provider";
 
 // Myndasería sem flett er með fingri; smellur opnar myndir í fullri skjástærð
 export function ImageGallery({ images, title }: { images: ImageRef[]; title: string }) {
+  const { t } = useT();
   const ref = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const [full, setFull] = useState<number | null>(null);
@@ -36,14 +38,14 @@ export function ImageGallery({ images, title }: { images: ImageRef[]; title: str
               key={img.path}
               type="button"
               onClick={() => setFull(i)}
-              aria-label={`Opna mynd ${i + 1} í fullri stærð`}
+              aria-label={t("Opna mynd {n} í fullri stærð", { n: i + 1 })}
               className="size-full shrink-0 snap-center"
               style={{ backgroundColor: img.color ?? "#1c1917" }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- myndir þegar minnkaðar við upphleðslu */}
               <img
                 src={imageUrl(img.path)}
-                alt={`${title} – mynd ${i + 1}`}
+                alt={`${title} – ${t("mynd {n}", { n: i + 1 })}`}
                 loading={i === 0 ? "eager" : "lazy"}
                 decoding="async"
                 className="size-full object-contain"
@@ -70,7 +72,7 @@ export function ImageGallery({ images, title }: { images: ImageRef[]; title: str
               type="button"
               onClick={() => go(index - 1)}
               disabled={index === 0}
-              aria-label="Fyrri mynd"
+              aria-label={t("Fyrri mynd")}
               className="absolute left-2 top-1/2 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white disabled:invisible sm:flex"
             >
               <ChevronLeft size={24} />
@@ -79,7 +81,7 @@ export function ImageGallery({ images, title }: { images: ImageRef[]; title: str
               type="button"
               onClick={() => go(index + 1)}
               disabled={index === images.length - 1}
-              aria-label="Næsta mynd"
+              aria-label={t("Næsta mynd")}
               className="absolute right-2 top-1/2 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white disabled:invisible sm:flex"
             >
               <ChevronRight size={24} />
@@ -96,7 +98,7 @@ export function ImageGallery({ images, title }: { images: ImageRef[]; title: str
               key={img.path}
               type="button"
               onClick={() => go(i)}
-              aria-label={`Sýna mynd ${i + 1}`}
+              aria-label={t("Sýna mynd {n}", { n: i + 1 })}
               className={`size-16 shrink-0 overflow-hidden rounded-xl ring-2 transition ${i === index ? "ring-orange-500" : "opacity-70 ring-transparent hover:opacity-100"}`}
               style={{ backgroundColor: img.color ?? "#1c1917" }}
             >
@@ -123,6 +125,7 @@ function FullscreenViewer({
   title: string;
   onClose: (index: number) => void;
 }) {
+  const { t } = useT();
   const ref = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(start);
   const [zoomed, setZoomed] = useState<number | null>(null);
@@ -142,12 +145,12 @@ function FullscreenViewer({
   }, [start, close]);
 
   return (
-    <div role="dialog" aria-modal aria-label={`${title} – myndir`} className="fixed inset-0 z-[70] flex flex-col bg-black">
+    <div role="dialog" aria-modal aria-label={`${title} – ${t("myndir")}`} className="fixed inset-0 z-[70] flex flex-col bg-black">
       <div className="flex items-center justify-between px-3 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))] text-white">
         <span className="text-sm font-medium">
           {index + 1} / {images.length}
         </span>
-        <button type="button" onClick={close} aria-label="Loka" className="flex size-10 items-center justify-center rounded-full bg-white/15">
+        <button type="button" onClick={close} aria-label={t("Loka")} className="flex size-10 items-center justify-center rounded-full bg-white/15">
           <X size={22} />
         </button>
       </div>
@@ -168,14 +171,14 @@ function FullscreenViewer({
             {/* eslint-disable-next-line @next/next/no-img-element -- myndir þegar minnkaðar við upphleðslu */}
             <img
               src={imageUrl(img.path)}
-              alt={`${title} – mynd ${i + 1}`}
+              alt={`${title} – ${t("mynd {n}", { n: i + 1 })}`}
               className={zoomed === i ? "max-w-none w-[220%]" : "max-h-full max-w-full object-contain"}
             />
           </div>
         ))}
       </div>
       <p className="pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-2 text-center text-xs text-white/60">
-        Tvísmelltu til að stækka
+        {t("Tvísmelltu til að stækka")}
       </p>
     </div>
   );

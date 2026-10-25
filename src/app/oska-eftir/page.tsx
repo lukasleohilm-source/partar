@@ -12,8 +12,12 @@ import { WANTED_SELECT, describeWanted, wantedTitle, wantedToFilters, type Wante
 import { setWantedActive } from "./actions";
 import { DeleteWantedButton } from "./delete-wanted-button";
 import { MarkNotificationsRead } from "./mark-read";
+import { getT } from "@/lib/lang-server";
 
-export const metadata = { title: "Óska eftir – Partar" };
+export async function generateMetadata() {
+  const { t } = await getT();
+  return { title: `${t("Óska eftir")} – Partar` };
+}
 
 type NotificationRow = {
   id: number;
@@ -24,6 +28,7 @@ type NotificationRow = {
 };
 
 export default async function WantedPage() {
+  const { t, lang } = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -56,9 +61,9 @@ export default async function WantedPage() {
       <MarkNotificationsRead key={notes[0]?.id} hasUnread={notes.some((n) => !n.read_at)} />
 
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Óska eftir</h1>
+        <h1 className="text-2xl font-bold">{t("Óska eftir")}</h1>
         <Link href="/oska-eftir/ny" className="inline-flex items-center gap-1 rounded-full bg-orange-600 py-2 pl-3 pr-4 text-sm font-semibold text-white shadow-md shadow-orange-600/25 active:bg-orange-700">
-          <Plus size={17} strokeWidth={2.6} /> Ný ósk
+          <Plus size={17} strokeWidth={2.6} />{" "}{t("Ný ósk")}
         </Link>
       </header>
 
@@ -69,19 +74,19 @@ export default async function WantedPage() {
           <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-orange-50 text-orange-600" aria-hidden>
             <BellRing size={28} />
           </div>
-          <p className="font-medium">Vantar þig eitthvað?</p>
+          <p className="font-medium">{t("Vantar þig eitthvað?")}</p>
           <p className="mt-1 text-sm text-stone-600">
-            Skráðu hvað þú leitar að og við látum þig vita um leið og auglýsing sem passar birtist.
+            {t("Skráðu hvað þú leitar að og við látum þig vita um leið og auglýsing sem passar birtist.")}
           </p>
           <Link href="/oska-eftir/ny" className="mt-4 inline-block font-semibold text-orange-600">
-            Skrá fyrstu óskina →
+            {t("Skrá fyrstu óskina →")}
           </Link>
         </div>
       )}
 
       {notes.length > 0 && (
         <section>
-          <h2 className="mb-2 font-semibold">Tilkynningar</h2>
+          <h2 className="mb-2 font-semibold">{t("Tilkynningar")}</h2>
           <ul className="divide-y divide-stone-200 overflow-hidden rounded-2xl bg-surface">
             {notes.map((n) => {
               const l = n.listings!;
@@ -92,14 +97,14 @@ export default async function WantedPage() {
                     <Thumb image={coverOf(l.listing_images)} className="size-16 shrink-0 rounded-xl" />
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-orange-700">
-                        {unread && <span className="mr-1 inline-block size-2 rounded-full bg-orange-600" aria-label="Nýtt" />}
-                        Passar við {n.wanted_requests ? wantedTitle(n.wanted_requests, m, c) : "ósk"}
+                        {unread && <span className="mr-1 inline-block size-2 rounded-full bg-orange-600" aria-label={t("Nýtt")} />}
+                        {t("Passar við")}{" "}{n.wanted_requests ? wantedTitle(n.wanted_requests, m, c, lang) : t("ósk")}
                       </p>
                       <p className={`truncate ${unread ? "font-bold" : "font-medium"}`}>{l.title}</p>
                       <p className="text-sm">
-                        <span className="font-bold text-orange-600">{formatPrice(l.price_isk)}</span>
-                        <span className="text-stone-500"> · {timeAgo(n.created_at)}</span>
-                        {l.status === "sold" && <span className="ml-1 font-bold text-red-600">SELT</span>}
+                        <span className="font-bold text-orange-600">{formatPrice(l.price_isk, lang)}</span>
+                        <span className="text-stone-500"> · {timeAgo(n.created_at, Date.now(), lang)}</span>
+                        {l.status === "sold" && <span className="ml-1 font-bold text-red-600">{t("SELT")}</span>}
                       </p>
                     </div>
                   </Link>
@@ -112,33 +117,33 @@ export default async function WantedPage() {
 
       {wants.length > 0 && (
         <section>
-          <h2 className="mb-2 font-semibold">Mínar óskir</h2>
+          <h2 className="mb-2 font-semibold">{t("Mínar óskir")}</h2>
           <ul className="space-y-2">
             {wants.map((w) => (
               <li key={w.id} className={`rounded-2xl bg-surface p-4 ${w.active ? "" : "opacity-60"}`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-semibold">{wantedTitle(w, m, c)}</p>
-                    <p className="mt-0.5 text-sm text-stone-600">{describeWanted(w, m, mo, c).join(" · ")}</p>
+                    <p className="font-semibold">{wantedTitle(w, m, c, lang)}</p>
+                    <p className="mt-0.5 text-sm text-stone-600">{describeWanted(w, m, mo, c, lang).join(" · ")}</p>
                   </div>
                   <span
                     className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
                       w.active ? "bg-green-100 text-green-800" : "bg-stone-200 text-stone-600"
                     }`}
                   >
-                    {w.active ? "Virk" : "Í hléi"}
+                    {w.active ? t("Virk") : t("Í hléi")}
                   </span>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium">
                   <Link href={searchHref(wantedToFilters(w))} className="text-orange-700">
-                    Sjá það sem passar nú þegar
+                    {t("Sjá það sem passar nú þegar")}
                   </Link>
                   <form action={setWantedActive.bind(null, w.id, !w.active)}>
                     <button type="submit" className="text-stone-600">
-                      {w.active ? "Setja í hlé" : "Virkja aftur"}
+                      {w.active ? t("Setja í hlé") : t("Virkja aftur")}
                     </button>
                   </form>
-                  <DeleteWantedButton id={w.id} title={wantedTitle(w, m, c)} />
+                  <DeleteWantedButton id={w.id} title={wantedTitle(w, m, c, lang)} />
                 </div>
               </li>
             ))}

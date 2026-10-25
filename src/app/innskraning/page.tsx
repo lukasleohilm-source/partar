@@ -6,8 +6,12 @@ import { getUser } from "@/lib/supabase/server";
 import { safeNext } from "@/lib/safe-next";
 import { LoginForm } from "./login-form";
 import { MergePrompt } from "./merge-prompt";
+import { getT } from "@/lib/lang-server";
 
-export const metadata = { title: "Innskráning – Partar" };
+export async function generateMetadata() {
+  const { t } = await getT();
+  return { title: `${t("Innskráning")} – Partar` };
+}
 
 const ERRORS: Record<string, string> = {
   hlekkur: "Hlekkurinn er útrunninn eða þegar notaður. Biddu um nýjan.",
@@ -21,6 +25,7 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ next?: string; villa?: string }>;
 }) {
+  const { t } = await getT();
   const { next: rawNext, villa } = await searchParams;
   const next = safeNext(rawNext);
 
@@ -30,14 +35,14 @@ export default async function LoginPage({
   return (
     <div className="mx-auto max-w-md md:max-w-xl md:pt-10 px-4 pt-8">
       <Logo className="mb-6" />
-      <h1 className="mb-1 text-2xl font-extrabold tracking-tight">Skráðu þig inn</h1>
-      <p className="mb-6 text-stone-600">Ekkert lykilorð. Nýir notendur eru skráðir sjálfkrafa.</p>
+      <h1 className="mb-1 text-2xl font-extrabold tracking-tight">{t("Skráðu þig inn")}</h1>
+      <p className="mb-6 text-stone-600">{t("Ekkert lykilorð. Nýir notendur eru skráðir sjálfkrafa.")}</p>
 
       <MergePrompt
         next={next}
         forced={villa === "google_til"}
         isGuest={Boolean(user?.is_anonymous)}
-        errorText={villa ? ERRORS[villa] : undefined}
+        errorText={villa && ERRORS[villa] ? t(ERRORS[villa]) : undefined}
       />
 
       <div className="space-y-2.5">
@@ -45,7 +50,7 @@ export default async function LoginPage({
         <FacebookButton next={next} />
       </div>
       {user?.is_anonymous && (
-        <p className="mt-2 text-center text-xs text-stone-500">Auglýsingar og skilaboð sem þú átt sem gestur haldast.</p>
+        <p className="mt-2 text-center text-xs text-stone-500">{t("Auglýsingar og skilaboð sem þú átt sem gestur haldast.")}</p>
       )}
 
       <OrDivider />
@@ -54,9 +59,9 @@ export default async function LoginPage({
 
       {user?.is_anonymous && (
         <p className="mt-4 text-center text-sm text-stone-500">
-          Viltu frekar tengja netfang við gestaaðganginn?{" "}
+          {t("Viltu frekar tengja netfang við gestaaðganginn?")}{" "}
           <Link href="/profill" className="font-semibold text-orange-700">
-            Fara í „Ég“
+            {t("Fara í „Ég“")}
           </Link>
         </p>
       )}

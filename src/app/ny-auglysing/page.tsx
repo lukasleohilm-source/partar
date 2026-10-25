@@ -1,8 +1,12 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ListingForm } from "./listing-form";
+import { getT } from "@/lib/lang-server";
 
-export const metadata = { title: "Ný auglýsing – Partar" };
+export async function generateMetadata() {
+  const { t } = await getT();
+  return { title: `${t("Ný auglýsing")} – Partar` };
+}
 
 export default async function NewListingPage() {
   const supabase = await createClient();

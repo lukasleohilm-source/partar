@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { LegalPage } from "@/components/legal-page";
+import { getT } from "@/lib/lang-server";
 
-export const metadata = { title: "Eyðing gagna – Partar" };
+export async function generateMetadata() {
+  const { t } = await getT();
+  return { title: `${t("Eyðing gagna")} – Partar` };
+}
 
 // Opin síða (án innskráningar) með leiðbeiningum um eyðingu gagna; Meta krefst hennar fyrir Facebook-innskráningu
 export default function DataDeletionPage() {

@@ -6,9 +6,11 @@ import { ListingCard } from "@/components/listing/listing-card";
 import { RECENT_KEY } from "@/components/listing/view-tracker";
 import { LISTING_SUMMARY_SELECT, type ListingSummary } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/client";
+import { useT } from "@/components/lang-provider";
 
 // „Nýlega skoðað“ á forsíðu. Listinn er geymdur í vafranum (sjá ViewTracker).
 export function RecentlyViewed() {
+  const { t } = useT();
   const [items, setItems] = useState<ListingSummary[]>([]);
 
   useEffect(() => {
@@ -42,10 +44,10 @@ export function RecentlyViewed() {
     <section className="mt-7 px-4">
       <div className="mb-3 flex items-baseline justify-between">
         <h2 className="flex items-center gap-2 text-lg font-bold tracking-tight">
-          <History size={19} className="text-orange-600" /> Nýlega skoðað
+          <History size={19} className="text-orange-600" />{" "}{t("Nýlega skoðað")}
         </h2>
         <button type="button" onClick={clear} className="flex items-center gap-1 text-sm font-medium text-stone-500">
-          <X size={15} /> Hreinsa
+          <X size={15} />{" "}{t("Hreinsa")}
         </button>
       </div>
       <ul className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:px-0">

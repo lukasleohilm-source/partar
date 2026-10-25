@@ -1,6 +1,10 @@
 import { LegalPage } from "@/components/legal-page";
+import { getT } from "@/lib/lang-server";
 
-export const metadata = { title: "Persónuvernd – Partar" };
+export async function generateMetadata() {
+  const { t } = await getT();
+  return { title: `${t("Persónuvernd")} – Partar` };
+}
 
 export default function PrivacyPage() {
   return (

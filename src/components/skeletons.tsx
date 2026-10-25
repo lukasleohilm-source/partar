@@ -1,3 +1,4 @@
+import { getT } from "@/lib/lang-server";
 // Hleðsluskuggar sem birtast meðan síða sækir gögn
 
 export function CardSkeleton() {
@@ -13,9 +14,10 @@ export function CardSkeleton() {
   );
 }
 
-export function GridSkeleton({ count = 6 }: { count?: number }) {
+export async function GridSkeleton({ count = 6 }: { count?: number }) {
+  const { t } = await getT();
   return (
-    <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4" aria-busy aria-label="Hleð…">
+    <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4" aria-busy aria-label={t("Hleð…")}>
       {Array.from({ length: count }, (_, i) => (
         <li key={i}>
           <CardSkeleton />
@@ -25,9 +27,10 @@ export function GridSkeleton({ count = 6 }: { count?: number }) {
   );
 }
 
-export function RowSkeleton({ count = 5 }: { count?: number }) {
+export async function RowSkeleton({ count = 5 }: { count?: number }) {
+  const { t } = await getT();
   return (
-    <ul className="divide-y divide-stone-200 overflow-hidden rounded-2xl bg-surface" aria-busy aria-label="Hleð…">
+    <ul className="divide-y divide-stone-200 overflow-hidden rounded-2xl bg-surface" aria-busy aria-label={t("Hleð…")}>
       {Array.from({ length: count }, (_, i) => (
         <li key={i} className="flex gap-3 p-3">
           <div className="skeleton size-14 shrink-0 rounded-xl" />

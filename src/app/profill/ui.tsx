@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, type LucideIcon } from "lucide-react";
 import Link from "next/link";
+import { getT } from "@/lib/lang-server";
 
 // Byggingareiningar Ég-flipans: flokkaðar raðir eins og í stillingum símans
 
@@ -69,10 +70,11 @@ export function ActionRow({ action, ...props }: RowProps & { action: () => Promi
   );
 }
 
-export function SubpageHeader({ title, back = "/profill" }: { title: string; back?: string }) {
+export async function SubpageHeader({ title, back = "/profill" }: { title: string; back?: string }) {
+  const { t } = await getT();
   return (
     <header className="mb-5 flex items-center gap-1">
-      <Link href={back} aria-label="Til baka" className="-ml-2 grid size-10 place-items-center rounded-full text-stone-600 active:bg-stone-100">
+      <Link href={back} aria-label={t("Til baka")} className="-ml-2 grid size-10 place-items-center rounded-full text-stone-600 active:bg-stone-100">
         <ChevronLeft size={26} />
       </Link>
       <h1 className="text-2xl font-bold tracking-tight">{title}</h1>

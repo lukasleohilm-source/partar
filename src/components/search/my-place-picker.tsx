@@ -7,9 +7,11 @@ import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { inputClass, labelClass, primaryButton, secondaryButton } from "@/components/ui/styles";
 import { POSTAL, nearestPostal } from "@/lib/places";
 import { DISTANCES, serializeMyPlace } from "@/lib/search";
+import { useT } from "@/components/lang-provider";
 
 // „Minn staður“: póstnúmer notanda (eða GPS) fyrir fjarlægð og röðun „Næst mér“
 export function MyPlacePicker({ place, maxKm }: { place: string | null; maxKm?: number }) {
+  const { t } = useT();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [postal, setPostal] = useState(place ?? "");
@@ -32,7 +34,7 @@ export function MyPlacePicker({ place, maxKm }: { place: string | null; maxKm?: 
   }
 
   function locate() {
-    if (!navigator.geolocation) return setError("Tækið styður ekki staðsetningu.");
+    if (!navigator.geolocation) return setError(t("Tækið styður ekki staðsetningu."));
     setLocating(true);
     setError(null);
     navigator.geolocation.getCurrentPosition(
@@ -41,7 +43,7 @@ export function MyPlacePicker({ place, maxKm }: { place: string | null; maxKm?: 
         setLocating(false);
       },
       () => {
-        setError("Ekki fékkst leyfi til að sjá staðsetningu.");
+        setError(t("Ekki fékkst leyfi til að sjá staðsetningu."));
         setLocating(false);
       },
       { maximumAge: 600_000, timeout: 10_000 },
@@ -58,22 +60,22 @@ export function MyPlacePicker({ place, maxKm }: { place: string | null; maxKm?: 
         className="flex shrink-0 items-center gap-1.5 rounded-full bg-surface px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-black/5 active:scale-95"
       >
         <MapPin size={16} className="text-orange-600" />
-        {name ? `${name}${maxKm ? ` · innan ${maxKm} km` : ""}` : "Staðsetning"}
+        {name ? `${name}${maxKm ? ` · innan ${maxKm} km` : ""}` : t("Staðsetning")}
         <ChevronRight size={15} className="text-stone-400" />
       </button>
 
       <BottomSheet
         open={open}
         onClose={() => setOpen(false)}
-        title="Minn staður"
+        title={t("Minn staður")}
         footer={
           <div className="space-y-2">
             <button type="button" disabled={!valid} onClick={() => apply(postal, km)} className={primaryButton}>
-              Sýna næst mér
+              {t("Sýna næst mér")}
             </button>
             {place && (
               <button type="button" onClick={() => apply(null, undefined)} className={secondaryButton}>
-                Fjarlægja staðsetningu
+                {t("Fjarlægja staðsetningu")}
               </button>
             )}
           </div>
@@ -81,10 +83,10 @@ export function MyPlacePicker({ place, maxKm }: { place: string | null; maxKm?: 
       >
         <div className="space-y-4">
           <button type="button" onClick={locate} disabled={locating} className={`${secondaryButton} flex items-center justify-center gap-2`}>
-            {locating ? <Loader2 size={18} className="animate-spin" /> : <LocateFixed size={18} />} Nota staðsetningu símans
+            {locating ? <Loader2 size={18} className="animate-spin" /> : <LocateFixed size={18} />}{" "}{t("Nota staðsetningu símans")}
           </button>
           <label className="block">
-            <span className={labelClass}>eða póstnúmer</span>
+            <span className={labelClass}>{t("eða póstnúmer")}</span>
             <input
               value={postal}
               onChange={(e) => setPostal(e.target.value.replace(/\D/g, "").slice(0, 3))}
@@ -94,13 +96,13 @@ export function MyPlacePicker({ place, maxKm }: { place: string | null; maxKm?: 
             />
             {postal.length === 3 && (
               <span className={`mt-1 block text-sm ${valid ? "text-stone-600" : "text-red-600"}`}>
-                {valid ? POSTAL[postal][0] : "Óþekkt póstnúmer"}
+                {valid ? POSTAL[postal][0] : t("Óþekkt póstnúmer")}
               </span>
             )}
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <fieldset>
-            <legend className={labelClass}>Hámarksfjarlægð</legend>
+            <legend className={labelClass}>{t("Hámarksfjarlægð")}</legend>
             <div className="flex flex-wrap gap-2">
               {[undefined, ...DISTANCES].map((d) => (
                 <button
@@ -110,12 +112,12 @@ export function MyPlacePicker({ place, maxKm }: { place: string | null; maxKm?: 
                   aria-pressed={km === d}
                   className={`rounded-full border px-3.5 py-2 text-sm ${km === d ? "border-orange-600 bg-orange-600 text-white" : "border-stone-300 bg-surface"}`}
                 >
-                  {d ? `${d} km` : "Allt landið"}
+                  {d ? `${d} km` : t("Allt landið")}
                 </button>
               ))}
             </div>
           </fieldset>
-          <p className="text-xs text-stone-500">Fjarlægð er reiknuð út frá póstnúmeri auglýsingar (annars landshluta) og er áætluð.</p>
+          <p className="text-xs text-stone-500">{t("Fjarlægð er reiknuð út frá póstnúmeri auglýsingar (annars landshluta) og er áætluð.")}</p>
         </div>
       </BottomSheet>
     </>

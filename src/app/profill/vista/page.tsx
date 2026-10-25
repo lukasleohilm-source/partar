@@ -2,10 +2,15 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SaveAccount } from "../save-account";
 import { SubpageHeader } from "../ui";
+import { getT } from "@/lib/lang-server";
 
-export const metadata = { title: "Vista aðgang – Partar" };
+export async function generateMetadata() {
+  const { t } = await getT();
+  return { title: `${t("Vista aðgang")} – Partar` };
+}
 
 export default async function SaveAccountPage() {
+  const { t } = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -15,7 +20,7 @@ export default async function SaveAccountPage() {
 
   return (
     <div className="mx-auto max-w-md md:max-w-xl md:pt-10 px-4 pt-6">
-      <SubpageHeader title="Vista aðgang" />
+      <SubpageHeader title={t("Vista aðgang")} />
       <SaveAccount />
     </div>
   );

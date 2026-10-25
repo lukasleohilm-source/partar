@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { disablePush, enablePush, getPushState, isIos, type PushState } from "@/lib/push-client";
 import { reportError } from "@/lib/report-error";
 import { createClient } from "@/lib/supabase/client";
+import { useT } from "@/components/lang-provider";
 
 type PrefKey = "messages" | "wanted" | "price_drop" | "reviews" | "email";
 type Prefs = Record<PrefKey, boolean>;
@@ -45,6 +46,7 @@ function errorText(e: unknown): string {
 }
 
 export function PushToggle({ compact = false }: { compact?: boolean }) {
+  const { t } = useT();
   const [state, setState] = useState<PushState | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -71,7 +73,7 @@ export function PushToggle({ compact = false }: { compact?: boolean }) {
       }
       const result = await enablePush();
       if (result === "dismissed") {
-        setNotice("Þú lokaðir glugganum án þess að leyfa. Ýttu aftur og veldu „Leyfa“.");
+        setNotice(t("Þú lokaðir glugganum án þess að leyfa. Ýttu aftur og veldu „Leyfa“."));
         return;
       }
       setState(result);
@@ -79,12 +81,12 @@ export function PushToggle({ compact = false }: { compact?: boolean }) {
         // Staðfesting beint í símann svo notandinn sjái strax að þetta virkar
         const reg = await navigator.serviceWorker.ready;
         await reg
-          .showNotification("Tilkynningar virka 🎉", { body: "Þú færð tilkynningu þegar eitthvað gerist á Partar.", icon: "/pwa-icon/192" })
+          .showNotification(t("Tilkynningar virka 🎉"), { body: t("Þú færð tilkynningu þegar eitthvað gerist á Partar."), icon: "/pwa-icon/192" })
           .catch(() => {});
       }
     } catch (e) {
       reportError(e, `push: toggle from ${state}`);
-      setNotice(errorText(e));
+      setNotice(t(errorText(e)));
     } finally {
       setBusy(false);
     }
@@ -97,16 +99,16 @@ export function PushToggle({ compact = false }: { compact?: boolean }) {
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="flex items-center gap-2 font-semibold">
-            <Bell size={18} className="text-orange-600" /> Tilkynningar
+            <Bell size={18} className="text-orange-600" />{" "}{t("Tilkynningar")}
           </p>
-          <p className="mt-0.5 text-sm text-stone-600">{state === "denied" ? deniedText() : TEXT[state]}</p>
+          <p className="mt-0.5 text-sm text-stone-600">{t(state === "denied" ? deniedText() : TEXT[state])}</p>
         </div>
         {canToggle && (
           <button
             type="button"
             role="switch"
             aria-checked={state === "on"}
-            aria-label="Tilkynningar"
+            aria-label={t("Tilkynningar")}
             disabled={busy}
             onClick={toggle}
             className={`relative h-7 w-12 shrink-0 rounded-full transition-colors disabled:opacity-60 ${
@@ -124,15 +126,15 @@ export function PushToggle({ compact = false }: { compact?: boolean }) {
         <ol className="mt-3 space-y-2 text-sm text-stone-700">
           <li className="flex items-center gap-2">
             <span className="grid size-6 shrink-0 place-items-center rounded-full bg-orange-100 text-xs font-bold text-orange-700">1</span>
-            Ýttu á <Share size={16} className="text-blue-600" aria-label="Deila" /> Deila neðst í Safari
+            {t("Ýttu á")}{" "}<Share size={16} className="text-blue-600" aria-label={t("Deila")} />{" "}{t("Deila neðst í Safari")}
           </li>
           <li className="flex items-center gap-2">
             <span className="grid size-6 shrink-0 place-items-center rounded-full bg-orange-100 text-xs font-bold text-orange-700">2</span>
-            Veldu <SquarePlus size={16} aria-hidden /> „Setja á heimaskjá“ (Add to Home Screen)
+            {t("Veldu")}{" "}<SquarePlus size={16} aria-hidden />{" "}{t("„Setja á heimaskjá“ (Add to Home Screen)")}
           </li>
           <li className="flex items-center gap-2">
             <span className="grid size-6 shrink-0 place-items-center rounded-full bg-orange-100 text-xs font-bold text-orange-700">3</span>
-            Opnaðu Partar af heimaskjánum, skráðu þig inn og kveiktu hér
+            {t("Opnaðu Partar af heimaskjánum, skráðu þig inn og kveiktu hér")}
           </li>
         </ol>
       )}
@@ -147,6 +149,7 @@ export function PushToggle({ compact = false }: { compact?: boolean }) {
 
 // Hvaða tilkynningar notandinn vill fá. Engin vistuð röð = allt kveikt.
 function NotificationPrefs({ pushOn, emailMode = false }: { pushOn: boolean; emailMode?: boolean }) {
+  const { t } = useT();
   const [supabase] = useState(createClient);
   const [prefs, setPrefs] = useState<Prefs | null>(null);
   const [failed, setFailed] = useState(false);
@@ -184,12 +187,12 @@ function NotificationPrefs({ pushOn, emailMode = false }: { pushOn: boolean; ema
 
   // Pósturinn er eina leiðin: aðalrofinn fyrst, svo tegundirnar
   const rows = emailMode
-    ? [{ key: "email" as const, label: "Senda mér tölvupóst", hint: `Á ${email}` }, ...PREFS.filter((p) => p.key !== "email")]
-    : PREFS.filter((p) => p.key !== "email" || email).map((p) => (p.key === "email" ? { ...p, hint: `${p.hint} (${email})` } : p));
+    ? [{ key: "email" as const, label: t("Senda mér tölvupóst"), hint: t("Á {netfang}", { netfang: email ?? "" }) }, ...PREFS.filter((p) => p.key !== "email").map((p) => ({ ...p, label: t(p.label), hint: t(p.hint) }))]
+    : PREFS.filter((p) => p.key !== "email" || email).map((p) => ({ ...p, label: t(p.label), hint: p.key === "email" ? `${t(p.hint)} (${email})` : t(p.hint) }));
 
   return (
     <fieldset className="mt-4 border-t border-line pt-3">
-      <legend className="mb-1 text-sm font-semibold text-stone-800">Láta mig vita um</legend>
+      <legend className="mb-1 text-sm font-semibold text-stone-800">{t("Láta mig vita um")}</legend>
       {rows.map((p) => (
         <label key={p.key} className="flex cursor-pointer items-center justify-between gap-3 py-2">
           <span>
@@ -206,7 +209,7 @@ function NotificationPrefs({ pushOn, emailMode = false }: { pushOn: boolean; ema
       ))}
       {failed && (
         <p role="alert" className="text-sm text-red-600">
-          Ekki tókst að vista. Reyndu aftur.
+          {t("Ekki tókst að vista. Reyndu aftur.")}
         </p>
       )}
     </fieldset>
@@ -215,6 +218,7 @@ function NotificationPrefs({ pushOn, emailMode = false }: { pushOn: boolean; ema
 
 // Tilkynningar koma í tölvupósti. Gestir án netfangs eru beðnir að vista aðganginn.
 function EmailNotifications({ compact }: { compact: boolean }) {
+  const { t } = useT();
   const [email, setEmail] = useState<string | null | undefined>(undefined);
 
   useEffect(() => {
@@ -228,20 +232,20 @@ function EmailNotifications({ compact }: { compact: boolean }) {
   return (
     <section className="rounded-2xl bg-surface p-4">
       <p className="flex items-center gap-2 font-semibold">
-        <Mail size={18} className="text-orange-600" /> Tilkynningar í tölvupósti
+        <Mail size={18} className="text-orange-600" />{" "}{t("Tilkynningar í tölvupósti")}
       </p>
       {email ? (
         <>
-          <p className="mt-0.5 text-sm text-stone-600">Við sendum þér póst þegar þú færð skilaboð eða eitthvað passar við óskir þínar.</p>
+          <p className="mt-0.5 text-sm text-stone-600">{t("Við sendum þér póst þegar þú færð skilaboð eða eitthvað passar við óskir þínar.")}</p>
           <NotificationPrefs pushOn={false} emailMode />
         </>
       ) : (
         <>
           <p className="mt-0.5 text-sm text-stone-600">
-            Vistaðu aðganginn með Google eða netfangi til að fá póst þegar þú færð skilaboð eða auglýsing passar við ósk.
+            {t("Vistaðu aðganginn með Google eða netfangi til að fá póst þegar þú færð skilaboð eða auglýsing passar við ósk.")}
           </p>
           <Link href="/profill/vista" className="mt-2 inline-block text-sm font-semibold text-orange-700 underline">
-            Vista aðgang
+            {t("Vista aðgang")}
           </Link>
         </>
       )}

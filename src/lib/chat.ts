@@ -1,4 +1,5 @@
 import { formatDate, formatTime } from "./i18n";
+import type { Lang } from "./lang";
 
 // Sent á window þegar ólesið breytist, svo valmyndin uppfæri merkið sitt
 export const UNREAD_EVENT = "partar:unread-changed";
@@ -26,9 +27,9 @@ function dayKey(d: Date): string {
 }
 
 // Klukka ef í dag, annars dagsetning (fyrir samtalalista)
-export function shortTime(iso: string, now = new Date()): string {
+export function shortTime(iso: string, now = new Date(), lang: Lang = "is"): string {
   const d = new Date(iso);
-  return dayKey(d) === dayKey(now) ? formatTime(d) : formatDate(d, { month: "short" });
+  return dayKey(d) === dayKey(now) ? formatTime(d) : formatDate(d, { month: "short" }, lang);
 }
 
 export function messageTime(iso: string): string {
@@ -36,12 +37,12 @@ export function messageTime(iso: string): string {
 }
 
 // Fyrirsögn dags í spjallþræði
-export function dayLabel(iso: string, now = new Date()): string {
+export function dayLabel(iso: string, now = new Date(), lang: Lang = "is"): string {
   const d = new Date(iso);
   const yesterday = new Date(now.getTime() - 86_400_000);
-  if (dayKey(d) === dayKey(now)) return "Í dag";
-  if (dayKey(d) === dayKey(yesterday)) return "Í gær";
-  return formatDate(d, { weekday: true });
+  if (dayKey(d) === dayKey(now)) return lang === "en" ? "Today" : "Í dag";
+  if (dayKey(d) === dayKey(yesterday)) return lang === "en" ? "Yesterday" : "Í gær";
+  return formatDate(d, { weekday: true }, lang);
 }
 
 export function sameDay(a: string, b: string): boolean {

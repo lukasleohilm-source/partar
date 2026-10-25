@@ -3,8 +3,12 @@ import { MESSAGE_COLS, type Message } from "@/lib/chat";
 import { IMAGE_COLS, coverOf, type ImageRef } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/server";
 import { ChatThread } from "./chat-thread";
+import { getT } from "@/lib/lang-server";
 
-export const metadata = { title: "Spjall – Partar" };
+export async function generateMetadata() {
+  const { t } = await getT();
+  return { title: `${t("Spjall")} – Partar` };
+}
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

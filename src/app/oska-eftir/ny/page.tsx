@@ -3,8 +3,12 @@ import { redirect } from "next/navigation";
 import { MY_CAR_COOKIE, parseFilters, parseMyCar } from "@/lib/search";
 import { createClient } from "@/lib/supabase/server";
 import { WantedForm } from "./wanted-form";
+import { getT } from "@/lib/lang-server";
 
-export const metadata = { title: "Ný ósk – Partar" };
+export async function generateMetadata() {
+  const { t } = await getT();
+  return { title: `${t("Ný ósk")} – Partar` };
+}
 
 export default async function NewWantedPage({
   searchParams,

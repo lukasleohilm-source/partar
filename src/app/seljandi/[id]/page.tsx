@@ -9,6 +9,7 @@ import { Stars } from "@/components/stars";
 import { REGIONS, formatDate, formatDecimal, isRegion } from "@/lib/i18n";
 import { LISTING_SUMMARY_SELECT, timeAgo, type ListingSummary } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/server";
+import { getT } from "@/lib/lang-server";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -21,11 +22,13 @@ const getProfile = cache(async (id: string) => {
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const profile = await getProfile((await params).id);
-  return { title: profile ? `${profile.display_name} – Partar` : "Seljandi fannst ekki – Partar" };
+  const { t } = await getT();
+  return { title: profile ? `${profile.display_name} – Partar` : `${t("Seljandi fannst ekki")} – Partar` };
 }
 
 // Opin síða seljanda: hver hann er, einkunnir og allar auglýsingar hans
 export default async function SellerPage({ params }: { params: Promise<{ id: string }> }) {
+  const { t, lang } = await getT();
   const { id } = await params;
   const profile = await getProfile(id);
   if (!profile) notFound();
@@ -52,7 +55,7 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
     ...l,
     listing_images: [...l.listing_images].sort((a, b) => a.sort - b.sort),
   }));
-  const region = profile.region && isRegion(profile.region) ? REGIONS[profile.region] : null;
+  const region = profile.region && isRegion(profile.region) ? t(REGIONS[profile.region]) : null;
   const withComments = (reviews ?? []).filter((r) => r.comment);
 
   return (
@@ -73,7 +76,7 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
                 </span>
               )}
               <span className="flex items-center gap-1">
-                <CalendarDays size={14} /> Á Pörtum síðan {formatDate(new Date(profile.created_at), { day: false, year: true })}
+                <CalendarDays size={14} />{" "}{t("Á Pörtum síðan")}{" "}{formatDate(new Date(profile.created_at), { day: false, year: true }, lang)}
               </span>
             </p>
           </div>
@@ -82,32 +85,32 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
         <div className="mt-5 grid grid-cols-3 divide-x divide-line rounded-2xl bg-canvas py-3 text-center md:ml-auto md:mt-0 md:min-w-96">
           <div>
             <span className="block text-lg font-bold tabular-nums">{active.length}</span>
-            <span className="block text-xs text-stone-500">Til sölu</span>
+            <span className="block text-xs text-stone-500">{t("Til sölu")}</span>
           </div>
           <div>
             <span className="block text-lg font-bold tabular-nums">{sold.count ?? 0}</span>
-            <span className="block text-xs text-stone-500">Selt</span>
+            <span className="block text-xs text-stone-500">{t("Selt")}</span>
           </div>
           <div>
             <span className="flex items-center justify-center gap-1 text-lg font-bold tabular-nums">
               {rating?.total ? (
                 <>
                   <Star size={16} className="fill-amber-400 text-amber-400" aria-hidden />
-                  {formatDecimal(Number(rating.average))}
+                  {formatDecimal(Number(rating.average), lang)}
                 </>
               ) : (
                 <span className="text-stone-400">–</span>
               )}
             </span>
             <span className="block text-xs text-stone-500">
-              {rating?.total ? `${rating.total} ${rating.total === 1 ? "einkunn" : "einkunnir"}` : "Engin einkunn"}
+              {rating?.total ? `${rating.total} ${t(rating.total === 1 ? "einkunn" : "einkunnir")}` : t("Engin einkunn")}
             </span>
           </div>
         </div>
       </section>
 
       <section className="mt-7">
-        <h2 className="mb-3 text-lg font-bold tracking-tight">Til sölu</h2>
+        <h2 className="mb-3 text-lg font-bold tracking-tight">{t("Til sölu")}</h2>
         {active.length ? (
           <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4">
             {active.map((l, i) => (
@@ -119,20 +122,20 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
         ) : (
           <div className="rounded-2xl bg-surface p-8 text-center text-stone-500">
             <Package className="mx-auto mb-2 text-stone-400" size={32} />
-            Engar auglýsingar til sölu núna.
+            {t("Engar auglýsingar til sölu núna.")}
           </div>
         )}
       </section>
 
       {withComments.length > 0 && (
         <section className="mt-8 md:max-w-2xl">
-          <h2 className="mb-3 text-lg font-bold tracking-tight">Umsagnir</h2>
+          <h2 className="mb-3 text-lg font-bold tracking-tight">{t("Umsagnir")}</h2>
           <ul className="space-y-2">
             {withComments.map((r, i) => (
               <li key={i} className="rounded-2xl bg-surface p-4">
                 <div className="flex items-center justify-between gap-3">
-                  <Stars value={r.stars} size={15} />
-                  <span className="text-xs text-stone-500">{timeAgo(r.created_at)}</span>
+                  <Stars value={r.stars} size={15} lang={lang} />
+                  <span className="text-xs text-stone-500">{timeAgo(r.created_at, Date.now(), lang)}</span>
                 </div>
                 <p className="mt-2 text-stone-800">„{r.comment}“</p>
               </li>
