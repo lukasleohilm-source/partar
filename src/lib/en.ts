@@ -557,4 +557,8 @@ export const EN: Record<string, string> = {
   "Verð til": "Price to",
   "{n} af 5 stjörnum": "{n} out of 5 stars",
   "Láttu vita þegar hluturinn kemur": "Get notified when it shows up",
+  "Ljóst útlit": "Light theme",
+  "Dökkt útlit": "Dark theme",
+  Útlit: "Theme",
+  "Útlit og tungumál": "Theme and language",
 };

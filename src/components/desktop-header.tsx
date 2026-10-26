@@ -4,6 +4,7 @@ import { BellRing, Heart, MessageCircle, Plus, Search, User, type LucideIcon } f
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LangSwitch, useT } from "./lang-provider";
+import { ThemeSwitch } from "./theme-switch";
 import { Logo } from "./logo";
 import { useUnreadCounts, type UnreadCounts } from "./use-unread-counts";
 
@@ -52,6 +53,7 @@ export function DesktopHeader() {
           })}
         </nav>
         <div className="ml-auto flex items-center gap-2">
+          <ThemeSwitch />
           <LangSwitch className="mr-1" />
           <Link href="/uppahalds" aria-label={t("Uppáhalds")} className={`${link(pathname.startsWith("/uppahalds"))} px-2.5`}>
             <Heart size={19} />

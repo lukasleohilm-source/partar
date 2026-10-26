@@ -2,6 +2,7 @@ import { Car, CarFront, ChevronRight, Heart, Search, Wrench } from "lucide-react
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { LangSwitch } from "@/components/lang-provider";
+import { ThemeSwitch } from "@/components/theme-switch";
 import { LegalLinks } from "@/components/legal-links";
 import { ListingCard } from "@/components/listing/listing-card";
 import { RecentlyViewed } from "@/components/listing/recently-viewed";
@@ -55,6 +56,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
         <header className="mb-5 flex items-center justify-between md:hidden">
           <Logo />
           <div className="flex items-center gap-2">
+          <ThemeSwitch />
           <LangSwitch />
           <Link
             href="/uppahalds"

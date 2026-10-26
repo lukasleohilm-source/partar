@@ -1,4 +1,4 @@
-import { Bell, FileText, Heart, LogOut, Package, Pencil, Search, Shield, ShieldCheck, Star, Trash2, UserRoundPlus } from "lucide-react";
+import { Bell, FileText, Heart, LogOut, Package, Palette, Pencil, Search, Shield, ShieldCheck, Star, Trash2, UserRoundPlus } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Avatar } from "@/components/avatar";
@@ -6,6 +6,8 @@ import { REGIONS, formatDecimal, isRegion } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "./actions";
 import { ActionRow, Group, Row } from "./ui";
+import { LangSwitch } from "@/components/lang-provider";
+import { ThemeSwitch } from "@/components/theme-switch";
 import { getT } from "@/lib/lang-server";
 
 export async function generateMetadata() {
@@ -115,6 +117,15 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
       </Group>
 
       <Group title={t("Stillingar")}>
+        {/* Útlit og tungumál beint í röðinni, án undirsíðu */}
+        <div className="flex items-center gap-3 px-4 py-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-amber-500/15 text-amber-600">
+            <Palette size={19} />
+          </span>
+          <span className="flex-1 font-medium text-stone-900">{t("Útlit og tungumál")}</span>
+          <ThemeSwitch />
+          <LangSwitch />
+        </div>
         <Row
           href="/profill/breyta"
           icon={Pencil}

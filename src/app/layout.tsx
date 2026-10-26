@@ -7,6 +7,8 @@ import { LangProvider } from "@/components/lang-provider";
 import { ServiceWorker } from "@/components/service-worker";
 import { WelcomeGate } from "@/components/welcome-gate";
 import { getT } from "@/lib/lang-server";
+import { THEME_COOKIE } from "@/lib/lang";
+import { cookies } from "next/headers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -37,10 +39,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const { lang } = await getT();
+  const saved = (await cookies()).get(THEME_COOKIE)?.value;
+  const theme = saved === "light" || saved === "dark" ? saved : null;
   return (
-    <html lang={lang}>
+    <html lang={lang} data-theme={theme ?? undefined}>
       <body className={`${geistSans.variable} antialiased`}>
-        <LangProvider lang={lang}>
+        <LangProvider lang={lang} theme={theme}>
           <DesktopHeader />
           <main className="min-h-dvh pb-24 md:pb-16">{children}</main>
           <BottomNav />

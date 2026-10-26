@@ -1,8 +1,21 @@
 @import "tailwindcss";
 
+/* dark: klasar fylgja vali notandans (data-theme á <html>), annars stillingu tækisins */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+}
+
 /* ===== Hönnunarkerfi Partar =====
    Ljóst útlit er sjálfgefið. Í dökku útliti snýst grái skalinn (stone) við og ljósir litatónar
-   (t.d. orange-50) verða dökkir, svo allir hlutar fá dökkt útlit án sérstakra dark:-klasa. */
+   (t.d. orange-50) verða dökkir, svo allir hlutar fá dökkt útlit án sérstakra dark:-klasa.
+   Dökkt útlit kemur annaðhvort frá stillingu tækisins eða vali notandans (ThemeSwitch). */
 
 @theme inline {
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
@@ -20,8 +33,47 @@
   color-scheme: light;
 }
 
+/* Sömu dökku gildin í báðum reglum: valið dökkt, eða dökkt tæki án vals */
+:root[data-theme="dark"] {
+  --canvas: #0f0e0d;
+  --surface: #1a1918;
+  --surface-2: #222120;
+  --line: #2e2c2a;
+  color-scheme: dark;
+
+  --color-stone-50: #1c1b1a;
+  --color-stone-100: #242322;
+  --color-stone-200: #2f2d2b;
+  --color-stone-300: #45423f;
+  --color-stone-400: #6f6a66;
+  --color-stone-500: #9c968f;
+  --color-stone-600: #bcb6af;
+  --color-stone-700: #d6d1cb;
+  --color-stone-800: #e9e5e0;
+  --color-stone-900: #f5f3f0;
+
+  --color-orange-50: #2a1609;
+  --color-orange-100: #3a1d0b;
+  --color-orange-200: #5a2c0f;
+  --color-orange-300: #7c3b12;
+  --color-orange-700: #fb923c;
+  --color-orange-800: #fdba74;
+  --color-orange-900: #fed7aa;
+
+  --color-red-50: #2b1111;
+  --color-red-200: #5c1f1f;
+  --color-red-300: #7f2626;
+  --color-red-700: #fca5a5;
+  --color-green-50: #0f2416;
+  --color-green-100: #143020;
+  --color-green-700: #86efac;
+  --color-green-800: #bbf7d0;
+  --color-amber-50: #2a210b;
+  --color-amber-900: #fde68a;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --canvas: #0f0e0d;
     --surface: #1a1918;
     --surface-2: #222120;
@@ -86,8 +138,11 @@ body {
   background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.35), transparent);
   animation: partar-shimmer 1.4s infinite;
 }
+:root[data-theme="dark"] .skeleton::after {
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.06), transparent);
+}
 @media (prefers-color-scheme: dark) {
-  .skeleton::after {
+  :root:not([data-theme="light"]) .skeleton::after {
     background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.06), transparent);
   }
 }
