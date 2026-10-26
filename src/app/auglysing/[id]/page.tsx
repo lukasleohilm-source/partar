@@ -184,171 +184,175 @@ export default async function ListingPage({
   ];
 
   return (
-    <article className="mx-auto max-w-md pb-32 md:grid md:max-w-6xl md:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] md:items-start md:gap-x-10 md:px-6 md:pb-12 md:pt-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
-      <div className="relative md:sticky md:top-24 md:row-span-2 md:overflow-hidden md:rounded-3xl">
-        <ImageGallery images={[...listing.listing_images].sort((a, b) => a.sort - b.sort)} title={listing.title} />
-        <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-between p-3">
-          <BackButton />
-          <div className="pointer-events-auto flex gap-2">
-            <ShareButton title={listing.title} text={`${listing.title} – ${formatPrice(listing.price_isk, lang)}`} />
-            {!isOwner && <FavoriteButton listingId={listing.id} initial={isFavorite} variant="overlay" />}
+    <article className="mx-auto max-w-md pb-32 md:max-w-6xl md:px-6 md:pb-12 md:pt-8">
+      {/* Tveir dálkar í tölvu. Límda myndin og aðgerðastikan haldast innan þessa hluta og fara ekki yfir það sem kemur fyrir neðan. */}
+      <div className="md:grid md:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] md:items-start md:gap-x-10">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+        <div className="relative md:sticky md:top-24 md:row-span-2 md:overflow-hidden md:rounded-3xl">
+          <ImageGallery images={[...listing.listing_images].sort((a, b) => a.sort - b.sort)} title={listing.title} />
+          <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-between p-3">
+            <BackButton />
+            <div className="pointer-events-auto flex gap-2">
+              <ShareButton title={listing.title} text={`${listing.title} – ${formatPrice(listing.price_isk, lang)}`} />
+              {!isOwner && <FavoriteButton listingId={listing.id} initial={isFavorite} variant="overlay" />}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="-mt-4 space-y-5 rounded-t-3xl bg-canvas px-4 pt-5 [position:relative] md:mt-0 md:rounded-none md:bg-transparent md:px-0 md:pt-0">
-        {villa && (
-          <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
-            {villa === "lokad" ? t("Seljandinn tekur ekki við skilaboðum frá þér.") : t("Ekki tókst að hefja spjall. Reyndu aftur.")}
-          </p>
-        )}
-        <header>
-          <div className="mb-2 flex flex-wrap gap-1.5">
-            {listing.status === "sold" && (
-              <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold text-white">{t("SELT")}</span>
-            )}
-            {listing.status === "draft" && (
-              <span className="rounded-full bg-stone-300 px-2.5 py-0.5 text-xs font-bold">{t("Óbirt")}</span>
-            )}
-            {listing.bumped_at && listing.published_at && listing.bumped_at > listing.published_at && (
-              <span className="flex items-center gap-1 rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-semibold text-orange-700">
-                <ArrowUp size={12} />{" "}{t("Ýtt upp")}
-              </span>
-            )}
-          </div>
-          <h1 className="text-[22px] font-extrabold leading-tight tracking-tight md:text-3xl">{listing.title}</h1>
-          <p className="mt-1 text-[28px] font-black tracking-tight text-orange-600">{formatPrice(listing.price_isk, lang)}</p>
-          <p className="mt-1 flex items-center gap-1.5 text-sm text-stone-500">
-            <Clock size={14} />{" "}{t("Birt")}{" "}{timeAgo(listing.published_at ?? listing.created_at, Date.now(), lang)}
-          </p>
-        </header>
-
-        <dl className="grid grid-cols-2 gap-2">
-          {facts.map(({ icon: Icon, label, value }) => (
-            <div key={label} className="flex items-start gap-2.5 rounded-2xl bg-surface p-3 shadow-sm ring-1 ring-black/5">
-              <Icon size={18} className="mt-0.5 shrink-0 text-orange-600" />
-              <div className="min-w-0">
-                <dt className="text-[11px] font-medium uppercase tracking-wide text-stone-500">{label}</dt>
-                <dd className="truncate font-semibold">{value}</dd>
-              </div>
-            </div>
-          ))}
-        </dl>
-
-        <section>
-          <h2 className="mb-2 text-lg font-bold tracking-tight">{isCar ? t("Bíllinn") : t("Passar í")}</h2>
-          {listing.universal_fit ? (
-            <p className="flex items-center gap-2 rounded-2xl bg-orange-50 px-4 py-3 text-sm font-medium text-orange-900">
-              <CheckCircle2 size={18} className="text-orange-600" />{" "}{t("Passar í alla bíla")}
+        <div className="-mt-4 space-y-5 rounded-t-3xl bg-canvas px-4 pt-5 [position:relative] md:mt-0 md:rounded-none md:bg-transparent md:px-0 md:pt-0">
+          {villa && (
+            <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
+              {villa === "lokad" ? t("Seljandinn tekur ekki við skilaboðum frá þér.") : t("Ekki tókst að hefja spjall. Reyndu aftur.")}
             </p>
-          ) : listing.listing_fitments.length ? (
-            <ul className="flex flex-wrap gap-2">
-              {listing.listing_fitments.map((f, i) => (
-                <li key={i}>
-                  <Link
-                    href={`/leit?merki=${f.make_id}${f.model_id ? `&gerd=${f.model_id}` : ""}`}
-                    className="flex items-center gap-2 rounded-full bg-orange-50 py-2 pl-3 pr-3.5 text-sm text-orange-900 active:bg-orange-100"
-                  >
-                    <CarFront size={16} className="text-orange-600" />
-                    <span className="font-semibold">
-                      {f.makes.name} {f.models?.name ?? (isCar ? "" : t("– allar gerðir"))}
-                    </span>
-                    <span className="text-orange-700">{t(yearRange(f.year_from, f.year_to))}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-stone-500">{t("Ekki tilgreint.")}</p>
           )}
-        </section>
-
-        {listing.description && (
-          <section>
-            <h2 className="mb-2 text-lg font-bold tracking-tight">{t("Lýsing")}</h2>
-            <p className="whitespace-pre-line break-words leading-relaxed text-stone-800">{listing.description}</p>
-          </section>
-        )}
-
-        {stats && (
-          <section aria-label={t("Tölfræði")} className="grid grid-cols-3 divide-x divide-line rounded-2xl bg-orange-500/10 py-3 text-center">
-            {[
-              [Eye, stats.views, t(stats.views === 1 ? "skoðun" : "skoðanir")],
-              [Heart, stats.favorites, t("í uppáhaldi")],
-              [MessageCircle, stats.chats, t(stats.chats === 1 ? "samtal" : "samtöl")],
-            ].map(([Icon, n, label]) => {
-              const I = Icon as LucideIcon;
-              return (
-                <div key={label as string}>
-                  <p className="flex items-center justify-center gap-1.5 text-lg font-bold tabular-nums text-orange-700">
-                    <I size={17} /> {formatNumber(n as number, lang)}
-                  </p>
-                  <p className="text-xs text-stone-600">{label as string}</p>
-                </div>
-              );
-            })}
-          </section>
-        )}
-
-        <section className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-black/5">
-          <Link href={`/seljandi/${listing.seller_id}`} className="-m-1 flex items-center gap-3 rounded-xl p-1 active:bg-stone-100">
-            <Avatar name={listing.profiles.display_name} />
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-bold">{listing.profiles.display_name}</p>
-              <p className="text-sm text-stone-500">{t("Á Pörtum síðan")}{" "}{formatDate(new Date(listing.profiles.created_at), { day: false, year: true }, lang)}</p>
-            </div>
-            <span className="flex shrink-0 items-center text-sm font-semibold text-orange-600">
-              {t("Allar auglýsingar")}{" "}<ChevronRight size={16} />
-            </span>
-          </Link>
-          <SellerRating sellerId={listing.seller_id} />
-        </section>
-
-        {!isOwner && (
-          <div className="flex justify-center pb-2">
-            <ReportListing listingId={listing.id} />
-          </div>
-        )}
-      </div>
-
-      {/* Aðgerðir fastar neðst, fyrir ofan aðalvalmyndina */}
-      <div className="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-30 px-3 md:sticky md:bottom-6 md:col-start-2 md:mt-6 md:px-0">
-        <div className="mx-auto flex max-w-md gap-2 rounded-2xl bg-surface/95 p-2 shadow-xl ring-1 ring-black/10 backdrop-blur-xl md:max-w-none">
-          {isOwner ? (
-            <>
-              <Link href={`/auglysing/${listing.id}/breyta`} className={`${primaryButton} flex flex-1 items-center justify-center gap-2`}>
-                <Pencil size={18} />{" "}{t("Breyta")}
-              </Link>
-              {listing.status === "active" && <BumpButton listingId={listing.id} bumpedAt={listing.bumped_at} publishedAt={listing.published_at} />}
-              <form action={setListingStatus.bind(null, listing.id, listing.status === "sold" ? "active" : "sold")} className="flex-1">
-                <button type="submit" className={`${secondaryButton} flex items-center justify-center gap-2`}>
-                  <BadgeCheck size={18} /> {listing.status === "sold" ? t("Í sölu") : t("Selt")}
-                </button>
-              </form>
-            </>
-          ) : listing.status === "active" ? (
-            <>
-              <form action={contactSeller.bind(null, listing.id)} className="flex-[2]">
-                <button type="submit" className={`${primaryButton} flex items-center justify-center gap-2`}>
-                  <MessageCircle size={19} />{" "}{t("Senda skilaboð")}
-                </button>
-              </form>
-              {phone && (
-                <a
-                  href={`tel:${phone.replace(/\s/g, "")}`}
-                  aria-label={t("Hringja í seljanda")}
-                  className={`${secondaryButton} flex flex-1 items-center justify-center gap-2`}
-                >
-                  <Phone size={18} />{" "}{t("Hringja")}
-                </a>
+          <header>
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {listing.status === "sold" && (
+                <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold text-white">{t("SELT")}</span>
               )}
-            </>
-          ) : (
-            <p className="w-full py-3 text-center text-stone-500">{t("Þessi auglýsing er ekki lengur virk.")}</p>
+              {listing.status === "draft" && (
+                <span className="rounded-full bg-stone-300 px-2.5 py-0.5 text-xs font-bold">{t("Óbirt")}</span>
+              )}
+              {listing.bumped_at && listing.published_at && listing.bumped_at > listing.published_at && (
+                <span className="flex items-center gap-1 rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-semibold text-orange-700">
+                  <ArrowUp size={12} />{" "}{t("Ýtt upp")}
+                </span>
+              )}
+            </div>
+            <h1 className="text-[22px] font-extrabold leading-tight tracking-tight md:text-3xl">{listing.title}</h1>
+            <p className="mt-1 text-[28px] font-black tracking-tight text-orange-600">{formatPrice(listing.price_isk, lang)}</p>
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-stone-500">
+              <Clock size={14} />{" "}{t("Birt")}{" "}{timeAgo(listing.published_at ?? listing.created_at, Date.now(), lang)}
+            </p>
+          </header>
+
+          <dl className="grid grid-cols-2 gap-2">
+            {facts.map(({ icon: Icon, label, value }) => (
+              <div key={label} className="flex items-start gap-2.5 rounded-2xl bg-surface p-3 shadow-sm ring-1 ring-black/5">
+                <Icon size={18} className="mt-0.5 shrink-0 text-orange-600" />
+                <div className="min-w-0">
+                  <dt className="text-[11px] font-medium uppercase tracking-wide text-stone-500">{label}</dt>
+                  <dd className="truncate font-semibold">{value}</dd>
+                </div>
+              </div>
+            ))}
+          </dl>
+
+          <section>
+            <h2 className="mb-2 text-lg font-bold tracking-tight">{isCar ? t("Bíllinn") : t("Passar í")}</h2>
+            {listing.universal_fit ? (
+              <p className="flex items-center gap-2 rounded-2xl bg-orange-50 px-4 py-3 text-sm font-medium text-orange-900">
+                <CheckCircle2 size={18} className="text-orange-600" />{" "}{t("Passar í alla bíla")}
+              </p>
+            ) : listing.listing_fitments.length ? (
+              <ul className="flex flex-wrap gap-2">
+                {listing.listing_fitments.map((f, i) => (
+                  <li key={i}>
+                    <Link
+                      href={`/leit?merki=${f.make_id}${f.model_id ? `&gerd=${f.model_id}` : ""}`}
+                      className="flex items-center gap-2 rounded-full bg-orange-50 py-2 pl-3 pr-3.5 text-sm text-orange-900 active:bg-orange-100"
+                    >
+                      <CarFront size={16} className="text-orange-600" />
+                      <span className="font-semibold">
+                        {f.makes.name} {f.models?.name ?? (isCar ? "" : t("– allar gerðir"))}
+                      </span>
+                      <span className="text-orange-700">{t(yearRange(f.year_from, f.year_to))}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-stone-500">{t("Ekki tilgreint.")}</p>
+            )}
+          </section>
+
+          {listing.description && (
+            <section>
+              <h2 className="mb-2 text-lg font-bold tracking-tight">{t("Lýsing")}</h2>
+              <p className="whitespace-pre-line break-words leading-relaxed text-stone-800">{listing.description}</p>
+            </section>
+          )}
+
+          {stats && (
+            <section aria-label={t("Tölfræði")} className="grid grid-cols-3 divide-x divide-line rounded-2xl bg-orange-500/10 py-3 text-center">
+              {[
+                [Eye, stats.views, t(stats.views === 1 ? "skoðun" : "skoðanir")],
+                [Heart, stats.favorites, t("í uppáhaldi")],
+                [MessageCircle, stats.chats, t(stats.chats === 1 ? "samtal" : "samtöl")],
+              ].map(([Icon, n, label]) => {
+                const I = Icon as LucideIcon;
+                return (
+                  <div key={label as string}>
+                    <p className="flex items-center justify-center gap-1.5 text-lg font-bold tabular-nums text-orange-700">
+                      <I size={17} /> {formatNumber(n as number, lang)}
+                    </p>
+                    <p className="text-xs text-stone-600">{label as string}</p>
+                  </div>
+                );
+              })}
+            </section>
+          )}
+
+          <section className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-black/5">
+            <Link href={`/seljandi/${listing.seller_id}`} className="-m-1 flex items-center gap-3 rounded-xl p-1 active:bg-stone-100">
+              <Avatar name={listing.profiles.display_name} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-bold">{listing.profiles.display_name}</p>
+                <p className="text-sm text-stone-500">{t("Á Pörtum síðan")}{" "}{formatDate(new Date(listing.profiles.created_at), { day: false, year: true }, lang)}</p>
+              </div>
+              <span className="flex shrink-0 items-center text-sm font-semibold text-orange-600">
+                {t("Allar auglýsingar")}{" "}<ChevronRight size={16} />
+              </span>
+            </Link>
+            <SellerRating sellerId={listing.seller_id} />
+          </section>
+
+          {!isOwner && (
+            <div className="flex justify-center pb-2">
+              <ReportListing listingId={listing.id} />
+            </div>
           )}
         </div>
+
+        {/* Aðgerðir fastar neðst, fyrir ofan aðalvalmyndina */}
+        <div className="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-30 px-3 md:sticky md:bottom-6 md:col-start-2 md:mt-6 md:px-0">
+          <div className="mx-auto flex max-w-md gap-2 rounded-2xl bg-surface/95 p-2 shadow-xl ring-1 ring-black/10 backdrop-blur-xl md:max-w-none">
+            {isOwner ? (
+              <>
+                <Link href={`/auglysing/${listing.id}/breyta`} className={`${primaryButton} flex flex-1 items-center justify-center gap-2`}>
+                  <Pencil size={18} />{" "}{t("Breyta")}
+                </Link>
+                {listing.status === "active" && <BumpButton listingId={listing.id} bumpedAt={listing.bumped_at} publishedAt={listing.published_at} />}
+                <form action={setListingStatus.bind(null, listing.id, listing.status === "sold" ? "active" : "sold")} className="flex-1">
+                  <button type="submit" className={`${secondaryButton} flex items-center justify-center gap-2`}>
+                    <BadgeCheck size={18} /> {listing.status === "sold" ? t("Í sölu") : t("Selt")}
+                  </button>
+                </form>
+              </>
+            ) : listing.status === "active" ? (
+              <>
+                <form action={contactSeller.bind(null, listing.id)} className="flex-[2]">
+                  <button type="submit" className={`${primaryButton} flex items-center justify-center gap-2`}>
+                    <MessageCircle size={19} />{" "}{t("Senda skilaboð")}
+                  </button>
+                </form>
+                {phone && (
+                  <a
+                    href={`tel:${phone.replace(/\s/g, "")}`}
+                    aria-label={t("Hringja í seljanda")}
+                    className={`${secondaryButton} flex flex-1 items-center justify-center gap-2`}
+                  >
+                    <Phone size={18} />{" "}{t("Hringja")}
+                  </a>
+                )}
+              </>
+            ) : (
+              <p className="w-full py-3 text-center text-stone-500">{t("Þessi auglýsing er ekki lengur virk.")}</p>
+            )}
+          </div>
+        </div>
       </div>
+
       <RelatedListings
         listingId={listing.id}
         sellerId={listing.seller_id}

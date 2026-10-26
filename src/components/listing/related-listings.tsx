@@ -55,7 +55,7 @@ export async function RelatedListings({ listingId, sellerId, sellerName, kind, c
   if (!seller.length && !similar.length) return null;
 
   return (
-    <div className="space-y-8 px-4 pt-8 md:col-span-2 md:px-0">
+    <div className="space-y-8 border-t border-line px-4 pt-8 mt-8 md:mt-12 md:px-0 md:pt-10">
       {seller.length > 0 && (
         <section>
           <div className="mb-3 flex items-baseline justify-between gap-3">

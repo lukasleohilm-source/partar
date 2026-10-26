@@ -29,7 +29,7 @@ export function LangSwitch({ className = "" }: { className?: string }) {
   }
 
   return (
-    <div role="group" aria-label="Tungumál / Language" className={`inline-flex rounded-full bg-stone-200/80 p-0.5 text-xs font-bold ${className}`}>
+    <div role="group" aria-label="Tungumál / Language" className={`inline-flex rounded-full bg-stone-500/15 p-0.5 text-xs font-bold ${className}`}>
       {(["is", "en"] as const).map((l) => (
         <button
           key={l}
@@ -38,7 +38,7 @@ export function LangSwitch({ className = "" }: { className?: string }) {
           aria-pressed={lang === l}
           aria-label={l === "is" ? "Íslenska" : "English"}
           lang={l}
-          className={`rounded-full px-2.5 py-1 uppercase transition-colors ${lang === l ? "bg-stone-900 text-white" : "text-stone-600 hover:text-stone-900"}`}
+          className={`rounded-full px-2.5 py-1 uppercase transition-colors ${lang === l ? "bg-orange-600 text-white shadow-sm" : "text-stone-600 hover:text-stone-900"}`}
         >
           {l}
         </button>
