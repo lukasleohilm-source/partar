@@ -256,6 +256,24 @@ describe("spjall og aðgangsreglur", () => {
     await expect(t.q(`insert into favorites (user_id, listing_id) values ($1, $2)`, [buyer, l.id])).rejects.toThrow();
   });
 
+  it("einkvæm nöfn: óháð hástöfum og bilum, ný nöfn fá númer, og laust nafn er hægt að athuga", async () => {
+    // Nafn sem er tekið, með öðrum hástöfum og aukabilum, er hafnað
+    await t.as(buyer);
+    await expect(t.q(`update profiles set display_name = '  SELJANDI ' where id = $1`, [buyer])).rejects.toThrow(/name_key|unique/i);
+    expect((await t.q<{ ok: boolean }>(`select display_name_available('Seljandi') ok`))[0].ok).toBe(false);
+    expect((await t.q<{ ok: boolean }>(`select display_name_available('Glænýtt nafn') ok`))[0].ok).toBe(true);
+    // Eigið nafn telst laust (að vista prófílinn óbreyttan virkar)
+    expect((await t.q<{ ok: boolean }>(`select display_name_available('Kaupandi') ok`))[0].ok).toBe(true);
+    await t.q(`update profiles set display_name = 'kaupandi' where id = $1`, [buyer]);
+
+    // Nýr notandi með sama netfangsforskeyti fær laust nafn
+    const twin = await t.createUser("seljandi@annad.is");
+    await t.asAdmin();
+    const [{ display_name }] = await t.q<{ display_name: string }>(`select display_name from profiles where id = $1`, [twin]);
+    expect(display_name).toBe("seljandi 2");
+    await t.q(`delete from auth.users where id = $1`, [twin]);
+  });
+
   it("verð lækkað: fyrra verð munað, helst við aðra lækkun og hverfur við hækkun", async () => {
     const id = await publish("Verðmerkisprufa", 45000, "gott", "hofudborgarsvaedid", null);
     const read = async () => {

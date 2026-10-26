@@ -578,4 +578,7 @@ export const EN: Record<string, string> = {
   "Lýsir dökkar myndir og lagar gulleita birtu": "Brightens dark photos and fixes yellowish light",
   Nota: "Use",
   "Ýttu á ✨ til að lagfæra birtu eða fá hvítan bakgrunn.": "Tap ✨ to fix the lighting or get a white background.",
+  "Ýttu á ✨ til að lagfæra birtu og liti.": "Tap ✨ to fix the lighting and colours.",
+  "Nafnið er laust": "This name is available",
+  "Þetta nafn er þegar í notkun. Veldu annað.": "This name is already taken. Choose another.",
 };

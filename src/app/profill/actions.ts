@@ -34,6 +34,8 @@ export async function updateProfile(_prev: ProfileState, formData: FormData): Pr
     .update({ phone: phone || null, show_phone: Boolean(phone) && showPhone })
     .eq("id", user.id);
 
+  // 23505 = nafnið er þegar í notkun hjá öðrum (einkvæm nöfn)
+  if (e1?.code === "23505") return { status: "error", message: "Þetta nafn er þegar í notkun. Veldu annað." };
   if (e1 || e2) return { status: "error", message: "Ekki tókst að vista. Reyndu aftur." };
 
   revalidatePath("/profill");

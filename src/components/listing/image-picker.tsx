@@ -148,7 +148,7 @@ export function ImagePicker({ images, onChange }: Props) {
       )}
       {images.length > 0 && (
         <p className="mt-2 flex items-center gap-1.5 text-sm text-stone-500">
-          <Sparkles size={14} className="text-orange-600" /> {t("Ýttu á ✨ til að lagfæra birtu eða fá hvítan bakgrunn.")}
+          <Sparkles size={14} className="text-orange-600" /> {t("Ýttu á ✨ til að lagfæra birtu og liti.")}
         </p>
       )}
 

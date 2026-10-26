@@ -8,6 +8,9 @@ import { primaryButton, secondaryButton } from "@/components/ui/styles";
 import { enhanceImage, processImage, removeBackground, type PickedImage, type ProcessedImage } from "@/lib/images";
 import { reportError } from "@/lib/report-error";
 
+// Hvítur bakgrunnur þarf Cloudflare Image Transformations á lukels255.com; falið þar til kveikt er á því
+const BACKGROUND_REMOVAL = false;
+
 type Props = {
   image: PickedImage | null;
   // Upprunalega myndin (fyrir bætur), svo hægt sé að skipta um skoðun án þess að gæðin rýrni
@@ -155,7 +158,7 @@ export function ImageEnhancer({ image, original, onClose, onApply }: Props) {
           )}
         </div>
         {toggle(light, setLight, Sun, t("Lagfæra birtu og liti"), t("Lýsir dökkar myndir og lagar gulleita birtu"))}
-        {toggle(white, setWhite, Eraser, t("Hvítur bakgrunnur"), t("Fjarlægir bakgrunninn, eins og í vefverslun"))}
+        {BACKGROUND_REMOVAL && toggle(white, setWhite, Eraser, t("Hvítur bakgrunnur"), t("Fjarlægir bakgrunninn, eins og í vefverslun"))}
         {error && (
           <p role="alert" className="text-sm text-red-600">
             {error}
