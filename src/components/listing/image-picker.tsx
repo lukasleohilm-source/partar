@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, ImagePlus, Loader2, Sparkles, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { processImage, type PickedImage, type ProcessedImage } from "@/lib/images";
 import { ImageEnhancer } from "./image-enhancer";
 import { useT } from "@/components/lang-provider";
@@ -22,12 +22,17 @@ export function ImagePicker({ images, onChange }: Props) {
   // Upprunalegar myndir (fyrir ✨-bætur), svo endurtekin vinnsla rýri ekki gæðin
   const originals = useRef(new Map<string, Blob>());
 
-  async function handleFiles(files: FileList | null) {
-    if (!files?.length) return;
+  async function handleFiles(list: FileList | File[] | null) {
+    // Aðeins myndir (dregið inn getur líka innihaldið PDF, Word o.fl.)
+    const files = Array.from(list ?? []).filter((f) => f.type.startsWith("image/") || /\.(heic|heif)$/i.test(f.name));
+    if (!files.length) {
+      if (list?.length) setError(t("Aðeins myndir eru leyfðar."));
+      return;
+    }
     setError(null);
     setBusy(true);
     const room = MAX_IMAGES - images.length;
-    const picked = Array.from(files).slice(0, room);
+    const picked = files.slice(0, room);
     const added: PickedImage[] = [];
     for (const file of picked) {
       try {
@@ -41,6 +46,34 @@ export function ImagePicker({ images, onChange }: Props) {
     setBusy(false);
     if (inputRef.current) inputRef.current.value = "";
   }
+
+  // Draga og sleppa: myndir dregnar úr Downloads, möppu eða öðrum glugga
+  const [dragging, setDragging] = useState(false);
+  const dragDepth = useRef(0);
+  const hasFiles = (e: React.DragEvent) => Array.from(e.dataTransfer.types).includes("Files");
+
+  // Mynd sem er sleppt utan reitsins á ekki að opnast í vafranum (og yfirgefa formið);
+  // Ctrl+V límir inn mynd af klippiborðinu
+  useEffect(() => {
+    const block = (e: DragEvent) => {
+      if (e.dataTransfer?.types.includes("Files")) e.preventDefault();
+    };
+    const paste = (e: ClipboardEvent) => {
+      const pasted = Array.from(e.clipboardData?.files ?? []);
+      if (pasted.length) {
+        e.preventDefault();
+        void handleFiles(pasted);
+      }
+    };
+    window.addEventListener("dragover", block);
+    window.addEventListener("drop", block);
+    window.addEventListener("paste", paste);
+    return () => {
+      window.removeEventListener("dragover", block);
+      window.removeEventListener("drop", block);
+      window.removeEventListener("paste", paste);
+    };
+  });
 
   function applyEnhanced(result: ProcessedImage, original: Blob) {
     if (!editing) return;
@@ -64,7 +97,38 @@ export function ImagePicker({ images, onChange }: Props) {
   }
 
   return (
-    <div>
+    <div
+      onDragEnter={(e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        dragDepth.current++;
+        setDragging(true);
+      }}
+      onDragOver={(e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "copy";
+      }}
+      onDragLeave={() => {
+        dragDepth.current = Math.max(0, dragDepth.current - 1);
+        if (dragDepth.current === 0) setDragging(false);
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        dragDepth.current = 0;
+        setDragging(false);
+        if (images.length < MAX_IMAGES) void handleFiles(e.dataTransfer.files);
+        else setError(t("Hámark {n} myndir.", { n: MAX_IMAGES }));
+      }}
+      className={`relative rounded-2xl transition ${dragging ? "bg-orange-500/10 outline-2 outline-dashed outline-offset-4 outline-orange-500" : ""}`}
+    >
+      {dragging && (
+        <div className="pointer-events-none absolute inset-0 z-10 grid place-items-center rounded-2xl bg-orange-500/10 backdrop-blur-[1px]">
+          <span className="flex items-center gap-2 rounded-full bg-orange-600 px-4 py-2 font-semibold text-white shadow-lg">
+            <ImagePlus size={20} /> {t("Slepptu myndunum hér")}
+          </span>
+        </div>
+      )}
       <ul className="grid grid-cols-3 gap-2">
         {images.map((img, i) => (
           <li key={img.id} className="relative aspect-square overflow-hidden rounded-xl bg-stone-200">
@@ -124,6 +188,7 @@ export function ImagePicker({ images, onChange }: Props) {
             >
               {busy ? <Loader2 size={28} className="animate-spin" /> : <ImagePlus size={30} strokeWidth={1.8} />}
               <span className="text-xs">{busy ? t("Vinn myndir") : t("Bæta við")}</span>
+              {!busy && <span className="hidden px-2 text-center text-[11px] leading-tight text-stone-400 md:block">{t("eða dragðu myndir hingað")}</span>}
             </button>
           </li>
         )}

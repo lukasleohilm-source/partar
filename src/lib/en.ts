@@ -580,5 +580,8 @@ export const EN: Record<string, string> = {
   "Ýttu á ✨ til að lagfæra birtu eða fá hvítan bakgrunn.": "Tap ✨ to fix the lighting or get a white background.",
   "Ýttu á ✨ til að lagfæra birtu og liti.": "Tap ✨ to fix the lighting and colours.",
   "Nafnið er laust": "This name is available",
+  "Aðeins myndir eru leyfðar.": "Only images are allowed.",
+  "Slepptu myndunum hér": "Drop the photos here",
+  "eða dragðu myndir hingað": "or drag photos here",
   "Þetta nafn er þegar í notkun. Veldu annað.": "This name is already taken. Choose another.",
 };
