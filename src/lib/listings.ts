@@ -34,11 +34,22 @@ export type ListingSummary = {
   region: Region;
   postal_code: string | null;
   published_at: string;
+  previous_price_isk: number | null;
+  price_dropped_at: string | null;
   listing_images: ImageRef[];
 };
 
+const DROP_DAYS = 30;
+
+// Fyrra verð ef verðið var lækkað síðustu 30 daga (annars null)
+export function droppedFrom(l: { price_isk: number | null; previous_price_isk: number | null; price_dropped_at: string | null }): number | null {
+  if (l.previous_price_isk == null || l.price_isk == null || !l.price_dropped_at) return null;
+  if (l.previous_price_isk <= l.price_isk) return null;
+  return Date.now() - new Date(l.price_dropped_at).getTime() < DROP_DAYS * 86_400_000 ? l.previous_price_isk : null;
+}
+
 // Dálkar fyrir auglýsingaspjöld
-export const LISTING_SUMMARY_SELECT = `id, seller_id, title, kind, status, price_isk, condition, region, postal_code, published_at, listing_images(${IMAGE_COLS})`;
+export const LISTING_SUMMARY_SELECT = `id, seller_id, title, kind, status, price_isk, previous_price_isk, price_dropped_at, condition, region, postal_code, published_at, listing_images(${IMAGE_COLS})`;
 
 // Íslenskur afstæður tími (sjá i18n.ts)
 export { timeAgo } from "./i18n";

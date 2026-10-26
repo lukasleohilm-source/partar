@@ -256,6 +256,33 @@ describe("spjall og aðgangsreglur", () => {
     await expect(t.q(`insert into favorites (user_id, listing_id) values ($1, $2)`, [buyer, l.id])).rejects.toThrow();
   });
 
+  it("verð lækkað: fyrra verð munað, helst við aðra lækkun og hverfur við hækkun", async () => {
+    const id = await publish("Verðmerkisprufa", 45000, "gott", "hofudborgarsvaedid", null);
+    const read = async () => {
+      const [r] = await t.q<{ price_isk: number; previous_price_isk: number | null; price_dropped_at: string | null }>(
+        `select price_isk, previous_price_isk, price_dropped_at from listings where id = $1`,
+        [id],
+      );
+      return r;
+    };
+    await t.as(seller);
+    await t.q(`update listings set price_isk = 35000 where id = $1`, [id]);
+    expect(await read()).toMatchObject({ price_isk: 35000, previous_price_isk: 45000 });
+    expect((await read()).price_dropped_at).not.toBeNull();
+
+    await t.q(`update listings set price_isk = 30000 where id = $1`, [id]); // önnur lækkun: upprunalegt verð helst
+    expect(await read()).toMatchObject({ price_isk: 30000, previous_price_isk: 45000 });
+
+    await t.q(`update listings set title = 'Verðmerkisprufa 2' where id = $1`, [id]); // annað en verð: óbreytt
+    expect(await read()).toMatchObject({ previous_price_isk: 45000 });
+
+    await t.q(`update listings set price_isk = 50000 where id = $1`, [id]); // hækkað yfir fyrra verð
+    expect(await read()).toMatchObject({ price_isk: 50000, previous_price_isk: null, price_dropped_at: null });
+
+    await t.asAdmin();
+    await t.q(`delete from listings where id = $1`, [id]);
+  });
+
   it("tölfræði: skoðanir annarra teljast, seljandinn sér bara sínar tölur", async () => {
     // Afturljós Yaris: seljandi á hana og kaupandi hefur samtal um hana
     const [l] = await t.q<{ id: string }>(`select id from listings where title = 'Afturljós Yaris'`);

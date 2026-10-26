@@ -561,4 +561,21 @@ export const EN: Record<string, string> = {
   "Dökkt útlit": "Dark theme",
   Útlit: "Theme",
   "Útlit og tungumál": "Theme and language",
+  "Verð lækkað": "Price drop",
+  "Verð lækkað um {upphaed}": "Price lowered by {upphaed}",
+
+  // ===== Myndabætur =====
+  "Ekki tókst að fjarlægja bakgrunninn. Prófaðu aftur eða aðra mynd.": "Could not remove the background. Try again or use another photo.",
+  "Ekki tókst að lagfæra myndina.": "Could not enhance the photo.",
+  "Fjarlægi bakgrunn…": "Removing background…",
+  "Fjarlægir bakgrunninn, eins og í vefverslun": "Removes the background, like in an online store",
+  Forskoðun: "Preview",
+  "Gera mynd {n} flottari": "Enhance photo {n}",
+  "Gera myndina flottari": "Make the photo look better",
+  "Hvítur bakgrunnur": "White background",
+  "Lagfæra birtu og liti": "Fix light and colours",
+  "Lagfæri…": "Enhancing…",
+  "Lýsir dökkar myndir og lagar gulleita birtu": "Brightens dark photos and fixes yellowish light",
+  Nota: "Use",
+  "Ýttu á ✨ til að lagfæra birtu eða fá hvítan bakgrunn.": "Tap ✨ to fix the lighting or get a white background.",
 };

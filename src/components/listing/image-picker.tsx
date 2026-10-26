@@ -1,8 +1,9 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, ImagePlus, Loader2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImagePlus, Loader2, Sparkles, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { processImage, type PickedImage } from "@/lib/images";
+import { processImage, type PickedImage, type ProcessedImage } from "@/lib/images";
+import { ImageEnhancer } from "./image-enhancer";
 import { useT } from "@/components/lang-provider";
 
 export const MAX_IMAGES = 10;
@@ -17,6 +18,9 @@ export function ImagePicker({ images, onChange }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState<PickedImage | null>(null);
+  // Upprunalegar myndir (fyrir ✨-bætur), svo endurtekin vinnsla rýri ekki gæðin
+  const originals = useRef(new Map<string, Blob>());
 
   async function handleFiles(files: FileList | null) {
     if (!files?.length) return;
@@ -36,6 +40,14 @@ export function ImagePicker({ images, onChange }: Props) {
     onChange([...images, ...added]);
     setBusy(false);
     if (inputRef.current) inputRef.current.value = "";
+  }
+
+  function applyEnhanced(result: ProcessedImage, original: Blob) {
+    if (!editing) return;
+    originals.current.set(result.id, original);
+    if (editing.source === "new") URL.revokeObjectURL(editing.url);
+    onChange(images.map((i) => (i.id === editing.id ? result : i)));
+    setEditing(null);
   }
 
   function remove(id: string) {
@@ -71,7 +83,7 @@ export function ImagePicker({ images, onChange }: Props) {
             >
               <X size={16} />
             </button>
-            <div className="absolute inset-x-1 bottom-1 flex justify-between">
+            <div className="absolute inset-x-1 bottom-1 flex items-center justify-between">
               <button
                 type="button"
                 onClick={() => move(i, -1)}
@@ -80,6 +92,14 @@ export function ImagePicker({ images, onChange }: Props) {
                 className="flex size-7 items-center justify-center rounded-full bg-black/60 text-white disabled:invisible"
               >
                 <ChevronLeft size={18} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditing(img)}
+                aria-label={t("Gera mynd {n} flottari", { n: i + 1 })}
+                className="flex h-7 items-center gap-1 rounded-full bg-orange-600 px-2.5 text-xs font-bold text-white shadow active:scale-95"
+              >
+                <Sparkles size={14} />
               </button>
               <button
                 type="button"
@@ -126,6 +146,18 @@ export function ImagePicker({ images, onChange }: Props) {
           {error}
         </p>
       )}
+      {images.length > 0 && (
+        <p className="mt-2 flex items-center gap-1.5 text-sm text-stone-500">
+          <Sparkles size={14} className="text-orange-600" /> {t("Ýttu á ✨ til að lagfæra birtu eða fá hvítan bakgrunn.")}
+        </p>
+      )}
+
+      <ImageEnhancer
+        image={editing}
+        original={editing ? (originals.current.get(editing.id) ?? (editing.source === "new" ? editing.blob : null)) : null}
+        onClose={() => setEditing(null)}
+        onApply={applyEnhanced}
+      />
     </div>
   );
 }

@@ -16,6 +16,7 @@ import {
   Phone,
   Sparkles,
   Tag,
+  TrendingDown,
   type LucideIcon,
 } from "lucide-react";
 import type { Metadata } from "next";
@@ -30,7 +31,7 @@ import { BackButton, BumpButton, FavoriteButton, ShareButton } from "@/component
 import { SellerRating } from "@/components/stars";
 import { primaryButton, secondaryButton } from "@/components/ui/styles";
 import { CONDITIONS, KINDS, REGIONS, formatDate, formatNumber, formatPrice, type Condition, type Kind, type Region } from "@/lib/i18n";
-import { IMAGE_COLS, coverOf, imageUrl, timeAgo, type ImageRef } from "@/lib/listings";
+import { IMAGE_COLS, coverOf, droppedFrom, imageUrl, timeAgo, type ImageRef } from "@/lib/listings";
 import { placeLabel } from "@/lib/places";
 import { createClient } from "@/lib/supabase/server";
 import { yearRange } from "@/lib/vehicles";
@@ -55,6 +56,8 @@ type ListingDetail = {
   universal_fit: boolean;
   category_id: number | null;
   view_count: number;
+  previous_price_isk: number | null;
+  price_dropped_at: string | null;
   published_at: string | null;
   bumped_at: string | null;
   created_at: string;
@@ -82,7 +85,7 @@ const getListing = cache(async (id: string) => {
     .from("listings")
     .select(
       `id, seller_id, kind, status, title, description, price_isk, condition, region, postal_code,
-       part_number, license_plate, mileage_km, universal_fit, category_id, view_count, published_at, bumped_at, created_at,
+       part_number, license_plate, mileage_km, universal_fit, category_id, view_count, previous_price_isk, price_dropped_at, published_at, bumped_at, created_at,
        categories(name),
        listing_images(${IMAGE_COLS}),
        listing_fitments(make_id, model_id, year_from, year_to, makes(name), models(name)),
@@ -166,6 +169,7 @@ export default async function ListingPage({
   };
 
   const isOwner = user?.id === listing.seller_id;
+  const oldPrice = listing.status === "active" ? droppedFrom(listing) : null;
   const isCar = listing.kind !== "part";
   const phone = contact?.phone ?? null;
 
@@ -220,7 +224,16 @@ export default async function ListingPage({
               )}
             </div>
             <h1 className="text-[22px] font-extrabold leading-tight tracking-tight md:text-3xl">{listing.title}</h1>
-            <p className="mt-1 text-[28px] font-black tracking-tight text-orange-600">{formatPrice(listing.price_isk, lang)}</p>
+            <p className="mt-1 flex flex-wrap items-baseline gap-x-3 text-[28px] font-black tracking-tight text-orange-600">
+              {formatPrice(listing.price_isk, lang)}
+              {oldPrice != null && <span className="text-lg font-semibold text-stone-400 line-through">{formatPrice(oldPrice, lang)}</span>}
+            </p>
+            {oldPrice != null && listing.price_isk != null && (
+              <p className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-red-600 px-2.5 py-1 text-xs font-bold text-white">
+                <TrendingDown size={14} strokeWidth={2.6} />
+                {t("Verð lækkað um {upphaed}", { upphaed: formatPrice(oldPrice - listing.price_isk, lang) })}
+              </p>
+            )}
             <p className="mt-1 flex items-center gap-1.5 text-sm text-stone-500">
               <Clock size={14} />{" "}{t("Birt")}{" "}{timeAgo(listing.published_at ?? listing.created_at, Date.now(), lang)}
             </p>
