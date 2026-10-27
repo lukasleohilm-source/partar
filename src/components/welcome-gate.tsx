@@ -62,7 +62,7 @@ export function WelcomeGate() {
     >
       <div className="px-6 pb-6 pt-7 text-center">
         <Logo className="justify-center" />
-        <h2 id="velkomin-titill" className="mt-5 text-[22px] font-extrabold leading-tight tracking-tight text-stone-900">
+        <h2 id="velkomin-titill" className="mt-5 text-[22px] font-semibold leading-tight tracking-tight text-stone-900">
           {t("Velkomin(n) á Partar")}
         </h2>
         <p className="mt-2 text-stone-600">{t("Notaðir varahlutir, partabílar og ódýrir bílar, beint frá fólki.")}</p>

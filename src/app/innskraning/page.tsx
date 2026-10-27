@@ -36,7 +36,7 @@ export default async function LoginPage({
   return (
     <div className="mx-auto max-w-md md:max-w-xl md:pt-10 px-4 pt-8">
       <Logo className="mb-6" />
-      <h1 className="mb-1 text-2xl font-extrabold tracking-tight">{t("Skráðu þig inn")}</h1>
+      <h1 className="mb-1 text-2xl font-semibold tracking-tight">{t("Skráðu þig inn")}</h1>
       <p className="mb-6 text-stone-600">{t("Ekkert lykilorð. Nýir notendur eru skráðir sjálfkrafa.")}</p>
 
       {krafa && (

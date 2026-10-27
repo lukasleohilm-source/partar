@@ -58,7 +58,7 @@ export function BottomNav() {
                 }`}
               >
                 {item.primary ? (
-                  <span className="-mt-6 flex size-[52px] items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-lg shadow-orange-600/30 ring-4 ring-canvas transition active:scale-95">
+                  <span className="-mt-6 flex size-[52px] items-center justify-center rounded-2xl bg-orange-600 text-white shadow-[0_6px_16px_rgb(0_0_0/0.55)] ring-4 ring-canvas transition active:scale-95">
                     <Icon size={26} strokeWidth={2.6} />
                   </span>
                 ) : (

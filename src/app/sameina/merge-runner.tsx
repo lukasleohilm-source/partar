@@ -42,14 +42,14 @@ export function MergeRunner({ next }: { next: string }) {
       {state.status === "working" && (
         <>
           <Loader2 size={40} className="animate-spin text-orange-600" />
-          <h1 className="mt-4 text-xl font-extrabold">{t("Flyt gögnin þín…")}</h1>
+          <h1 className="mt-4 text-xl font-semibold">{t("Flyt gögnin þín…")}</h1>
           <p className="mt-2 text-stone-600">{t("Auglýsingar, skilaboð og óskir færast yfir á aðganginn þinn.")}</p>
         </>
       )}
       {state.status === "done" && (
         <>
           <CheckCircle2 size={48} className="text-green-600" />
-          <h1 className="mt-4 text-xl font-extrabold">{t("Allt komið!")}</h1>
+          <h1 className="mt-4 text-xl font-semibold">{t("Allt komið!")}</h1>
           <p className="mt-2 text-stone-600">
             {state.listings > 0
               ? t(state.listings === 1 ? "{n} auglýsing og annað frá gestaaðganginum er nú á aðganginum þínum." : "{n} auglýsingar og annað frá gestaaðganginum er nú á aðganginum þínum.", { n: state.listings })
@@ -60,7 +60,7 @@ export function MergeRunner({ next }: { next: string }) {
       {state.status === "error" && (
         <>
           <TriangleAlert size={48} className="text-orange-600" />
-          <h1 className="mt-4 text-xl font-extrabold">{t("Ekki tókst að flytja gögnin")}</h1>
+          <h1 className="mt-4 text-xl font-semibold">{t("Ekki tókst að flytja gögnin")}</h1>
           <p className="mt-2 text-stone-600">
             {t("Þú ert innskráð(ur), en flutningurinn rann út eða mistókst. Gestaaðgangurinn er óbreyttur.")}
           </p>

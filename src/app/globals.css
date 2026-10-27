@@ -8,36 +8,43 @@
    eru dökkir, svo allir hlutar fá dökkt útlit án sérstakra dark:-klasa. */
 
 @theme inline {
-  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
   --color-canvas: var(--canvas);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line-strong: var(--line-strong);
   --color-line: var(--line);
   --container-page: 90rem;
 }
 
 :root {
-  --canvas: #0f0e0d;
-  --surface: #1a1918;
-  --surface-2: #222120;
-  --line: #2e2c2a;
+  /* Linear-grunnur (sjá DESIGN.md) */
+  --canvas: #08090a;
+  --surface: #0f1011;
+  --surface-2: #151617;
+  --surface-3: #1b1c1e;
+  --line: #23252a;
+  --line-strong: #34343a;
   color-scheme: dark;
 
-  --color-stone-50: #1c1b1a;
-  --color-stone-100: #242322;
-  --color-stone-200: #2f2d2b;
-  --color-stone-300: #45423f;
-  --color-stone-400: #6f6a66;
-  --color-stone-500: #9c968f;
-  --color-stone-600: #bcb6af;
-  --color-stone-700: #d6d1cb;
-  --color-stone-800: #e9e5e0;
-  --color-stone-900: #f5f3f0;
+  --color-stone-50: #121314;
+  --color-stone-100: #17181a;
+  --color-stone-200: #1f2023;
+  --color-stone-300: #34343a;
+  --color-stone-400: #62666d;
+  --color-stone-500: #8a8f98;
+  --color-stone-600: #a9aeb6;
+  --color-stone-700: #d0d6e0;
+  --color-stone-800: #e6e8eb;
+  --color-stone-900: #f7f8f8;
 
   --color-orange-50: #2a1609;
   --color-orange-100: #3a1d0b;
   --color-orange-200: #5a2c0f;
   --color-orange-300: #7c3b12;
+  /* Hnappalitur: hvítur texti nær 4.6:1 */
+  --color-orange-600: #cf470b;
   --color-orange-700: #fb923c;
   --color-orange-800: #fdba74;
   --color-orange-900: #fed7aa;
@@ -57,8 +64,26 @@
 body {
   background: var(--canvas);
   color: var(--color-stone-900);
+  font-feature-settings: "cv11", "ss01";
+  caret-color: var(--color-orange-700);
+  scrollbar-color: var(--line-strong) var(--canvas);
   -webkit-tap-highlight-color: transparent;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Vafraflötur í litum Partar */
+::selection {
+  background: rgb(207 71 11 / 0.35);
+  color: var(--color-stone-900);
+}
+:focus-visible {
+  outline: 2px solid var(--color-orange-700);
+  outline-offset: 2px;
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
 }
 
 /* Hleðsluskuggi (skeleton) */
@@ -77,7 +102,7 @@ body {
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.06), transparent);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.06), transparent); /* taste-skill-ignore: hleðsluskuggi */
   animation: partar-shimmer 1.4s infinite;
 }
 

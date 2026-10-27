@@ -223,8 +223,8 @@ export default async function ListingPage({
                 </span>
               )}
             </div>
-            <h1 className="text-[22px] font-extrabold leading-tight tracking-tight md:text-3xl">{listing.title}</h1>
-            <p className="mt-1 flex flex-wrap items-baseline gap-x-3 text-[28px] font-black tracking-tight text-orange-600">
+            <h1 className="text-[22px] font-semibold leading-tight tracking-tight md:text-3xl">{listing.title}</h1>
+            <p className="mt-1 flex flex-wrap items-baseline gap-x-3 text-[28px] font-semibold tabular-nums tracking-[-0.02em] text-stone-900">
               {formatPrice(listing.price_isk, lang)}
               {oldPrice != null && <span className="text-lg font-semibold text-stone-400 line-through">{formatPrice(oldPrice, lang)}</span>}
             </p>
@@ -242,9 +242,9 @@ export default async function ListingPage({
           <dl className="grid grid-cols-2 gap-2">
             {facts.map(({ icon: Icon, label, value }) => (
               <div key={label} className="flex items-start gap-2.5 rounded-2xl bg-surface p-3 shadow-sm ring-1 ring-black/5">
-                <Icon size={18} className="mt-0.5 shrink-0 text-orange-600" />
+                <Icon size={18} className="mt-0.5 shrink-0 text-orange-700" />
                 <div className="min-w-0">
-                  <dt className="text-[11px] font-medium uppercase tracking-wide text-stone-500">{label}</dt>
+                  <dt className="text-[13px] text-stone-500">{label}</dt>
                   <dd className="truncate font-semibold">{value}</dd>
                 </div>
               </div>

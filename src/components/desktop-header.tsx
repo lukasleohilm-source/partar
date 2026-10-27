@@ -26,14 +26,14 @@ export function DesktopHeader() {
 
   const me = pathname.startsWith("/profill") || pathname.startsWith("/minar-auglysingar");
   const link = (active: boolean) =>
-    `relative flex items-center gap-2 rounded-full px-3.5 py-2 text-[15px] font-semibold transition-colors ${
-      active ? "bg-orange-500/10 text-orange-700" : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+    `relative flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-150 ${
+      active ? "bg-surface-3 text-stone-900" : "text-stone-500 hover:bg-surface-2 hover:text-stone-900"
     }`;
 
   return (
-    <header className="sticky top-0 z-40 hidden border-b border-line bg-surface/85 backdrop-blur-xl md:block">
+    <header className="sticky top-0 z-40 hidden border-b border-line bg-canvas/80 backdrop-blur-xl md:block">
       <div className="mx-auto flex h-16 max-w-page items-center gap-2 px-8">
-        <Link href="/" aria-label={t("Partar forsíða")} className="mr-4 shrink-0">
+        <Link href="/" aria-label={t("Partar forsíða")} className="mr-6 shrink-0 rounded-lg">
           <Logo />
         </Link>
         <nav aria-label={t("Aðalvalmynd")} className="flex items-center gap-1">
@@ -41,9 +41,9 @@ export function DesktopHeader() {
             const count = badge ? unread[badge] : 0;
             return (
               <Link key={href} href={href} aria-current={match(pathname) ? "page" : undefined} className={link(match(pathname))}>
-                <Icon size={18} /> {t(label)}
+                <Icon size={16} strokeWidth={1.75} /> {t(label)}
                 {count > 0 && (
-                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-600 px-1.5 text-[11px] font-bold text-white">
+                  <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-orange-600 px-1 text-[11px] font-semibold tabular-nums text-white">
                     {count > 9 ? "9+" : count}
                   </span>
                 )}
@@ -54,16 +54,16 @@ export function DesktopHeader() {
         <div className="ml-auto flex items-center gap-2">
           <LangSwitch className="mr-1" />
           <Link href="/uppahalds" aria-label={t("Uppáhalds")} className={`${link(pathname.startsWith("/uppahalds"))} px-2.5`}>
-            <Heart size={19} />
+            <Heart size={17} strokeWidth={1.75} />
           </Link>
           <Link href="/profill" aria-current={me ? "page" : undefined} className={link(me)}>
-            <User size={18} /> {t("Ég")}
+            <User size={16} strokeWidth={1.75} /> {t("Ég")}
           </Link>
           <Link
             href="/ny-auglysing"
-            className="ml-2 flex items-center gap-1.5 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 px-4 py-2 text-[15px] font-bold text-white shadow-md shadow-orange-600/25 transition hover:brightness-105 active:scale-95"
+            className="ml-2 flex items-center gap-1.5 rounded-lg bg-orange-600 px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#e0560f] active:scale-[0.97]"
           >
-            <Plus size={18} strokeWidth={2.6} /> {t("Selja")}
+            <Plus size={16} strokeWidth={2.25} /> {t("Selja")}
           </Link>
         </div>
       </div>

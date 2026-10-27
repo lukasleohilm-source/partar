@@ -7,7 +7,7 @@ import { getT } from "@/lib/lang-server";
 export function Group({ title, children }: { title?: string; children: React.ReactNode }) {
   return (
     <section className="mb-5">
-      {title && <h2 className="mb-1.5 px-1 text-xs font-semibold uppercase tracking-wide text-stone-500">{title}</h2>}
+      {title && <h2 className="mb-1.5 px-1 text-[13px] font-medium text-stone-500">{title}</h2>}
       <div className="divide-y divide-line overflow-hidden rounded-2xl bg-surface">{children}</div>
     </section>
   );

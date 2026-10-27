@@ -41,7 +41,7 @@ export default async function FavoritesPage() {
 
       {listings.length > 0 && <PushPrompt reason={t("Viltu vita þegar verðið lækkar á uppáhaldi?")} />}
       {listings.length ? (
-        <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4 xl:grid-cols-5">
+        <ul className="grid grid-cols-2 gap-x-3 gap-y-6 md:grid-cols-3 md:gap-x-6 md:gap-y-8 lg:grid-cols-4 xl:grid-cols-5">
           {listings.map((l, i) => (
             <li key={l.id}>
               <ListingCard listing={l} priority={i < 4} favorite={<FavoriteButton listingId={l.id} initial />} />

@@ -92,10 +92,10 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
     <>
       {car ? (
         <div
-          className={`flex items-center gap-3 rounded-2xl p-3 shadow-sm ring-1 ${active ? "bg-orange-50 ring-orange-200" : "bg-surface ring-black/5"}`}
+          className={`flex items-center gap-3 rounded-xl border p-3 ${active ? "border-orange-600/50 bg-orange-600/[0.08]" : "border-line bg-surface"}`}
         >
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 text-white" aria-hidden>
-            <CarFront size={22} />
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-orange-600 text-white" aria-hidden>
+            <CarFront size={20} strokeWidth={1.75} />
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-xs text-stone-500">{active ? t("Sýni bara það sem passar í") : t("Minn bíll")}</p>
@@ -114,16 +114,16 @@ export function MyCarPicker({ makes, models, car, active, toggleHref }: Props) {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="flex w-full items-center gap-3 rounded-2xl border-2 border-dashed border-orange-300 bg-surface/70 p-3 text-left active:bg-orange-50"
+          className="group flex w-full items-center gap-3 rounded-xl border border-line bg-surface p-3 text-left transition-colors duration-150 hover:border-line-strong hover:bg-surface-2"
         >
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600" aria-hidden>
-            <CarFront size={22} />
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-surface-3 text-orange-700" aria-hidden>
+            <CarFront size={20} strokeWidth={1.75} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block font-semibold">{t("Veldu þinn bíl")}</span>
+            <span className="block font-medium">{t("Veldu þinn bíl")}</span>
             <span className="text-sm text-stone-500">{t("Sjáðu bara hluti sem passa")}</span>
           </span>
-          <ChevronRight size={20} className="text-stone-400" aria-hidden />
+          <ChevronRight size={18} className="text-stone-500 transition-transform duration-150 group-hover:translate-x-0.5" aria-hidden />
         </button>
       )}
 

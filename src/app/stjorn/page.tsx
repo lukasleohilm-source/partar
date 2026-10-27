@@ -65,7 +65,7 @@ export default async function AdminPage() {
   return (
     <div className="mx-auto max-w-md md:max-w-2xl md:pt-10 space-y-6 px-4 pt-6">
       <header>
-        <h1 className="text-2xl font-extrabold tracking-tight">Stjórnborð</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Stjórnborð</h1>
         <p className="text-sm text-stone-500">Aðeins sýnilegt stjórnendum.</p>
       </header>
 
@@ -73,7 +73,7 @@ export default async function AdminPage() {
         {tiles.map(({ icon: Icon, label, value, sub, warn }) => (
           <div key={label} className={`rounded-2xl p-3 shadow-sm ring-1 ${warn ? "bg-orange-50 ring-orange-200" : "bg-surface ring-black/5"}`}>
             <Icon size={18} className={warn ? "text-orange-600" : "text-stone-400"} />
-            <p className="mt-1 text-2xl font-extrabold tabular-nums">{formatNumber(value)}</p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums">{formatNumber(value)}</p>
             <p className="text-xs font-medium text-stone-500">
               {label}
               {sub && <span className="block text-stone-400">{sub}</span>}

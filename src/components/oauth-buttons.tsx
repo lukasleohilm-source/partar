@@ -129,7 +129,7 @@ export function FacebookButton(props: ButtonProps) {
 export function OrDivider() {
   const { t } = useT();
   return (
-    <div className="my-4 flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-stone-400">
+    <div className="my-4 flex items-center gap-3 text-[13px] text-stone-500">
       <span className="h-px flex-1 bg-stone-200" />
       {t("eða")}
       <span className="h-px flex-1 bg-stone-200" />

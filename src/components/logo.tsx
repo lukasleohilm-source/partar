@@ -6,13 +6,7 @@ export const NUT_PATH =
 export function LogoMark({ size = 32, className = "" }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" className={className} aria-hidden>
-      <defs>
-        <linearGradient id="partar-g" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#fb923c" />
-          <stop offset="1" stopColor="#ea580c" />
-        </linearGradient>
-      </defs>
-      <rect width="100" height="100" rx="24" fill="url(#partar-g)" />
+      <rect width="100" height="100" rx="24" fill="#e0560f" />
       <path d={NUT_PATH} fill="#fff" fillRule="evenodd" />
     </svg>
   );
@@ -21,8 +15,8 @@ export function LogoMark({ size = 32, className = "" }: { size?: number; classNa
 export function Logo({ className = "" }: { className?: string }) {
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
-      <LogoMark size={30} />
-      <span className="text-[22px] font-black tracking-tight text-stone-900">
+      <LogoMark size={28} />
+      <span className="text-[21px] font-semibold tracking-[-0.03em] text-stone-900">
         Partar<span className="text-orange-600">.</span>
       </span>
     </span>

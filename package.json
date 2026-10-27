@@ -18,7 +18,8 @@
     "lucide-react": "^1.61.0",
     "next": "15.5.28",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "three": "^0.180.0"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.11",
@@ -28,6 +29,7 @@
     "@types/node": "^24.19.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.180.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.28",
     "http_ece": "^1.2.1",

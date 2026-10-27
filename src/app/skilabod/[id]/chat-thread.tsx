@@ -244,7 +244,7 @@ export function ChatThread(props: Props) {
             <Thumb image={listing.cover} className="size-11 shrink-0 rounded-xl" />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold">{listing.title}</p>
-              <p className="text-sm font-extrabold text-orange-600">{listing.sold ? t("SELT") : formatPrice(listing.price, lang)}</p>
+              <p className="text-sm font-semibold text-orange-600">{listing.sold ? t("SELT") : formatPrice(listing.price, lang)}</p>
             </div>
           </Link>
           {canReview && (

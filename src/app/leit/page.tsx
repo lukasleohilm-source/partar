@@ -170,7 +170,7 @@ export default async function SearchPage({
         </p>
       ) : listings.length ? (
         <>
-          <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4 xl:grid-cols-5 pt-1">
+          <ul className="grid grid-cols-2 gap-x-3 gap-y-6 md:grid-cols-3 md:gap-x-6 md:gap-y-8 lg:grid-cols-4 xl:grid-cols-5 pt-1">
             {listings.map((l) => (
               <li key={l.id}>
                 <ListingCard

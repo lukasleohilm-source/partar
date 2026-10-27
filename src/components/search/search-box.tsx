@@ -84,7 +84,7 @@ export function SearchBox({
       }}
       className="relative flex-1"
     >
-      <Search size={20} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" aria-hidden />
+      <Search size={19} strokeWidth={1.75} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-stone-500" aria-hidden />
       <input
         type="search"
         value={q}
@@ -115,7 +115,7 @@ export function SearchBox({
         aria-expanded={showList}
         aria-controls={listId}
         enterKeyHint="search"
-        className="w-full rounded-2xl border border-stone-200 bg-surface py-3.5 pl-12 pr-11 text-base shadow-sm outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-500/15 [&::-webkit-search-cancel-button]:hidden"
+        className="w-full rounded-full border border-line bg-surface py-3.5 pl-12 pr-24 text-base outline-none transition-colors duration-150 placeholder:text-stone-500 hover:border-line-strong focus:border-orange-600 focus:ring-4 focus:ring-orange-600/15 md:pr-28 [&::-webkit-search-cancel-button]:hidden"
       />
       {q && (
         <button
@@ -125,17 +125,26 @@ export function SearchBox({
             setItems([]);
           }}
           aria-label={t("Hreinsa")}
-          className="absolute right-3 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-stone-200 text-stone-600"
+          className="absolute right-[4.5rem] top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-stone-200 text-stone-600 md:right-[5.5rem]"
         >
           <X size={15} />
         </button>
       )}
 
+      <button
+        type="submit"
+        className="absolute right-1.5 top-1/2 flex h-[calc(100%-12px)] -translate-y-1/2 items-center gap-1.5 rounded-full bg-orange-600 px-4 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#e0560f] active:scale-[0.97]"
+      >
+        <Search size={16} strokeWidth={2.25} aria-hidden />
+        <span className="hidden md:inline">{t("Leita")}</span>
+        <span className="sr-only md:hidden">{t("Leita")}</span>
+      </button>
+
       {showList && (
         <ul
           id={listId}
           role="listbox"
-          className="absolute inset-x-0 top-full z-30 mt-2 overflow-hidden rounded-2xl bg-surface py-1 shadow-xl ring-1 ring-black/10"
+          className="absolute inset-x-0 top-full z-30 mt-2 overflow-hidden rounded-xl border border-line bg-surface-2 py-1 shadow-[0_8px_24px_rgb(0_0_0/0.5)]"
         >
           {items.map((s, i) => {
             const Icon = ICON[s.kind];

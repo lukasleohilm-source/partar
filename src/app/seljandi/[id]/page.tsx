@@ -68,7 +68,7 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
         <div className="flex items-center gap-4">
           <Avatar name={profile.display_name} size={72} />
           <div className="min-w-0">
-            <h1 className="truncate text-2xl font-extrabold tracking-tight">{profile.display_name}</h1>
+            <h1 className="truncate text-2xl font-semibold tracking-tight">{profile.display_name}</h1>
             <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-stone-500">
               {region && (
                 <span className="flex items-center gap-1">
@@ -112,7 +112,7 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
       <section className="mt-7">
         <h2 className="mb-3 text-lg font-bold tracking-tight">{t("Til sölu")}</h2>
         {active.length ? (
-          <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4 xl:grid-cols-5">
+          <ul className="grid grid-cols-2 gap-x-3 gap-y-6 md:grid-cols-3 md:gap-x-6 md:gap-y-8 lg:grid-cols-4 xl:grid-cols-5">
             {active.map((l, i) => (
               <li key={l.id}>
                 <ListingCard listing={l} priority={i < 4} />

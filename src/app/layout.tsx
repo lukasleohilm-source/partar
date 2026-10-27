@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Inter } from "next/font/google";
 import { BottomNav } from "@/components/bottom-nav";
 import { DesktopHeader } from "@/components/desktop-header";
 import { ErrorReporter } from "@/components/error-reporter";
@@ -10,8 +10,8 @@ import { WelcomeGate } from "@/components/welcome-gate";
 import { getT } from "@/lib/lang-server";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin", "latin-ext"],
 });
 
@@ -29,7 +29,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#0f0e0d",
+  themeColor: "#08090a",
   colorScheme: "dark",
 };
 
@@ -41,7 +41,7 @@ export default async function RootLayout({
   const { lang } = await getT();
   return (
     <html lang={lang} data-theme="dark">
-      <body className={`${geistSans.variable} antialiased`}>
+      <body className={`${inter.variable} antialiased`}>
         <LangProvider lang={lang}>
           <DesktopHeader />
           <main className="min-h-dvh pb-24 md:min-h-[calc(100dvh-4rem)] md:pb-8">{children}</main>

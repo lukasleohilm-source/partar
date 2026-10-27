@@ -65,7 +65,7 @@ export function SearchForm({ filters, categories, activeCount }: Props) {
           type="button"
           onClick={openSheet}
           aria-label={activeCount ? `Síur (${activeCount} virkar)` : t("Síur")}
-          className="relative flex size-[52px] shrink-0 items-center justify-center rounded-2xl border border-stone-200 bg-surface shadow-sm active:scale-95"
+          className="relative flex size-[52px] shrink-0 items-center justify-center rounded-full border border-line bg-surface transition-colors duration-150 hover:border-line-strong active:scale-95"
         >
           <SlidersHorizontal size={21} />
           {activeCount > 0 && (

@@ -49,3 +49,6 @@ supabase/.temp/
 .wrangler/
 .dev.vars
 merki/
+
+# Hönnunarskjámyndir
+.design/

@@ -17,7 +17,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
       <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
         <TriangleAlert size={32} />
       </div>
-      <h1 className="text-xl font-extrabold">{t("Eitthvað fór úrskeiðis")}</h1>
+      <h1 className="text-xl font-semibold">{t("Eitthvað fór úrskeiðis")}</h1>
       <p className="mt-2 text-stone-600">{t("Villan hefur verið skráð. Reyndu aftur eftir smá stund.")}</p>
       <div className="mt-6 flex gap-2">
         <button
