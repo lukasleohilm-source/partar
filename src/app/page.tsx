@@ -1,8 +1,7 @@
-import { Car, CarFront, ChevronRight, Heart, Search, Wrench } from "lucide-react";
+import { Car, CarFront, ChevronRight, Heart, MessageCircle, Search, ShieldCheck, Sparkles, Wrench } from "lucide-react";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { LangSwitch } from "@/components/lang-provider";
-import { ThemeSwitch } from "@/components/theme-switch";
 import { LegalLinks } from "@/components/legal-links";
 import { ListingCard } from "@/components/listing/listing-card";
 import { RecentlyViewed } from "@/components/listing/recently-viewed";
@@ -37,7 +36,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
       .select(LISTING_SUMMARY_SELECT)
       .eq("status", "active")
       .order("published_at", { ascending: false })
-      .limit(20),
+      .limit(30),
     supabase.from("makes").select("id, name").order("name"),
     supabase.from("models").select("id, make_id, name").order("name"),
     supabase.from("categories").select("id, slug, sort").is("parent_id", null).order("sort"),
@@ -46,17 +45,22 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
   const listings = (data ?? []) as ListingSummary[];
 
   return (
-    <div className="mx-auto max-w-md md:max-w-6xl md:px-2">
-      {/* Haus með litaðri bakgrunnsbylgju */}
-      <section className="relative overflow-hidden px-4 pb-5 pt-5 md:pb-10 md:pt-14">
+    <div>
+      {/* Haus með litaðri bakgrunnsbylgju; nær yfir allan skjáinn í tölvu */}
+      <section className="relative isolate overflow-hidden">
         <div
           aria-hidden
-          className="absolute inset-x-0 top-0 -z-10 h-56 md:h-80 bg-[radial-gradient(120%_100%_at_100%_0%,rgb(251_146_60/0.35),transparent_60%),radial-gradient(90%_80%_at_0%_0%,rgb(234_88_12/0.18),transparent_60%)]"
+          className="absolute inset-x-0 top-0 -z-10 h-56 bg-[radial-gradient(120%_100%_at_100%_0%,rgb(251_146_60/0.35),transparent_60%),radial-gradient(90%_80%_at_0%_0%,rgb(234_88_12/0.18),transparent_60%)] md:h-full md:bg-[radial-gradient(50%_70%_at_50%_0%,rgb(234_88_12/0.28),transparent_70%),radial-gradient(35%_55%_at_90%_10%,rgb(251_146_60/0.14),transparent_70%),radial-gradient(35%_55%_at_10%_20%,rgb(251_146_60/0.10),transparent_70%)]"
         />
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 hidden bg-[linear-gradient(to_right,rgb(255_255_255/0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgb(255_255_255/0.035)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:radial-gradient(60%_80%_at_50%_0%,black,transparent)] md:block"
+        />
+        <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 hidden h-px bg-gradient-to-r from-transparent via-orange-500/25 to-transparent md:block" />
+        <div className="mx-auto max-w-md px-4 pb-5 pt-5 md:max-w-page md:px-8 md:pb-14 md:pt-16">
         <header className="mb-5 flex items-center justify-between md:hidden">
           <Logo />
           <div className="flex items-center gap-2">
-          <ThemeSwitch />
           <LangSwitch />
           <Link
             href="/uppahalds"
@@ -67,11 +71,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
           </Link>
           </div>
         </header>
-        <h1 className="mb-4 text-[26px] font-extrabold leading-[1.15] tracking-tight text-stone-900 md:mb-8 md:text-center md:text-5xl">
+        <h1 className="mb-4 text-[26px] font-extrabold leading-[1.15] tracking-tight text-stone-900 md:mb-4 md:text-center md:text-6xl md:leading-[1.05]">
           {t("Notaðir varahlutir,")}
           <br />
           <span className="text-orange-600">{t("beint frá fólki.")}</span>
         </h1>
+        <p className="mx-auto mb-9 hidden max-w-xl text-center text-lg text-stone-500 md:block">
+          {t("Varahlutir, partabílar og ódýrir bílar um allt land. Finndu það sem passar í bílinn þinn eða seldu það sem þú þarft ekki.")}
+        </p>
 
         {eytt && (
           <p role="status" className="mb-4 rounded-xl bg-green-50 p-3 text-sm text-green-800">
@@ -109,9 +116,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
             )}
           </div>
         </div>
-      </section>
 
-      <nav aria-label={t("Tegundir")} className="flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:justify-center">
+      <nav aria-label={t("Tegundir")} className="-mx-4 mt-5 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:mt-8 md:justify-center md:px-0">
         {KIND_LINKS.map(({ href, label, icon: Icon }) => (
           <Link
             key={href}
@@ -122,8 +128,30 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
           </Link>
         ))}
       </nav>
+        </div>
+      </section>
 
-      <section className="mt-6 px-4">
+      <div className="mx-auto max-w-md md:max-w-page md:px-4">
+      {/* Kostir Partar (aðeins í tölvu) */}
+      <ul className="mt-10 hidden grid-cols-3 gap-4 px-4 md:grid">
+        {[
+          { icon: Sparkles, title: "Frítt að auglýsa", text: "Engin gjöld og engin þóknun. Myndir og auglýsing á einni mínútu." },
+          { icon: MessageCircle, title: "Spjallað beint", text: "Talaðu við seljandann í skilaboðum á Partar, án milliliða." },
+          { icon: ShieldCheck, title: "Raunverulegir seljendur", text: "Allir sem auglýsa eru með staðfestan aðgang." },
+        ].map(({ icon: Icon, title, text }) => (
+          <li key={title} className="flex gap-4 rounded-2xl border border-line bg-surface/60 p-5">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-orange-500/10 text-orange-500">
+              <Icon size={21} />
+            </span>
+            <div>
+              <p className="font-semibold text-stone-900">{t(title)}</p>
+              <p className="mt-0.5 text-sm leading-relaxed text-stone-500">{t(text)}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <section className="mt-6 px-4 md:mt-10">
         <h2 className="mb-3 text-lg font-bold tracking-tight">{t("Flokkar")}</h2>
         <ul className="grid grid-cols-4 gap-2 md:grid-cols-6 md:gap-3 lg:grid-cols-12">
           {(categories.data ?? [])
@@ -157,7 +185,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
           </Link>
         </div>
         {listings.length ? (
-          <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4">
+          <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4 xl:grid-cols-5">
             {listings.map((l, i) => (
               <li key={l.id}>
                 <ListingCard
@@ -179,7 +207,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
         )}
       </section>
 
-      <LegalLinks />
+      <div className="md:hidden">
+        <LegalLinks />
+      </div>
+      </div>
     </div>
   );
 }

@@ -4,13 +4,11 @@ import { useRouter } from "next/navigation";
 import { createContext, useContext, useMemo } from "react";
 import { LANG_COOKIE, makeT, type Lang, type T } from "@/lib/lang";
 
-type Theme = "light" | "dark";
-const LangContext = createContext<{ lang: Lang; t: T; theme: Theme | null }>({ lang: "is", t: makeT("is"), theme: null });
+const LangContext = createContext<{ lang: Lang; t: T }>({ lang: "is", t: makeT("is") });
 
 // Tungumálið kemur frá þjóninum (vafrakaka) svo síðan birtist strax á réttu máli
-// theme = þema sem notandinn valdi (vafrakaka), null = fylgja tækinu
-export function LangProvider({ lang, theme = null, children }: { lang: Lang; theme?: Theme | null; children: React.ReactNode }) {
-  const value = useMemo(() => ({ lang, t: makeT(lang), theme }), [lang, theme]);
+export function LangProvider({ lang, children }: { lang: Lang; children: React.ReactNode }) {
+  const value = useMemo(() => ({ lang, t: makeT(lang) }), [lang]);
   return <LangContext.Provider value={value}>{children}</LangContext.Provider>;
 }
 

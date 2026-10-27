@@ -1,21 +1,11 @@
 @import "tailwindcss";
 
-/* dark: klasar fylgja vali notandans (data-theme á <html>), annars stillingu tækisins */
-@custom-variant dark {
-  &:where([data-theme="dark"], [data-theme="dark"] *) {
-    @slot;
-  }
-  @media (prefers-color-scheme: dark) {
-    &:where(:root:not([data-theme="light"]) *) {
-      @slot;
-    }
-  }
-}
+/* Partar er alltaf í dökku útliti: dark:-klasar gilda alls staðar */
+@custom-variant dark (&:where(:root, :root *));
 
 /* ===== Hönnunarkerfi Partar =====
-   Ljóst útlit er sjálfgefið. Í dökku útliti snýst grái skalinn (stone) við og ljósir litatónar
-   (t.d. orange-50) verða dökkir, svo allir hlutar fá dökkt útlit án sérstakra dark:-klasa.
-   Dökkt útlit kemur annaðhvort frá stillingu tækisins eða vali notandans (ThemeSwitch). */
+   Dökkt útlit. Grái skalinn (stone) er snúinn við og ljósir litatónar (t.d. orange-50)
+   eru dökkir, svo allir hlutar fá dökkt útlit án sérstakra dark:-klasa. */
 
 @theme inline {
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
@@ -23,18 +13,10 @@
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-line: var(--line);
+  --container-page: 90rem;
 }
 
 :root {
-  --canvas: #f4f3f1;
-  --surface: #ffffff;
-  --surface-2: #faf9f7;
-  --line: #e7e5e4;
-  color-scheme: light;
-}
-
-/* Sömu dökku gildin í báðum reglum: valið dökkt, eða dökkt tæki án vals */
-:root[data-theme="dark"] {
   --canvas: #0f0e0d;
   --surface: #1a1918;
   --surface-2: #222120;
@@ -72,46 +54,6 @@
   --color-amber-900: #fde68a;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --canvas: #0f0e0d;
-    --surface: #1a1918;
-    --surface-2: #222120;
-    --line: #2e2c2a;
-    color-scheme: dark;
-
-    --color-stone-50: #1c1b1a;
-    --color-stone-100: #242322;
-    --color-stone-200: #2f2d2b;
-    --color-stone-300: #45423f;
-    --color-stone-400: #6f6a66;
-    --color-stone-500: #9c968f;
-    --color-stone-600: #bcb6af;
-    --color-stone-700: #d6d1cb;
-    --color-stone-800: #e9e5e0;
-    --color-stone-900: #f5f3f0;
-
-    --color-orange-50: #2a1609;
-    --color-orange-100: #3a1d0b;
-    --color-orange-200: #5a2c0f;
-    --color-orange-300: #7c3b12;
-    --color-orange-700: #fb923c;
-    --color-orange-800: #fdba74;
-    --color-orange-900: #fed7aa;
-
-    --color-red-50: #2b1111;
-    --color-red-200: #5c1f1f;
-    --color-red-300: #7f2626;
-    --color-red-700: #fca5a5;
-    --color-green-50: #0f2416;
-    --color-green-100: #143020;
-    --color-green-700: #86efac;
-    --color-green-800: #bbf7d0;
-    --color-amber-50: #2a210b;
-    --color-amber-900: #fde68a;
-  }
-}
-
 body {
   background: var(--canvas);
   color: var(--color-stone-900);
@@ -135,16 +77,8 @@ body {
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.35), transparent);
-  animation: partar-shimmer 1.4s infinite;
-}
-:root[data-theme="dark"] .skeleton::after {
   background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.06), transparent);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .skeleton::after {
-    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.06), transparent);
-  }
+  animation: partar-shimmer 1.4s infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

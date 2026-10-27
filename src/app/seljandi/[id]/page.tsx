@@ -59,7 +59,7 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
   const withComments = (reviews ?? []).filter((r) => r.comment);
 
   return (
-    <div className="mx-auto max-w-md px-4 pt-4 md:max-w-6xl md:px-6 md:pt-8">
+    <div className="mx-auto max-w-md px-4 pt-4 md:max-w-page md:px-8 md:pt-8">
       <div className="mb-3">
         <BackButton />
       </div>
@@ -112,7 +112,7 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
       <section className="mt-7">
         <h2 className="mb-3 text-lg font-bold tracking-tight">{t("Til sölu")}</h2>
         {active.length ? (
-          <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4">
+          <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4 xl:grid-cols-5">
             {active.map((l, i) => (
               <li key={l.id}>
                 <ListingCard listing={l} priority={i < 4} />

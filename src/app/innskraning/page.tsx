@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { UserCheck } from "lucide-react";
 import { redirect } from "next/navigation";
 import { Logo } from "@/components/logo";
 import { FacebookButton, GoogleButton, OrDivider } from "@/components/oauth-buttons";
@@ -23,10 +24,10 @@ const ERRORS: Record<string, string> = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string; villa?: string }>;
+  searchParams: Promise<{ next?: string; villa?: string; krafa?: string }>;
 }) {
   const { t } = await getT();
-  const { next: rawNext, villa } = await searchParams;
+  const { next: rawNext, villa, krafa } = await searchParams;
   const next = safeNext(rawNext);
 
   const user = await getUser();
@@ -37,6 +38,18 @@ export default async function LoginPage({
       <Logo className="mb-6" />
       <h1 className="mb-1 text-2xl font-extrabold tracking-tight">{t("Skráðu þig inn")}</h1>
       <p className="mb-6 text-stone-600">{t("Ekkert lykilorð. Nýir notendur eru skráðir sjálfkrafa.")}</p>
+
+      {krafa && (
+        <div role="status" className="mb-5 flex gap-3 rounded-2xl border border-orange-500/30 bg-orange-500/10 p-4 text-sm">
+          <UserCheck size={20} className="mt-0.5 shrink-0 text-orange-500" />
+          <div>
+            <p className="font-semibold text-stone-900">{t("Þú þarft aðgang til að setja inn auglýsingu eða ósk")}</p>
+            <p className="mt-0.5 text-stone-600">
+              {t("Þannig vita kaupendur hver stendur á bak við auglýsinguna og hún glatast aldrei. Það tekur innan við mínútu.")}
+            </p>
+          </div>
+        </div>
+      )}
 
       <MergePrompt
         next={next}

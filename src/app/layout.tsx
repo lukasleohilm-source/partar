@@ -5,10 +5,9 @@ import { DesktopHeader } from "@/components/desktop-header";
 import { ErrorReporter } from "@/components/error-reporter";
 import { LangProvider } from "@/components/lang-provider";
 import { ServiceWorker } from "@/components/service-worker";
+import { SiteFooter } from "@/components/site-footer";
 import { WelcomeGate } from "@/components/welcome-gate";
 import { getT } from "@/lib/lang-server";
-import { THEME_COOKIE } from "@/lib/lang";
-import { cookies } from "next/headers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL("https://partar.lukels255.com"),
     title: t("Partar – notaðir varahlutir og bílar"),
     description: t("Markaðstorg fyrir notaða varahluti, partabíla og ódýra bíla á Íslandi."),
-    appleWebApp: { capable: true, title: "Partar", statusBarStyle: "default" },
+    appleWebApp: { capable: true, title: "Partar", statusBarStyle: "black-translucent" },
   };
 }
 
@@ -30,7 +29,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#ea580c",
+  themeColor: "#0f0e0d",
+  colorScheme: "dark",
 };
 
 export default async function RootLayout({
@@ -39,14 +39,13 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const { lang } = await getT();
-  const saved = (await cookies()).get(THEME_COOKIE)?.value;
-  const theme = saved === "light" || saved === "dark" ? saved : null;
   return (
-    <html lang={lang} data-theme={theme ?? undefined}>
+    <html lang={lang} data-theme="dark">
       <body className={`${geistSans.variable} antialiased`}>
-        <LangProvider lang={lang} theme={theme}>
+        <LangProvider lang={lang}>
           <DesktopHeader />
-          <main className="min-h-dvh pb-24 md:pb-16">{children}</main>
+          <main className="min-h-dvh pb-24 md:min-h-[calc(100dvh-4rem)] md:pb-8">{children}</main>
+          <SiteFooter />
           <BottomNav />
           <ServiceWorker />
           <ErrorReporter />

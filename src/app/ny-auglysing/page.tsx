@@ -13,7 +13,7 @@ export default async function NewListingPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/");
+  if (!user || user.is_anonymous) redirect("/innskraning?next=%2Fny-auglysing&krafa=1");
 
   const [makes, models, categories, profile] = await Promise.all([
     supabase.from("makes").select("id, name").order("name"),

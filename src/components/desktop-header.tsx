@@ -4,7 +4,6 @@ import { BellRing, Heart, MessageCircle, Plus, Search, User, type LucideIcon } f
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LangSwitch, useT } from "./lang-provider";
-import { ThemeSwitch } from "./theme-switch";
 import { Logo } from "./logo";
 import { useUnreadCounts, type UnreadCounts } from "./use-unread-counts";
 
@@ -33,7 +32,7 @@ export function DesktopHeader() {
 
   return (
     <header className="sticky top-0 z-40 hidden border-b border-line bg-surface/85 backdrop-blur-xl md:block">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-6">
+      <div className="mx-auto flex h-16 max-w-page items-center gap-2 px-8">
         <Link href="/" aria-label={t("Partar forsíða")} className="mr-4 shrink-0">
           <Logo />
         </Link>
@@ -53,7 +52,6 @@ export function DesktopHeader() {
           })}
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <ThemeSwitch />
           <LangSwitch className="mr-1" />
           <Link href="/uppahalds" aria-label={t("Uppáhalds")} className={`${link(pathname.startsWith("/uppahalds"))} px-2.5`}>
             <Heart size={19} />

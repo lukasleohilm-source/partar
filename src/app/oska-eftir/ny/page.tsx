@@ -19,7 +19,7 @@ export default async function NewWantedPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/?villa=tenging");
+  if (!user || user.is_anonymous) redirect("/innskraning?next=%2Foska-eftir%2Fny&krafa=1");
 
   // Forfyllt úr leit (sömu slóðarbreytur og /leit) eða „Minn bíll“
   const prefill = parseFilters(await searchParams);

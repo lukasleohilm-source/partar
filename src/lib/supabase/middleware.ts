@@ -3,6 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // Síður sem krefjast innskráningar
 const PROTECTED = ["/ny-auglysing", "/skilabod", "/oska-eftir", "/tilkynningar", "/minar-auglysingar", "/profill", "/uppahalds", "/stjorn"];
+// Síður sem krefjast skráðs aðgangs (ekki gests): að setja inn auglýsingu eða ósk
+const REGISTERED = ["/ny-auglysing", "/oska-eftir/ny"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -33,6 +35,12 @@ export async function updateSession(request: NextRequest) {
   // Síður sem þurfa notanda: gestir fara á /byrja (CAPTCHA + nafnlaus notandi)
   // og koma svo aftur. Netfang má tengja seinna án þess að gögn tapist.
   const path = request.nextUrl.pathname;
+  if ((!user || user.is_anonymous) && REGISTERED.some((p) => path === p || path.startsWith(p + "/"))) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/innskraning";
+    url.search = `?next=${encodeURIComponent(path + request.nextUrl.search)}&krafa=1`;
+    return NextResponse.redirect(url);
+  }
   if (!user && PROTECTED.some((p) => path === p || path.startsWith(p + "/"))) {
     const url = request.nextUrl.clone();
     url.pathname = "/byrja";

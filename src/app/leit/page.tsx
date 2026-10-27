@@ -129,7 +129,7 @@ export default async function SearchPage({
   const noCarFilters: Partial<Filters> = { allCars: true };
 
   return (
-    <div className="mx-auto max-w-md md:max-w-6xl md:px-6 md:pt-8 space-y-3 px-4 pt-4">
+    <div className="mx-auto max-w-md md:max-w-page md:px-8 md:pt-8 space-y-3 px-4 pt-4">
       <h1 className="sr-only">{t("Leit")}</h1>
       <SearchForm key={searchHref(filters)} filters={filters} categories={allCategories} activeCount={activeCount} />
 
@@ -170,7 +170,7 @@ export default async function SearchPage({
         </p>
       ) : listings.length ? (
         <>
-          <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4 pt-1">
+          <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4 xl:grid-cols-5 pt-1">
             {listings.map((l) => (
               <li key={l.id}>
                 <ListingCard

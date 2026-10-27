@@ -5,8 +5,6 @@ import { EN } from "./en";
 export type Lang = "is" | "en";
 export const LANGS: Lang[] = ["is", "en"];
 export const LANG_COOKIE = "partar_lang";
-// Ljóst/dökkt útlit sem notandinn valdi (ThemeSwitch); engin kaka = fylgja tækinu
-export const THEME_COOKIE = "partar_theme";
 
 export type Vars = Record<string, string | number>;
 export type T = (text: string, vars?: Vars) => string;

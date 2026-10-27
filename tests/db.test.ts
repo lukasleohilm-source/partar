@@ -607,13 +607,21 @@ describe("sameining aðganga (gestur → aðgangur sem er til)", () => {
     await t.q(`insert into admins (user_id) values ($1)`, [guest]);
     await t.q(`update profiles set display_name = 'Lúkas' where id = $1`, [guest]);
 
+    // Gestir mega ekki lengur skrá auglýsingar/óskir, en eldri gögn gesta eru til og þarf að flytja
     await t.as(guest, { anonymous: true });
+    await expect(
+      t.q(`insert into listings (seller_id, title, condition, region, universal_fit) values ($1, 'Gestaauglýsing', 'gott', 'sudurland', true)`, [guest]),
+    ).rejects.toThrow(/row-level security/);
+    await expect(t.q(`insert into wanted_requests (user_id, query) values ($1, 'felgur')`, [guest])).rejects.toThrow(/row-level security/);
+
+    await t.asAdmin();
     const [l] = await t.q<{ id: string }>(
       `insert into listings (seller_id, title, condition, region, universal_fit) values ($1, 'Gestaauglýsing', 'gott', 'sudurland', true) returning id`,
       [guest],
     );
-    await t.q(`insert into favorites (user_id, listing_id) values ($1, $2)`, [guest, l.id]);
     await t.q(`insert into wanted_requests (user_id, query) values ($1, 'felgur')`, [guest]);
+    await t.as(guest, { anonymous: true });
+    await t.q(`insert into favorites (user_id, listing_id) values ($1, $2)`, [guest, l.id]);
     const [{ create_merge_token: token }] = await t.q<{ create_merge_token: string }>(`select create_merge_token()`);
 
     // Innskráður (ekki gestur) getur ekki búið til lykil

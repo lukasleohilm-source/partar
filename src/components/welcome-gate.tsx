@@ -87,7 +87,7 @@ export function WelcomeGate() {
         </div>
 
         <p className="mt-4 text-xs leading-relaxed text-stone-500">
-          {t("Gestir geta skoðað, leitað og selt. Þú getur alltaf vistað aðganginn síðar.")}
+          {t("Gestir geta skoðað og leitað. Til að selja eða óska eftir þarftu aðgang.")}
           <br />
           {t("Með því að halda áfram samþykkir þú")}{" "}
           <Link href="/skilmalar" onClick={close} className="underline">
