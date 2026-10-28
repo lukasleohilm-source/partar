@@ -153,7 +153,7 @@ export default async function ListingPage({
     "@type": "Product",
     name: listing.title,
     description: listing.description ?? undefined,
-    image: cover ? [imageUrl(cover.path)] : undefined,
+    image: cover ? [new URL(imageUrl(cover.path), process.env.SITE_URL ?? "https://partar.lukels255.com").toString()] : undefined,
     sku: listing.part_number ?? undefined,
     itemCondition: listing.condition === "nytt" ? "https://schema.org/NewCondition" : "https://schema.org/UsedCondition",
     offers:

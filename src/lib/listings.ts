@@ -1,8 +1,9 @@
 import type { Condition, Kind, Region } from "@/lib/i18n";
 
 // Myndir eru þegar minnkaðar við upphleðslu og fatan er opin, svo við vísum beint á þær
+// Myndir fara í gegnum /myndir (skyndiminni Cloudflare) í stað þess að sækja beint til Supabase
 export function imageUrl(path: string): string {
-  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/listing-images/${path}`;
+  return `/myndir/${path}`;
 }
 
 // Mynd auglýsingar eins og hún er sótt úr listing_images
