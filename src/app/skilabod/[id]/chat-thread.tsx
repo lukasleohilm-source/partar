@@ -205,7 +205,7 @@ export function ChatThread(props: Props) {
 
   return (
     <div className="fixed inset-0 z-50 mx-auto flex max-w-md flex-col bg-canvas md:top-16 md:max-w-3xl md:border-x md:border-line">
-      <header className="flex items-center gap-2 border-b border-line bg-surface/95 px-2 py-2 backdrop-blur">
+      <header className="flex items-center gap-2 border-b border-line bg-surface/95 px-2 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))] backdrop-blur md:pt-2">
         <Link href="/skilabod" aria-label={t("Til baka")} className="flex size-10 items-center justify-center text-stone-600">
           <ChevronLeft size={26} />
         </Link>
