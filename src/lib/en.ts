@@ -254,6 +254,8 @@ export const EN: Record<string, string> = {
   Opna: "Open",
   "Opna fyrir notanda": "Unblock user",
   "Opnaðu Partar af heimaskjánum, skráðu þig inn og kveiktu hér": "Open Partar from your home screen, sign in and turn it on here",
+  "Opnaðu Partar af heimaskjánum, skráðu þig inn og kveiktu á tilkynningum": "Open Partar from your home screen, sign in and turn on notifications",
+  "Settu Partar á heimaskjáinn og þú færð tilkynningu í símann eins og frá appi.": "Add Partar to your home screen and get notifications on your phone like from an app.",
   "Partar · notaðir varahlutir og bílar": "Partar · used car parts and cars",
   "Passar við": "Matches",
   "Passar í": "Fits",

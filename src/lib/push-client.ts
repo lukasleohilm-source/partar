@@ -11,11 +11,6 @@ export function isIos(): boolean {
   return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 }
 
-// Tilkynningar fara í tölvupósti (sími og tölva). Ýtitilkynningar aðeins ef Partar er sett upp sem app.
-export function emailOnly(): boolean {
-  return !isStandalone();
-}
-
 function isStandalone(): boolean {
   return window.matchMedia("(display-mode: standalone)").matches || ("standalone" in navigator && Boolean(navigator.standalone));
 }
@@ -42,8 +37,9 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
   return navigator.serviceWorker.register("/sw.js", { scope: "/" });
 }
 
+// Ýtitilkynningar í síma og tölvu (Android/Chrome beint, iPhone eftir „Setja á heimaskjá“).
+// Tölvupóstur er varaleið fyrir þá sem eru ekki með ýtiáskrift (sér Worker /api/push um).
 export async function getPushState(): Promise<PushState> {
-  if (emailOnly()) return "email";
   if (isInAppBrowser()) return "in-app";
   if (!VAPID_PUBLIC_KEY || !("serviceWorker" in navigator)) return "unsupported";
   // iPhone styður Web Push aðeins þegar appið hefur verið sett á heimaskjá
