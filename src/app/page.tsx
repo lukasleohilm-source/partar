@@ -1,6 +1,7 @@
 import { Car, CarFront, ChevronRight, Heart, Wrench } from "lucide-react";
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { InstallBanner } from "@/components/install-app";
 import { LangSwitch } from "@/components/lang-provider";
 import { LegalLinks } from "@/components/legal-links";
 import { ListingCard } from "@/components/listing/listing-card";
@@ -92,6 +93,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
                 </Link>
               )}
             </div>
+
+            <InstallBanner />
 
             <nav aria-label={t("Tegundir")} className="-mx-4 mt-5 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:mt-6 md:px-0">
               {KIND_LINKS.map(({ href, label, icon: Icon }) => (

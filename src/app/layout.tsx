@@ -7,6 +7,7 @@ import { LangProvider } from "@/components/lang-provider";
 import { ServiceWorker } from "@/components/service-worker";
 import { SiteFooter } from "@/components/site-footer";
 import { WelcomeGate } from "@/components/welcome-gate";
+import { INSTALL_LISTENER } from "@/lib/install-script";
 import { getT } from "@/lib/lang-server";
 import "./globals.css";
 
@@ -42,6 +43,7 @@ export default async function RootLayout({
   return (
     <html lang={lang} data-theme="dark">
       <body className={`${inter.variable} antialiased`}>
+        <script dangerouslySetInnerHTML={{ __html: INSTALL_LISTENER }} />
         <LangProvider lang={lang}>
           <DesktopHeader />
           <main className="min-h-dvh pb-24 md:min-h-[calc(100dvh-4rem)] md:pb-8">{children}</main>

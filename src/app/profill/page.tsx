@@ -6,6 +6,7 @@ import { REGIONS, formatDecimal, isRegion } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "./actions";
 import { ActionRow, Group, Row } from "./ui";
+import { InstallRow } from "@/components/install-app";
 import { LangSwitch } from "@/components/lang-provider";
 import { getT } from "@/lib/lang-server";
 
@@ -115,6 +116,11 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         <Row href="/oska-eftir" icon={Search} tone="violet" label={t("Óskir")} hint={t("Láttu vita þegar hluturinn kemur")} value={wants.count ?? 0} />
       </Group>
 
+      <Group title={t("Appið")}>
+        <InstallRow />
+        <Row href="/profill/tilkynningar" icon={Bell} tone="green" label={t("Tilkynningar")} hint={guest ? t("Vistaðu aðganginn til að fá tölvupóst") : t("Í símanum og í tölvupósti")} />
+      </Group>
+
       <Group title={t("Stillingar")}>
         {/* Tungumál beint í röðinni, án undirsíðu */}
         <div className="flex items-center gap-3 px-4 py-3">
@@ -130,13 +136,6 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           tone="blue"
           label={t("Prófíll og sími")}
           hint={contact?.phone ? (contact.show_phone ? t("Sími sýnilegur á auglýsingum") : t("Sími falinn")) : t("Nafn, landshluti og símanúmer")}
-        />
-        <Row
-          href="/profill/tilkynningar"
-          icon={Bell}
-          tone="green"
-          label={t("Tilkynningar")}
-          hint={guest ? t("Vistaðu aðganginn til að fá tölvupóst") : t("Í tölvupósti")}
         />
         {isAdmin && <Row href="/stjorn" icon={Shield} tone="dark" label={t("Stjórnborð")} />}
       </Group>
