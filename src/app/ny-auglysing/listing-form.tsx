@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FitmentPicker } from "@/components/listing/fitment-picker";
 import { ImagePicker } from "@/components/listing/image-picker";
+import { PriceHint } from "@/components/listing/price-hint";
 import { inputClass, labelClass, primaryButton, secondaryButton } from "@/components/ui/styles";
 import { CONDITIONS, KINDS, REGIONS, formatNumber, formatPrice, type Condition, type Kind, type Region } from "@/lib/i18n";
 import type { PickedImage } from "@/lib/images";
@@ -98,6 +99,10 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
   const [postalCode, setPostalCode] = useState(ex?.postal_code ?? "");
 
   const isCar = kind !== "part";
+  // Bíllinn sem verðviðmiðið miðast við: valinn bíll (bílar) eða fyrsti bíll sem hluturinn passar í
+  const refMake = isCar ? Number(car.make) || null : (fitments[0]?.make_id ?? null);
+  const refModel = isCar ? Number(car.model) || null : (fitments[0]?.model_id ?? null);
+  const refCarLabel = [makes.find((m) => m.id === refMake)?.name, models.find((m) => m.id === refModel)?.name].filter(Boolean).join(" ");
   const parents = categories.filter((c) => c.parent_id === null);
   const priceValue = priceMode === "tilbod" ? null : priceMode === "gefins" ? 0 : Number(price || NaN);
 
@@ -433,6 +438,21 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-500">{t("kr.")}</span>
               </div>
+            )}
+            {priceMode !== "gefins" && (
+              <PriceHint
+                kind={kind}
+                title={title}
+                categoryId={categoryId ? Number(categoryId) : null}
+                makeId={refMake}
+                modelId={refModel}
+                carLabel={refCarLabel}
+                excludeId={ex?.id}
+                onUse={(value) => {
+                  setPriceMode("verd");
+                  setPrice(String(value));
+                }}
+              />
             )}
           </fieldset>
 

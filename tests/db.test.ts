@@ -647,3 +647,29 @@ describe("sameining aðganga (gestur → aðgangur sem er til)", () => {
     expect(s).toEqual({ seller: owner, favs: 1, wants: 1, admin: 1, guests: 0, name: "Lúkas" });
   });
 });
+
+describe("verðviðmið", () => {
+  it("miðgildi og bil sambærilegra hluta, nákvæmasti samanburður fyrst, null undir 3", async () => {
+    seller = await t.createUser("verdvidmid@test.is"); // fyrri prófun eyddi upphaflega seljandanum
+    for (const [title, price] of [["Alternator Yaris", 10000], ["Alternator í Yaris 2008", 20000], ["Yaris alternator góður", 30000]] as const) {
+      await publish(title, price, "gott", "hofudborgarsvaedid", [ids.toyota, ids.yaris]);
+    }
+    const golf = await publish("Alternator Golf", 90000, "gott", "hofudborgarsvaedid", null);
+    await t.as(null);
+    const ref = async (model: number | null, exclude: string | null = null) =>
+      (await t.q<{ r: Record<string, unknown> | null }>(
+        `select price_reference('part', 'Alternator', 'alternator', $1, $2, $3, $4) r`,
+        [ids.framljos, ids.toyota, model, exclude],
+      ))[0].r;
+
+    // Sama bílgerð: aðeins Yaris-alternatorarnir þrír
+    expect(await ref(ids.yaris)).toEqual({ n: 3, scope: "model", low: 15000, median: 20000, high: 25000 });
+    // Engin bílgerð: allir fjórir
+    expect(await ref(null)).toMatchObject({ n: 4, scope: "any", median: 25000 });
+    // Auglýsingin sjálf er ekki með í eigin viðmiði; þá eru 3 eftir
+    expect(await ref(null, golf)).toMatchObject({ n: 3, median: 20000 });
+    // Annað lykilorð: of fáar auglýsingar til að gefa viðmið
+    const [{ r }] = await t.q<{ r: unknown }>(`select price_reference('part', 'Startari', 'startar', $1) r`, [ids.framljos]);
+    expect(r).toBeNull();
+  });
+});

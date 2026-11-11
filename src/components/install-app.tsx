@@ -2,6 +2,7 @@
 
 import { ChevronRight, EllipsisVertical, Share, Smartphone, SquarePlus, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { InstallDemo } from "@/components/install-demo";
 import { useT } from "@/components/lang-provider";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { INSTALL_EVENT, getInstallMode, installedBefore, promptInstall, type InstallMode } from "@/lib/install-client";
@@ -33,10 +34,16 @@ function useInstall() {
   return { mode, install, sheet, closeSheet: () => setSheet(false) };
 }
 
-function Step({ n, children }: { n: number; children: React.ReactNode }) {
+function Step({ n, active = false, children }: { n: number; active?: boolean; children: React.ReactNode }) {
   return (
-    <li className="flex items-center gap-3">
-      <span className="grid size-7 shrink-0 place-items-center rounded-full bg-orange-100 text-sm font-bold text-orange-700">{n}</span>
+    <li className={`flex items-center gap-3 rounded-lg transition-colors duration-300 ${active ? "text-stone-900" : "text-stone-500"}`}>
+      <span
+        className={`grid size-7 shrink-0 place-items-center rounded-full text-sm font-bold transition-colors duration-300 ${
+          active ? "bg-orange-600 text-white" : "bg-surface-2 text-stone-500"
+        }`}
+      >
+        {n}
+      </span>
       <span className="flex flex-wrap items-center gap-1.5">{children}</span>
     </li>
   );
@@ -44,6 +51,8 @@ function Step({ n, children }: { n: number; children: React.ReactNode }) {
 
 function InstallSheet({ open, onClose, mode }: { open: boolean; onClose: () => void; mode: InstallMode | null }) {
   const { t } = useT();
+  // Skrefið sem myndbandið sýnir núna (3 = komið á heimaskjá)
+  const [scene, setScene] = useState(0);
   return (
     <BottomSheet open={open} onClose={onClose} title={t("Sækja Partar appið")}>
       <div className="pb-[env(safe-area-inset-bottom)] text-[15px] text-stone-700">
@@ -55,23 +64,27 @@ function InstallSheet({ open, onClose, mode }: { open: boolean; onClose: () => v
             {t("Þú ert í vafra inni í Facebook eða öðru appi. Ýttu á ⋯ og veldu „Opna í vafra“ (Chrome eða Safari) og reyndu aftur.")}
           </p>
         ) : mode === "ios" ? (
+          <>
+          {open && <InstallDemo platform="ios" onScene={setScene} />}
           <ol className="space-y-3">
-            <Step n={1}>
+            <Step n={1} active={scene === 0}>
               {t("Ýttu á")} <Share size={18} className="text-blue-600" aria-label={t("Deila")} /> {t("Deila neðst í Safari")}
             </Step>
-            <Step n={2}>
+            <Step n={2} active={scene === 1}>
               {t("Veldu")} <SquarePlus size={18} aria-hidden /> {t("„Setja á heimaskjá“ (Add to Home Screen)")}
             </Step>
-            <Step n={3}>{t("Ýttu á „Bæta við“ efst til hægri")}</Step>
+            <Step n={3} active={scene === 2}>{t("Ýttu á „Bæta við“ efst til hægri")}</Step>
           </ol>
+          </>
         ) : (
           <>
+            {open && <InstallDemo platform="android" onScene={setScene} />}
             <ol className="space-y-3">
-              <Step n={1}>
+              <Step n={1} active={scene === 0}>
                 {t("Ýttu á")} <EllipsisVertical size={18} aria-label="⋮" /> {t("efst til hægri í Chrome")}
               </Step>
-              <Step n={2}>{t("Veldu „Setja upp forrit“ eða „Bæta við heimaskjá“")}</Step>
-              <Step n={3}>{t("Staðfestu með „Setja upp“")}</Step>
+              <Step n={2} active={scene === 1}>{t("Veldu „Setja upp forrit“ eða „Bæta við heimaskjá“")}</Step>
+              <Step n={3} active={scene === 2}>{t("Staðfestu með „Setja upp“")}</Step>
             </ol>
             <p className="mt-4 text-sm text-stone-500">{t("Í tölvu: smelltu á uppsetningartáknið hægra megin í slóðarstikunni í Chrome eða Edge.")}</p>
           </>

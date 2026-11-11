@@ -41,7 +41,7 @@ export default async function RootLayout({
 }>) {
   const { lang } = await getT();
   return (
-    <html lang={lang} data-theme="dark">
+    <html lang={lang} data-theme="dark" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased`}>
         <script dangerouslySetInnerHTML={{ __html: INSTALL_LISTENER }} />
         <LangProvider lang={lang}>

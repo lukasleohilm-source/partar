@@ -28,9 +28,10 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims staðfestir JWT staðbundið (ES256-lykill, geymdur í minni) í stað netbeiðni til
+  // Supabase við hverja síðu, og endurnýjar útrunna innskráningu eins og getUser gerði
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims ? { id: data.claims.sub, is_anonymous: Boolean(data.claims.is_anonymous) } : null;
 
   // Síður sem þurfa notanda: gestir fara á /byrja (CAPTCHA + nafnlaus notandi)
   // og koma svo aftur. Netfang má tengja seinna án þess að gögn tapist.

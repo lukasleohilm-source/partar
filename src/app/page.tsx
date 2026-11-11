@@ -29,9 +29,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
   const { t } = await getT();
   const myCar = parseMyCar((await cookies()).get(MY_CAR_COOKIE)?.value);
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Aðeins auðkennið þarf hér: staðfest staðbundið, án netbeiðni (forsíðan er það sem appið opnar)
+  const { data: auth } = await supabase.auth.getClaims();
+  const user = auth?.claims ? { id: auth.claims.sub } : null;
   const [{ data }, makes, models, categories, favs] = await Promise.all([
     supabase
       .from("listings")
