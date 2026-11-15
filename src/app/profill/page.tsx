@@ -1,4 +1,4 @@
-import { Bell, ChevronRight, FileText, Heart, LogOut, Languages, Package, Pencil, Search, Shield, ShieldCheck, Star, Trash2, UserRoundPlus } from "lucide-react";
+import { Bell, ChevronRight, CircleHelp, FileText, Heart, LogOut, Languages, Package, Pencil, Search, Shield, ShieldCheck, Star, Trash2, UserRoundPlus } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Avatar } from "@/components/avatar";
@@ -183,6 +183,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
       </Group>
 
       <Group title={t("Annað")}>
+        <Row href="/leidbeiningar" icon={CircleHelp} tone="orange" label={t("Leiðbeiningar")} hint={t("Svona selur þú, óskar eftir og kaupir")} />
         <Row href="/skilmalar" icon={FileText} label={t("Skilmálar")} />
         <Row href="/personuvernd" icon={ShieldCheck} label={t("Persónuvernd")} />
       </Group>

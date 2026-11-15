@@ -11,7 +11,7 @@ import { useT } from "@/components/lang-provider";
 
 const SEEN_KEY = "partar_velkomin";
 // Síður þar sem glugginn á ekki við
-const SKIP = [/^\/innskraning/, /^\/byrja/, /^\/auth/, /^\/sameina/, /^\/skilmalar/, /^\/personuvernd/, /^\/gagnaeyding/];
+const SKIP = [/^\/innskraning/, /^\/byrja/, /^\/auth/, /^\/sameina/, /^\/skilmalar/, /^\/personuvernd/, /^\/gagnaeyding/, /^\/leidbeiningar/];
 
 // Velkomugluggi við fyrstu heimsókn: skrá inn með Google, netfangi eða skoða sem gestur.
 // Birtist aðeins einu sinni og aldrei hjá þeim sem eru þegar með lotu (notendur eða gestir).

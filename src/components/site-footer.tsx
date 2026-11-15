@@ -27,6 +27,7 @@ const COLUMNS = [
   {
     title: "Um Partar",
     links: [
+      { href: "/leidbeiningar", label: "Leiðbeiningar" },
       { href: "/skilmalar", label: "Skilmálar" },
       { href: "/personuvernd", label: "Persónuvernd" },
       { href: "/gagnaeyding", label: "Eyðing gagna" },

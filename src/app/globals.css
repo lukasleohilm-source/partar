@@ -108,6 +108,13 @@ select:focus-visible {
   animation: partar-shimmer 1.4s infinite;
 }
 
+/* Leiðbeiningamyndbönd (components/guide) */
+@keyframes partar-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes partar-pop { 0% { opacity: 0; transform: scale(0.85); } 70% { opacity: 1; transform: scale(1.04); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes partar-drop { from { opacity: 0; transform: translateY(-24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes partar-rise { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes partar-star { 0% { transform: scale(0.6); } 60% { transform: scale(1.25); color: #fbbf24; fill: #fbbf24; } 100% { transform: scale(1); color: #fbbf24; fill: #fbbf24; } }
+
 /* Fingur sem ýtir í leiðbeiningamyndbandi (install-demo) */
 @keyframes partar-tap {
   0%, 15% { transform: scale(1.4); opacity: 0; }
