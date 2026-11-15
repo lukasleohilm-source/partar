@@ -40,12 +40,16 @@ function lathe(points: [number, number][], segments = 128) {
 
 export type WheelScene = { start: () => void; stop: () => void; renderOnce: () => void; dispose: () => void };
 
-export function createWheelScene(canvas: HTMLCanvasElement, { animate }: { animate: boolean }): WheelScene {
+export function createWheelScene(
+  canvas: HTMLCanvasElement,
+  { animate, light = false }: { animate: boolean; light?: boolean },
+): WheelScene {
   const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "low-power" });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.toneMapping = ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  // Ljóst þema: aðeins minni birta svo málmurinn renni ekki saman við ljósan bakgrunn
+  renderer.toneMappingExposure = light ? 0.95 : 1.05;
 
   const scene = new Scene();
   const pmrem = new PMREMGenerator(renderer);
@@ -62,9 +66,15 @@ export function createWheelScene(canvas: HTMLCanvasElement, { animate }: { anima
   // ---- Efni ----
   const rubber = track(new MeshStandardMaterial({ color: 0x141416, roughness: 0.92, metalness: 0 }));
   const rubberTread = track(new MeshStandardMaterial({ color: 0x0d0d0f, roughness: 0.97, metalness: 0 }));
-  const alloy = track(new MeshStandardMaterial({ color: 0xc8ccd2, roughness: 0.24, metalness: 1, envMapIntensity: 1.1 }));
-  const alloyDark = track(new MeshStandardMaterial({ color: 0x3a3d42, roughness: 0.38, metalness: 1 }));
-  const steel = track(new MeshStandardMaterial({ color: 0x8d9097, roughness: 0.5, metalness: 1 }));
+  // Dökkt þema: silfurfelga. Ljóst þema: dökk grafítfelga, svo teinarnir skeri sig úr ljósum bakgrunni
+  // (silfur á ljósu varð flatt og grátt).
+  const alloy = track(
+    light
+      ? new MeshStandardMaterial({ color: 0x737a84, roughness: 0.3, metalness: 0.9, envMapIntensity: 0.9 })
+      : new MeshStandardMaterial({ color: 0xc8ccd2, roughness: 0.24, metalness: 1, envMapIntensity: 1.1 }),
+  );
+  const alloyDark = track(new MeshStandardMaterial({ color: light ? 0x1f2226 : 0x3a3d42, roughness: 0.38, metalness: 1 }));
+  const steel = track(new MeshStandardMaterial({ color: light ? 0x9a9ea5 : 0x8d9097, roughness: 0.5, metalness: 1 }));
   const caliperMat = track(new MeshStandardMaterial({ color: 0xe0560f, roughness: 0.42, metalness: 0.15 }));
   const holeMat = track(new MeshStandardMaterial({ color: 0x050505, roughness: 1 }));
 
@@ -214,7 +224,8 @@ export function createWheelScene(canvas: HTMLCanvasElement, { animate }: { anima
   sc.width = sc.height = 128;
   const ctx = sc.getContext("2d")!;
   const grd = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-  grd.addColorStop(0, "rgba(0,0,0,0.75)");
+  // Mýkri skuggi á ljósum bakgrunni (þungur svartur skuggi leit út eins og blettur)
+  grd.addColorStop(0, light ? "rgba(0,0,0,0.32)" : "rgba(0,0,0,0.75)");
   grd.addColorStop(1, "rgba(0,0,0,0)");
   ctx.fillStyle = grd;
   ctx.fillRect(0, 0, 128, 128);

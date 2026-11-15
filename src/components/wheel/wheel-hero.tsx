@@ -8,10 +8,20 @@ import type { WheelScene } from "./wheel-scene";
 export function WheelHero({ className = "" }: { className?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const [ready, setReady] = useState(false);
+  const [light, setLight] = useState<boolean | null>(null);
+
+  // Fylgir útlitinu (Ég → Útlit); felgan er teiknuð upp á nýtt þegar því er breytt
+  useEffect(() => {
+    const read = () => setLight(document.documentElement.dataset.theme === "light");
+    read();
+    const mo = new MutationObserver(read);
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => mo.disconnect();
+  }, []);
 
   useEffect(() => {
     const canvas = ref.current;
-    if (!canvas || !window.matchMedia("(min-width: 768px)").matches) return;
+    if (light === null || !canvas || !window.matchMedia("(min-width: 768px)").matches) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let scene: WheelScene | null = null;
     let visible = true;
@@ -33,7 +43,7 @@ export function WheelHero({ className = "" }: { className?: string }) {
       import("./wheel-scene").then(({ createWheelScene }) => {
         if (cancelled) return;
         try {
-          scene = createWheelScene(canvas, { animate: !reduce });
+          scene = createWheelScene(canvas, { animate: !reduce, light });
         } catch {
           return; // ekkert WebGL: síðan virkar áfram án felgunnar
         }
@@ -50,7 +60,7 @@ export function WheelHero({ className = "" }: { className?: string }) {
       document.removeEventListener("visibilitychange", sync);
       scene?.dispose();
     };
-  }, []);
+  }, [light]);
 
   return (
     <canvas
