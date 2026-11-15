@@ -154,7 +154,9 @@ export default async function SearchPage({
             <li key={c.label}>
               <Link
                 href={c.href}
-                className="flex items-center gap-1.5 rounded-full bg-stone-900 py-1.5 pl-3 pr-2.5 text-sm text-white"
+                // Appelsínugult sést í báðum útlitum (stone-900 snýst við í dökku og varð hvítt á hvítu);
+                // orange-700 er líka snúið við í dökku útliti svo textinn verður ljós þar
+                className="flex items-center gap-1.5 rounded-full bg-orange-600/15 py-1.5 pl-3 pr-2.5 text-sm font-medium text-orange-700 ring-1 ring-orange-600/30 transition-colors hover:bg-orange-600/25"
                 aria-label={t("Fjarlægja síu: {sia}", { sia: c.label })}
               >
                 {c.label} <X size={14} aria-hidden />

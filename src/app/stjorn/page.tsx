@@ -138,7 +138,7 @@ export default async function AdminPage() {
                     </button>
                   </form>
                   <form action={setBan.bind(null, r.seller_id, !r.seller_banned)}>
-                    <button type="submit" className={`${btn} ${r.seller_banned ? "bg-stone-100 text-stone-700" : "bg-stone-900 text-white"}`}>
+                    <button type="submit" className={`${btn} ${r.seller_banned ? "bg-stone-100 text-stone-700" : "bg-red-600 text-white"}`}>
                       <Ban size={15} /> {r.seller_banned ? "Afbanna" : "Banna seljanda"}
                     </button>
                   </form>

@@ -21,7 +21,7 @@ const TONES = {
   green: "bg-emerald-500/15 text-emerald-500",
   violet: "bg-violet-500/15 text-violet-500",
   stone: "bg-stone-500/15 text-stone-500",
-  dark: "bg-stone-900 text-white",
+  dark: "bg-stone-500/20 text-stone-900",
 };
 
 type RowProps = {
