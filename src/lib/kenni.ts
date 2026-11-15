@@ -6,6 +6,9 @@ export const KENNI_CLIENT_ID = "@partar.lukels255.com/web";
 export const KENNI_SCOPES = "openid national_id audkenni_name";
 export const KENNI_FLOW_COOKIE = "kenni_flow";
 export const KENNI_CALLBACK_PATH = "/auth/kenni";
+// Ókeypis þróunaráskrift Kenni leyfir aðeins teymismeðlimum að auðkenna sig. Þangað til við erum
+// komnir með Grow/Pro sjá aðeins stjórnendur hnappinn. Setja á true þegar áskriftin er komin.
+export const KENNI_OPEN_TO_ALL = false;
 
 export function base64url(bytes: Uint8Array): string {
   let s = "";

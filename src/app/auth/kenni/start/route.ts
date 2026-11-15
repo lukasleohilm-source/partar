@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { KENNI_CALLBACK_PATH, KENNI_CLIENT_ID, KENNI_FLOW_COOKIE, KENNI_ISSUER, KENNI_SCOPES, pkceChallenge, randomToken } from "@/lib/kenni";
+import { KENNI_CALLBACK_PATH, KENNI_CLIENT_ID, KENNI_FLOW_COOKIE, KENNI_ISSUER, KENNI_OPEN_TO_ALL, KENNI_SCOPES, pkceChallenge, randomToken } from "@/lib/kenni";
 import { createClient } from "@/lib/supabase/server";
 
 // Hefur staðfestingu: sendir innskráðan notanda til Kenni með state, nonce og PKCE
@@ -10,6 +10,10 @@ export async function GET(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.redirect(new URL("/byrja?next=/profill", origin));
+  if (!KENNI_OPEN_TO_ALL) {
+    const { data: isAdmin } = await supabase.rpc("is_admin");
+    if (!isAdmin) return NextResponse.redirect(new URL("/profill?stadfesting=ekki-tilbuid", origin));
+  }
 
   const flow = { state: randomToken(), nonce: randomToken(), verifier: randomToken(48) };
   const url = new URL(`${KENNI_ISSUER}/oidc/auth`);

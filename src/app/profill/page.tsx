@@ -10,6 +10,7 @@ import { InstallRow } from "@/components/install-app";
 import { LangSwitch } from "@/components/lang-provider";
 import { getT } from "@/lib/lang-server";
 import { VerifiedBadge } from "@/components/verified-badge";
+import { KENNI_OPEN_TO_ALL } from "@/lib/kenni";
 
 export async function generateMetadata() {
   const { t } = await getT();
@@ -122,7 +123,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         </p>
       )}
 
-      {!guest && !verified && (
+      {!guest && !verified && (KENNI_OPEN_TO_ALL || isAdmin) && (
         // Venjulegur hlekkur (ekki Link) svo Next sæki ekki leiðina fyrirfram
         <a
           href="/auth/kenni/start"
