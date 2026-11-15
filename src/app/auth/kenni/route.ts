@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     }),
   });
   if (!tokenRes.ok) return done("villa");
-  const tokens = (await tokenRes.json()) as { id_token?: string };
+  const tokens = (await tokenRes.json()) as { id_token?: string; access_token?: string };
   if (!tokens.id_token) return done("villa");
 
   let claims: Record<string, unknown>;
@@ -62,6 +62,14 @@ export async function GET(request: NextRequest) {
   }
   // Fyrirtækjaumboð eru ekki leyfð: aðeins einstaklingur sem skráir sig inn sjálfur
   if (claims.actor) return done("villa");
+  // Kennitala og nafn eru oftast í ID-tókanum; annars sótt frá /oidc/me (sama notandi, sub athugað)
+  if (!claims.national_id && tokens.access_token) {
+    const me = await fetch(`${KENNI_ISSUER}/oidc/me`, { headers: { authorization: `Bearer ${tokens.access_token}` } });
+    if (me.ok) {
+      const info = (await me.json()) as Record<string, unknown>;
+      if (info.sub === claims.sub) claims = { ...info, ...claims, national_id: info.national_id, audkenni_name: claims.audkenni_name ?? info.audkenni_name };
+    }
+  }
   const nationalId = String(claims.national_id ?? "");
   const name = String(claims.audkenni_name ?? claims.name ?? "");
 
