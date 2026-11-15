@@ -33,7 +33,10 @@ export function ViewTracker({ listingId, isOwner }: { listingId: string; isOwner
     try {
       localStorage.setItem(VIEWED_KEY, JSON.stringify({ ...fresh, [listingId]: now }));
     } catch {}
-    void createClient().rpc("record_view", { p_listing: listingId });
+    // Supabase sendir fyrirspurnina ekki fyrr en .then() er kallað, svo `void` eitt og sér gerði ekkert
+    createClient()
+      .rpc("record_view", { p_listing: listingId })
+      .then(() => {});
   }, [listingId, isOwner]);
 
   return null;
