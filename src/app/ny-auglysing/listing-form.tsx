@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FitmentPicker } from "@/components/listing/fitment-picker";
 import { ImagePicker } from "@/components/listing/image-picker";
+import { PlacePicker } from "@/components/place-picker";
 import { inputClass, labelClass, primaryButton, secondaryButton } from "@/components/ui/styles";
-import { CONDITIONS, KINDS, REGIONS, formatNumber, formatPrice, type Condition, type Kind, type Region } from "@/lib/i18n";
+import { CONDITIONS, KINDS, formatNumber, formatPrice, type Condition, type Kind, type Region } from "@/lib/i18n";
 import type { PickedImage } from "@/lib/images";
 import { imageUrl, storagePaths } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/client";
@@ -121,7 +122,7 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
         if (isCar) return car.make && car.year ? null : t("Veldu tegund og árgerð bílsins.");
         return universal || fitments.length > 0 ? null : t("Bættu við að minnsta kosti einum bíl eða hakaðu í „Passar í alla bíla“.");
       case 4:
-        if (!region) return t("Veldu landshluta.");
+        if (!region) return t("Veldu hvar hluturinn er.");
         if (postalCode && !/^\d{3}$/.test(postalCode)) return t("Póstnúmer er þrír tölustafir.");
         return null;
       default:
@@ -553,27 +554,18 @@ export function ListingForm({ userId, makes, models, categories, defaultRegion, 
 
       {step === 4 && (
         <div className="space-y-4">
-          <label className="block">
-            <span className={labelClass}>{t("Landshluti")}</span>
-            <select value={region} onChange={(e) => setRegion(e.target.value as Region)} className={inputClass}>
-              <option value="">{t("Veldu…")}</option>
-              {Object.entries(REGIONS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {t(label)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block">
-            <span className={labelClass}>{t("Póstnúmer (valfrjálst)")}</span>
-            <input
-              value={postalCode}
-              onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, "").slice(0, 3))}
-              inputMode="numeric"
-              placeholder="t.d. 600"
-              className={inputClass}
+          <div>
+            <span className={labelClass}>{t("Hvar er hluturinn?")}</span>
+            <PlacePicker
+              value={region ? { region, postal: postalCode || null } : null}
+              onChange={(p) => {
+                setRegion(p?.region ?? "");
+                setPostalCode(p?.postal ?? "");
+              }}
+              placeholder={t("Veldu bæ eða landshluta")}
             />
-          </label>
+            <p className="mt-1.5 text-xs text-stone-500">{t("Veldu bæinn svo kaupendur sjái hvað er langt að sækja.")}</p>
+          </div>
 
           <section className="rounded-2xl bg-surface p-4">
             <h2 className="mb-3 font-semibold">{t("Yfirlit")}</h2>

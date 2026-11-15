@@ -1,11 +1,12 @@
 "use client";
 
-import { ChevronRight, LocateFixed, Loader2, MapPin } from "lucide-react";
+import { ChevronRight, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
-import { inputClass, labelClass, primaryButton, secondaryButton } from "@/components/ui/styles";
-import { POSTAL, nearestPostal } from "@/lib/places";
+import { PlaceList } from "@/components/place-picker";
+import { labelClass, primaryButton, secondaryButton } from "@/components/ui/styles";
+import { POSTAL, postalRegion } from "@/lib/places";
 import { DISTANCES, serializeMyPlace } from "@/lib/search";
 import { useT } from "@/components/lang-provider";
 
@@ -16,8 +17,6 @@ export function MyPlacePicker({ place, maxKm }: { place: string | null; maxKm?: 
   const [open, setOpen] = useState(false);
   const [postal, setPostal] = useState(place ?? "");
   const [km, setKm] = useState<number | undefined>(maxKm);
-  const [locating, setLocating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const name = place ? POSTAL[place]?.[0] : null;
 
   function apply(nextPlace: string | null, nextKm: number | undefined) {
@@ -31,23 +30,6 @@ export function MyPlacePicker({ place, maxKm }: { place: string | null; maxKm?: 
     if (!nextPlace && url.searchParams.get("rodun") === "distance") url.searchParams.delete("rodun");
     router.replace(url.pathname + url.search);
     router.refresh();
-  }
-
-  function locate() {
-    if (!navigator.geolocation) return setError(t("Tækið styður ekki staðsetningu."));
-    setLocating(true);
-    setError(null);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setPostal(nearestPostal(pos.coords.latitude, pos.coords.longitude));
-        setLocating(false);
-      },
-      () => {
-        setError(t("Ekki fékkst leyfi til að sjá staðsetningu."));
-        setLocating(false);
-      },
-      { maximumAge: 600_000, timeout: 10_000 },
-    );
   }
 
   const valid = /^\d{3}$/.test(postal) && POSTAL[postal];
@@ -82,25 +64,20 @@ export function MyPlacePicker({ place, maxKm }: { place: string | null; maxKm?: 
         }
       >
         <div className="space-y-4">
-          <button type="button" onClick={locate} disabled={locating} className={`${secondaryButton} flex items-center justify-center gap-2`}>
-            {locating ? <Loader2 size={18} className="animate-spin" /> : <LocateFixed size={18} />}{" "}{t("Nota staðsetningu símans")}
-          </button>
-          <label className="block">
-            <span className={labelClass}>{t("eða póstnúmer")}</span>
-            <input
-              value={postal}
-              onChange={(e) => setPostal(e.target.value.replace(/\D/g, "").slice(0, 3))}
-              inputMode="numeric"
-              placeholder="t.d. 800"
-              className={inputClass}
+          {/* Sama staðsetningarval og þegar auglýsing er sett inn: leit, Nálægt mér, landshlutar → bæir */}
+          <div className="flex h-[44vh] flex-col overflow-hidden rounded-2xl border border-line">
+            <PlaceList
+              value={valid ? { region: postalRegion(postal), postal } : null}
+              allowAll
+              allowRegion={false}
+              onSelect={(p) => (p?.postal ? setPostal(p.postal) : apply(null, undefined))}
             />
-            {postal.length === 3 && (
-              <span className={`mt-1 block text-sm ${valid ? "text-stone-600" : "text-red-600"}`}>
-                {valid ? POSTAL[postal][0] : t("Óþekkt póstnúmer")}
-              </span>
-            )}
-          </label>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          </div>
+          {valid && (
+            <p className="flex items-center gap-1.5 text-sm text-stone-700">
+              <MapPin size={15} className="text-orange-600" /> {POSTAL[postal][0]} · {postal}
+            </p>
+          )}
           <fieldset>
             <legend className={labelClass}>{t("Hámarksfjarlægð")}</legend>
             <div className="flex flex-wrap gap-2">

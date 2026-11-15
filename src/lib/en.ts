@@ -811,4 +811,16 @@ export const EN: Record<string, string> = {
   "Lykilorðið þarf að vera að minnsta kosti 8 stafir.": "The password must be at least 8 characters.",
   "Ekki tókst að búa til aðgang. Reyndu aftur.": "Couldn't create the account. Please try again.",
   "Ekki tókst að vista lykilorðið. Reyndu aftur.": "Couldn't save the password. Please try again.",
+  // Staðsetningarval
+  "Leita að staðsetningu": "Search for a location",
+  "Nálægt mér": "Near me",
+  "Engin staðsetning fannst.": "No location found.",
+  "Loka {svaedi}": "Close {svaedi}",
+  "Opna {svaedi}": "Open {svaedi}",
+  "Póstnúmer í {baer}": "Postcodes in {baer}",
+  "Veldu staðsetningu": "Choose a location",
+  "Hvar er hluturinn?": "Where is the item?",
+  "Veldu bæ eða landshluta": "Choose a town or region",
+  "Veldu bæinn svo kaupendur sjái hvað er langt að sækja.": "Choose the town so buyers can see how far it is to pick up.",
+  "Veldu hvar hluturinn er.": "Choose where the item is.",
 };

@@ -93,3 +93,34 @@ export function nearestPostal(lat: number, lng: number): string {
   }
   return best;
 }
+
+// Landshluti hvers póstnúmers (eftir póstnúmerasvæðum)
+export function postalRegion(code: string): Region {
+  const n = Number(code);
+  if ((n >= 100 && n <= 189) || (n >= 200 && n <= 229) || (n >= 270 && n <= 279)) return "hofudborgarsvaedid";
+  if (n === 190 || (n >= 230 && n <= 269)) return "sudurnes";
+  if (n >= 300 && n <= 399) return "vesturland";
+  if ((n >= 400 && n <= 499) || (n >= 510 && n <= 529)) return "vestfirdir";
+  if (n >= 500 && n <= 579) return "nordurland_vestra";
+  if (n >= 580 && n <= 689) return "nordurland_eystra";
+  if (n >= 690 && n <= 779) return "austurland";
+  return "sudurland";
+}
+
+export type PlaceTown = { name: string; codes: string[] };
+
+// Landshluti → bæir (í röð póstnúmera) → póstnúmer; fyrir staðsetningarvalið
+export const PLACE_TREE: { region: Region; towns: PlaceTown[] }[] = (() => {
+  const byRegion = new Map<Region, Map<string, string[]>>();
+  for (const code of Object.keys(POSTAL).sort()) {
+    const region = postalRegion(code);
+    const towns = byRegion.get(region) ?? new Map<string, string[]>();
+    const name = POSTAL[code][0];
+    towns.set(name, [...(towns.get(name) ?? []), code]);
+    byRegion.set(region, towns);
+  }
+  return (Object.keys(REGIONS) as Region[]).map((region) => ({
+    region,
+    towns: [...(byRegion.get(region) ?? new Map()).entries()].map(([name, codes]) => ({ name, codes })),
+  }));
+})();
