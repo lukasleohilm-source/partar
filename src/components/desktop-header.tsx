@@ -1,6 +1,6 @@
 "use client";
 
-import { BellRing, Heart, MessageCircle, Plus, Search, User, type LucideIcon } from "lucide-react";
+import { BellRing, CircleHelp, Heart, MessageCircle, Plus, Search, User, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LangSwitch, useT } from "./lang-provider";
@@ -14,6 +14,8 @@ const items: Item[] = [
   { href: "/leit", label: "Leita", icon: Search, match: (p) => p.startsWith("/leit") },
   { href: "/oska-eftir", label: "Óska eftir", icon: BellRing, badge: "notifications", match: (p) => p.startsWith("/oska-eftir") },
   { href: "/skilabod", label: "Skilaboð", icon: MessageCircle, badge: "conversations", match: (p) => p.startsWith("/skilabod") },
+  // Auðvelt að sjá hvernig Partar virkar: selja, óska eftir, leita og kaupa
+  { href: "/leidbeiningar", label: "Leiðbeiningar", icon: CircleHelp, match: (p) => p.startsWith("/leidbeiningar") },
 ];
 
 const HIDDEN = [/^\/byrja/];

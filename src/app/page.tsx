@@ -1,4 +1,4 @@
-import { Car, CarFront, ChevronRight, Heart, Wrench } from "lucide-react";
+import { Car, CarFront, ChevronRight, CircleHelp, Heart, Wrench } from "lucide-react";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { InstallBanner } from "@/components/install-app";
@@ -55,6 +55,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
             <Logo />
             <div className="flex items-center gap-2">
               <LangSwitch />
+              {/* Leiðbeiningar: svona selur þú, óskar eftir og leitar */}
+              <Link
+                href="/leidbeiningar"
+                aria-label={t("Leiðbeiningar")}
+                className="flex size-10 items-center justify-center rounded-full border border-line bg-surface text-stone-700"
+              >
+                <CircleHelp size={19} strokeWidth={1.75} />
+              </Link>
               <Link
                 href="/uppahalds"
                 aria-label={t("Uppáhalds")}
@@ -72,6 +80,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
             <p className="mt-4 max-w-[34rem] text-[17px] leading-relaxed text-stone-500 md:mt-6 md:text-lg">
               {t("Varahlutir, partabílar og ódýrir bílar um allt land. Finndu það sem passar í bílinn þinn eða seldu það sem þú þarft ekki.")}
             </p>
+            <Link
+              href="/leidbeiningar"
+              className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-orange-700 hover:underline md:mt-4"
+            >
+              <CircleHelp size={16} /> {t("Svona virkar Partar: selja, óska eftir og leita")}
+              <ChevronRight size={15} />
+            </Link>
 
             {eytt && (
               <p role="status" className="mt-5 rounded-lg border border-green-700/30 bg-green-50 p-3 text-sm text-green-800">
