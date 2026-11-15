@@ -1,4 +1,4 @@
-import { Bell, ChevronRight, CircleHelp, FileText, Heart, KeyRound, LogOut, Languages, Package, Pencil, Search, Shield, ShieldCheck, Star, Trash2, UserRoundPlus } from "lucide-react";
+import { Bell, ChevronRight, CircleHelp, FileText, Heart, KeyRound, LogOut, Languages, Package, Palette, Pencil, Search, Shield, ShieldCheck, Star, Trash2, UserRoundPlus } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Avatar } from "@/components/avatar";
@@ -8,6 +8,7 @@ import { logout } from "./actions";
 import { ActionRow, Group, Row } from "./ui";
 import { InstallRow } from "@/components/install-app";
 import { LangSwitch } from "@/components/lang-provider";
+import { ThemeSwitch } from "@/components/theme-switch";
 import { getT } from "@/lib/lang-server";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { KENNI_OPEN_TO_ALL } from "@/lib/kenni";
@@ -177,6 +178,14 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           </span>
           <span className="flex-1 font-medium text-stone-900">{t("Tungumál")}</span>
           <LangSwitch />
+        </div>
+        {/* Útlit: sól = ljóst, tungl = dökkt (dökkt er sjálfgefið) */}
+        <div className="flex items-center gap-3 px-4 py-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-violet-500/15 text-violet-500">
+            <Palette size={19} />
+          </span>
+          <span className="flex-1 font-medium text-stone-900">{t("Útlit")}</span>
+          <ThemeSwitch />
         </div>
         <Row
           href="/profill/breyta"

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import { Inter } from "next/font/google";
 import { BottomNav } from "@/components/bottom-nav";
 import { DesktopHeader } from "@/components/desktop-header";
@@ -9,6 +10,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { WelcomeGate } from "@/components/welcome-gate";
 import { INSTALL_LISTENER } from "@/lib/install-script";
 import { getT } from "@/lib/lang-server";
+import { THEME_COOKIE, type Theme } from "@/lib/lang";
 import "./globals.css";
 
 const inter = Inter({
@@ -26,13 +28,23 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  viewportFit: "cover",
-  themeColor: "#08090a",
-  colorScheme: "dark",
-};
+async function getTheme(): Promise<Theme> {
+  return (await cookies()).get(THEME_COOKIE)?.value === "light" ? "light" : "dark";
+}
+
+export async function generateViewport(): Promise<Viewport> {
+  const light = (await getTheme()) === "light";
+  return {
+    width: "device-width",
+    initialScale: 1,
+    viewportFit: "cover",
+    themeColor: light ? "#f7f7f6" : "#08090a",
+    colorScheme: light ? "light" : "dark",
+  };
+}
+
+// Setur útlit úr vafraköku áður en síðan birtist (líka þegar forsíðan kemur úr skyndiminni)
+const THEME_SCRIPT = `try{var m=document.cookie.match(/(?:^|; )${THEME_COOKIE}=(light|dark)/);document.documentElement.dataset.theme=m?m[1]:"dark"}catch(e){}`;
 
 export default async function RootLayout({
   children,
@@ -40,8 +52,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const { lang } = await getT();
+  const theme = await getTheme();
   return (
-    <html lang={lang} data-theme="dark" suppressHydrationWarning>
+    <html lang={lang} data-theme={theme} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className={`${inter.variable} antialiased`}>
         <script dangerouslySetInnerHTML={{ __html: INSTALL_LISTENER }} />
         <LangProvider lang={lang}>

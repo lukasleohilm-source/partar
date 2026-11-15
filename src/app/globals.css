@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
-/* Partar er alltaf í dökku útliti: dark:-klasar gilda alls staðar */
-@custom-variant dark (&:where(:root, :root *));
+/* Dökkt útlit er sjálfgefið; ljóst er val notandans (data-theme="light", sjá Ég → Útlit).
+   dark:-klasar gilda alls staðar nema í ljósu útliti. */
+@custom-variant dark (&:where(:root:not([data-theme="light"]), :root:not([data-theme="light"]) *));
 
 /* ===== Hönnunarkerfi Partar =====
    Dökkt útlit. Grái skalinn (stone) er snúinn við og ljósir litatónar (t.d. orange-50)
@@ -59,6 +60,52 @@
   --color-green-800: #bbf7d0;
   --color-amber-50: #2a210b;
   --color-amber-900: #fde68a;
+}
+
+/* Ljóst útlit: hreinn, ljósgrár grunnur og hvít spjöld. Litaskalarnir fá aftur
+   venjuleg (ósnúin) gildi svo stone-900 sé dökkur texti og orange-50 ljós flötur. */
+:root[data-theme="light"] {
+  --canvas: #f7f7f6;
+  --surface: #ffffff;
+  --surface-2: #f1f1ef;
+  --surface-3: #e8e8e5;
+  --line: #e4e4e1;
+  --line-strong: #cfcfcb;
+  color-scheme: light;
+
+  --color-stone-50: #fafaf9;
+  --color-stone-100: #f5f5f4;
+  --color-stone-200: #e7e5e4;
+  --color-stone-300: #d6d3d1;
+  --color-stone-400: #a8a29e;
+  --color-stone-500: #78716c;
+  --color-stone-600: #57534e;
+  --color-stone-700: #44403c;
+  --color-stone-800: #292524;
+  --color-stone-900: #1c1917;
+
+  --color-orange-50: #fff7ed;
+  --color-orange-100: #ffedd5;
+  --color-orange-200: #fed7aa;
+  --color-orange-300: #fdba74;
+  --color-orange-600: #ea580c;
+  --color-orange-700: #c2410c;
+  --color-orange-800: #9a3412;
+  --color-orange-900: #7c2d12;
+
+  --color-red-50: #fef2f2;
+  --color-red-200: #fecaca;
+  --color-red-300: #fca5a5;
+  --color-red-700: #b91c1c;
+  --color-green-50: #f0fdf4;
+  --color-green-100: #dcfce7;
+  --color-green-700: #15803d;
+  --color-green-800: #166534;
+  --color-amber-50: #fffbeb;
+  --color-amber-900: #78350f;
+}
+:root[data-theme="light"] .skeleton::after {
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.6), transparent); /* taste-skill-ignore: hleðsluskuggi */
 }
 
 body {
