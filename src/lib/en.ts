@@ -823,4 +823,11 @@ export const EN: Record<string, string> = {
   "Veldu bæ eða landshluta": "Choose a town or region",
   "Veldu bæinn svo kaupendur sjái hvað er langt að sækja.": "Choose the town so buyers can see how far it is to pick up.",
   "Veldu hvar hluturinn er.": "Choose where the item is.",
+  // Staðsetningartré með hökum
+  "Hreinsa val": "Clear selection",
+  "Sýna auglýsingar": "Show listings",
+  "Næstu auglýsingar birtast fyrst. Hámarksfjarlægð:": "Nearest listings come first. Maximum distance:",
+  "Engin": "None",
+  "Valið: {stadir}": "Selected: {stadir}",
+  "Ekkert valið: allt landið er sýnt.": "Nothing selected: all of Iceland is shown.",
 };

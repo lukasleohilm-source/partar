@@ -123,6 +123,23 @@ describe("leit", () => {
     expect(titles(await t.q(`select title from search_listings(p_region => 'sudurland')`))).toEqual(["Ljós tilboð"]);
   });
 
+  it("síar eftir mörgum stöðum í einu (landshlutar og póstnúmer)", async () => {
+    await t.as(seller);
+    await publish("Dekk í Garðabæ", 20000, "gott", "hofudborgarsvaedid", null);
+    await t.q(`update listings set postal_code = '210' where title = 'Dekk í Garðabæ'`);
+    await t.as(null);
+    const q = (places: string[]) =>
+      t.q<{ title: string }>(`select title from search_listings(p_places => $1::text[], p_sort => 'price_asc')`, [places]);
+    expect(titles(await q(["210"]))).toEqual(["Dekk í Garðabæ"]);
+    expect(titles(await q(["210", "sudurland", "nordurland_eystra"]))).toEqual(["Afturljós Yaris", "Dekk í Garðabæ", "Ljós tilboð"]);
+    expect(titles(await q(["101"]))).toEqual([]);
+    // Tómur listi = allt landið
+    expect((await q([])).length).toBeGreaterThan(3);
+    await t.as(seller);
+    await t.q(`delete from listings where title = 'Dekk í Garðabæ'`);
+    await t.as(null);
+  });
+
   it("raðar og skiptir í síður, „Tilboð“ síðast", async () => {
     const all = ["Framljós vinstra megin", "Framljós Toyota allar gerðir", "Afturljós Yaris", "Ljós tilboð"];
     expect(titles(await t.q(`select title from search_listings(p_sort => 'price_desc')`))).toEqual(all);

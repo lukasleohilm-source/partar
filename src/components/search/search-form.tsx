@@ -6,7 +6,7 @@ import { useState } from "react";
 import { SearchBox } from "./search-box";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { inputClass, labelClass, primaryButton, secondaryButton } from "@/components/ui/styles";
-import { CONDITIONS, KINDS, REGIONS, formatNumber, type Condition, type Kind } from "@/lib/i18n";
+import { CONDITIONS, KINDS, formatNumber, type Condition, type Kind } from "@/lib/i18n";
 import { SORTS, searchHref, type Filters, type Sort } from "@/lib/search";
 import type { Category } from "@/lib/vehicles";
 import { useT } from "@/components/lang-provider";
@@ -164,22 +164,6 @@ export function SearchForm({ filters, categories, activeCount }: Props) {
               })}
             </div>
           </fieldset>
-
-          <label className="block">
-            <span className={labelClass}>{t("Landshluti")}</span>
-            <select
-              value={draft.region ?? ""}
-              onChange={(e) => setDraft({ ...draft, region: (e.target.value || undefined) as Filters["region"] })}
-              className={inputClass}
-            >
-              <option value="">{t("Allt landið")}</option>
-              {Object.entries(REGIONS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {t(label)}
-                </option>
-              ))}
-            </select>
-          </label>
 
           <label className="block">
             <span className={labelClass}>{t("Röðun")}</span>

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { ListingCard } from "@/components/listing/listing-card";
 import { FavoriteButton } from "@/components/listing/listing-actions";
-import { MyPlacePicker } from "@/components/search/my-place-picker";
+import { LocationFilter } from "@/components/search/location-filter";
 import { MyCarPicker } from "@/components/search/my-car-picker";
 import { SearchForm } from "@/components/search/search-form";
 import { CONDITIONS, KINDS, REGIONS, formatPrice } from "@/lib/i18n";
@@ -63,6 +63,7 @@ export default async function SearchPage({
     p_max_price: filters.maxPrice,
     p_conditions: filters.conditions,
     p_region: filters.region,
+    p_places: filters.places,
     p_sort: filters.sort,
     p_limit: PAGE_SIZE + 1, // einni fleiri til að vita hvort næsta síða sé til
     p_offset: (filters.page - 1) * PAGE_SIZE,
@@ -145,7 +146,7 @@ export default async function SearchPage({
       )}
 
       <div className="flex gap-2">
-        <MyPlacePicker key={`${myPlace}-${filters.maxKm}`} place={myPlace} maxKm={filters.maxKm} />
+        <LocationFilter key={`${myPlace}-${filters.maxKm}-${filters.places?.join()}`} places={filters.places ?? []} myPlace={myPlace} maxKm={filters.maxKm} />
       </div>
 
       {chips.length > 0 && (

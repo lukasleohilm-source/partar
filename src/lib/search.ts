@@ -1,4 +1,5 @@
 import { CONDITIONS, KINDS, REGIONS, type Condition, type Kind, type Region } from "@/lib/i18n";
+import { isPlaceToken } from "@/lib/places";
 
 // Slóðarbreytur leitar (íslensk heiti svo slóðin sé læsileg)
 export type Filters = {
@@ -12,6 +13,7 @@ export type Filters = {
   maxPrice?: number; // verd_til
   conditions?: Condition[]; // astand=gott,notad
   region?: Region; // landshluti
+  places?: string[]; // stadir=210,225,sudurnes (póstnúmer og/eða landshlutar)
   maxKm?: number; // innan (km frá „Minn staður“)
   sort: Sort; // rodun
   page: number; // sida
@@ -62,6 +64,10 @@ export function parseFilters(p: Params): Filters {
     maxPrice: int(p, "verd_til"),
     conditions: conditions.length ? conditions : undefined,
     region: region && region in REGIONS ? (region as Region) : undefined,
+    places: (() => {
+      const list = [...new Set((str(p, "stadir") ?? "").split(",").filter(isPlaceToken))].slice(0, 60);
+      return list.length ? list : undefined;
+    })(),
     maxKm: int(p, "innan", 1000),
     sort: sort && sort in SORTS ? (sort as Sort) : "newest",
     page: Math.max(1, int(p, "sida", 1000) ?? 1),
@@ -83,6 +89,7 @@ export function searchHref(f: Filters, patch: Partial<Filters> = {}): string {
   if (m.maxPrice != null) sp.set("verd_til", String(m.maxPrice));
   if (m.conditions?.length) sp.set("astand", m.conditions.join(","));
   if (m.region) sp.set("landshluti", m.region);
+  if (m.places?.length) sp.set("stadir", m.places.join(","));
   if (m.maxKm) sp.set("innan", String(m.maxKm));
   if (m.sort !== "newest") sp.set("rodun", m.sort);
   if (m.allCars) sp.set("bill", "allir");

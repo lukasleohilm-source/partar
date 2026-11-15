@@ -109,13 +109,55 @@ export function postalRegion(code: string): Region {
 
 export type PlaceTown = { name: string; codes: string[] };
 
-// Landshluti → bæir (í röð póstnúmera) → póstnúmer; fyrir staðsetningarvalið
+// Bæir sem tilheyra stærra sveitarfélagi (eins og á mbl: Garðabær = 210 Garðabær + 225 Álftanes)
+const MUNICIPALITY: Record<string, string> = {
+  Kjalarnes: "Reykjavík",
+  Álftanes: "Garðabær",
+  Njarðvík: "Reykjanesbær",
+  Keflavíkurflugvöllur: "Reykjanesbær",
+  Sandgerði: "Suðurnesjabær",
+  Garður: "Suðurnesjabær",
+  Hellissandur: "Snæfellsbær",
+  Ólafsvík: "Snæfellsbær",
+  Hnífsdalur: "Ísafjarðarbær",
+  Flateyri: "Ísafjarðarbær",
+  Suðureyri: "Ísafjarðarbær",
+  Þingeyri: "Ísafjarðarbær",
+  Grímsey: "Akureyri",
+  Hrísey: "Akureyri",
+  Siglufjörður: "Fjallabyggð",
+  Ólafsfjörður: "Fjallabyggð",
+  Reyðarfjörður: "Fjarðabyggð",
+  Eskifjörður: "Fjarðabyggð",
+  Neskaupstaður: "Fjarðabyggð",
+  Fáskrúðsfjörður: "Fjarðabyggð",
+  Stöðvarfjörður: "Fjarðabyggð",
+  Mjóifjörður: "Fjarðabyggð",
+  Egilsstaðir: "Múlaþing",
+  Seyðisfjörður: "Múlaþing",
+  Djúpivogur: "Múlaþing",
+  "Borgarfjörður eystri": "Múlaþing",
+  Höfn: "Hornafjörður",
+  Öræfi: "Hornafjörður",
+  Selfoss: "Árborg",
+  Eyrarbakki: "Árborg",
+  Stokkseyri: "Árborg",
+  Þorlákshöfn: "Ölfus",
+};
+
+/** Sveitarfélag póstnúmers (sama og bæjarnafnið nema bærinn tilheyri stærra sveitarfélagi) */
+export function postalMunicipality(code: string): string {
+  const town = POSTAL[code]?.[0] ?? code;
+  return MUNICIPALITY[town] ?? town;
+}
+
+// Landshluti → sveitarfélög (í röð póstnúmera) → póstnúmer; fyrir staðsetningarvalið
 export const PLACE_TREE: { region: Region; towns: PlaceTown[] }[] = (() => {
   const byRegion = new Map<Region, Map<string, string[]>>();
   for (const code of Object.keys(POSTAL).sort()) {
     const region = postalRegion(code);
     const towns = byRegion.get(region) ?? new Map<string, string[]>();
-    const name = POSTAL[code][0];
+    const name = postalMunicipality(code);
     towns.set(name, [...(towns.get(name) ?? []), code]);
     byRegion.set(region, towns);
   }
@@ -124,3 +166,27 @@ export const PLACE_TREE: { region: Region; towns: PlaceTown[] }[] = (() => {
     towns: [...(byRegion.get(region) ?? new Map()).entries()].map(([name, codes]) => ({ name, codes })),
   }));
 })();
+
+/** Öll póstnúmer landshluta */
+export function regionCodes(region: Region): string[] {
+  return PLACE_TREE.find((r) => r.region === region)?.towns.flatMap((t) => t.codes) ?? [];
+}
+
+/**
+ * Staðir í leit: póstnúmer og/eða landshlutar. Ef öll póstnúmer landshluta eru valin
+ * kemur landshlutinn í staðinn (þá passa líka auglýsingar sem hafa aðeins landshluta).
+ */
+export function normalizePlaces(codes: Set<string>, regions: Set<Region>): string[] {
+  const out: string[] = [];
+  for (const { region } of PLACE_TREE) {
+    const all = regionCodes(region);
+    if (regions.has(region) || (all.length > 0 && all.every((c) => codes.has(c)))) out.push(region);
+    else out.push(...all.filter((c) => codes.has(c)));
+  }
+  return out;
+}
+
+/** Gilt staðartákn: póstnúmer sem er til eða landshluti */
+export function isPlaceToken(s: string): boolean {
+  return Boolean(POSTAL[s]) || s in REGIONS;
+}
