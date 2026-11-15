@@ -11,7 +11,8 @@ import { LogoMark } from "@/components/logo";
 export const ORANGE = "#ea580c";
 
 /** Spilari: skiptir um senu á fresti meðan myndbandið sést; stöðvast við „minni hreyfingu“ */
-export function useDemoPlayer(count: number, sceneMs = 3200) {
+// Hver sena stendur í 6 sek. svo fólk nái að lesa og sjá hvað gerist (var 3,2 sek.)
+export function useDemoPlayer(count: number, sceneMs = 6000) {
   const [scene, setScene] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [visible, setVisible] = useState(false);
