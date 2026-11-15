@@ -96,7 +96,8 @@ export function GoogleIdButton({ next, onUnavailable }: { next: string; onUnavai
           ux_mode: "popup",
           auto_select: false,
           itp_support: true,
-          use_fedcm_for_button: true,
+          // Venjulegur sprettigluggi; FedCM bregst í sumum vöfrum án þess að neitt gerist
+          use_fedcm_for_button: false,
           callback: async ({ credential }) => {
             setBusy(true);
             setError(null);
