@@ -6,7 +6,7 @@ import { THEME_COOKIE, type Theme } from "@/lib/lang";
 import { useT } from "./lang-provider";
 
 // Sól | tungl. Valið er vistað í vafraköku svo þjónninn birti rétt útlit strax (ekkert flökt).
-export function ThemeSwitch({ className = "" }: { className?: string }) {
+export function ThemeSwitch({ className = "", small = false }: { className?: string; small?: boolean }) {
   const { t } = useT();
   const [theme, setTheme] = useState<Theme>("dark");
 
@@ -37,11 +37,11 @@ export function ThemeSwitch({ className = "" }: { className?: string }) {
           aria-pressed={theme === value}
           aria-label={label}
           title={label}
-          className={`grid size-8 place-items-center rounded-full transition-colors ${
+          className={`grid ${small ? "size-6" : "size-8"} place-items-center rounded-full transition-colors ${
             theme === value ? "bg-orange-600 text-white shadow-sm" : "text-stone-600 hover:text-stone-900"
           }`}
         >
-          <Icon size={16} strokeWidth={2.2} />
+          <Icon size={small ? 13 : 16} strokeWidth={2.2} />
         </button>
       ))}
     </div>

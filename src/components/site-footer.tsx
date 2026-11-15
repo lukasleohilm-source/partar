@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LangSwitch, useT } from "./lang-provider";
 import { Logo } from "./logo";
+import { ThemeSwitch } from "./theme-switch";
 
 const COLUMNS = [
   {
@@ -51,7 +52,11 @@ export function SiteFooter() {
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-stone-500">
             {t("Markaðstorg fyrir notaða varahluti, partabíla og ódýra bíla á Íslandi.")}
           </p>
-          <LangSwitch className="mt-5" />
+          {/* Tungumál og útlit (sól / tungl) hlið við hlið */}
+          <div className="mt-5 flex items-center gap-3">
+            <LangSwitch />
+            <ThemeSwitch small />
+          </div>
         </div>
         {COLUMNS.map((col) => (
           <nav key={col.title} aria-label={t(col.title)}>
