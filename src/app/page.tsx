@@ -11,7 +11,7 @@ import { Logo } from "@/components/logo";
 import { MyCarPicker } from "@/components/search/my-car-picker";
 import { SearchBox } from "@/components/search/search-box";
 import { WheelHero } from "@/components/wheel/wheel-hero";
-import { CATEGORY_ICONS, CATEGORY_SHORT } from "@/lib/category-icons";
+import { CategoryTree, type CategoryRow } from "@/components/category-tree";
 import { favoriteIds } from "@/lib/favorites";
 import { getT } from "@/lib/lang-server";
 import { LISTING_SUMMARY_SELECT, type ListingSummary } from "@/lib/listings";
@@ -41,7 +41,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
       .limit(30),
     supabase.from("makes").select("id, name").order("name"),
     supabase.from("models").select("id, make_id, name").order("name"),
-    supabase.from("categories").select("id, slug, sort").is("parent_id", null).order("sort"),
+    supabase.from("categories").select("id, parent_id, slug, name, sort").order("sort"),
     favoriteIds(supabase, user?.id),
   ]);
   const listings = (data ?? []) as ListingSummary[];
@@ -149,24 +149,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
       <div className="mx-auto max-w-md md:max-w-page md:px-4">
       <section className="mt-8 px-4 md:mt-12">
         <h2 className="mb-4 text-xl font-semibold tracking-[-0.01em]">{t("Flokkar")}</h2>
-        <ul className="grid grid-cols-4 gap-2 md:flex md:gap-1 md:overflow-x-auto md:[scrollbar-width:none]">
-          {(categories.data ?? [])
-            .filter((c) => c.slug !== "annad")
-            .map((c) => {
-              const Icon = CATEGORY_ICONS[c.slug] ?? Wrench;
-              return (
-                <li key={c.id} className="md:flex-1">
-                  <Link
-                    href={`/leit?flokkur=${c.id}`}
-                    className="group flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border border-line bg-surface p-1 text-center transition-colors duration-150 hover:bg-surface-2 active:scale-[0.97] md:aspect-auto md:min-w-[88px] md:border-transparent md:bg-transparent md:py-3"
-                  >
-                    <Icon size={22} strokeWidth={1.75} className="text-orange-700 md:text-stone-500 md:transition-colors md:group-hover:text-orange-700" />
-                    <span className="text-[12px] font-medium leading-tight text-stone-600 group-hover:text-stone-900">{t(CATEGORY_SHORT[c.slug] ?? c.slug)}</span>
-                  </Link>
-                </li>
-              );
-            })}
-        </ul>
+        {/* Listi með „>“: smellt opnar undirflokkana */}
+        <CategoryTree categories={(categories.data ?? []) as CategoryRow[]} />
       </section>
 
       <RecentlyViewed />

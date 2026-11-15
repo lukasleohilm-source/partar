@@ -831,4 +831,5 @@ export const EN: Record<string, string> = {
   "Valið: {stadir}": "Selected: {stadir}",
   "Ekkert valið: allt landið er sýnt.": "Nothing selected: all of Iceland is shown.",
   "Svona virkar Partar: selja, óska eftir og leita": "How Partar works: sell, request and search",
+  "Allt í {flokkur}": "Everything in {flokkur}",
 };
