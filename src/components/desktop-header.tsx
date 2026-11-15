@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LangSwitch, useT } from "./lang-provider";
 import { Logo } from "./logo";
+import { useAuthStatus } from "./use-auth-status";
 import { useUnreadCounts, type UnreadCounts } from "./use-unread-counts";
 
 type Item = { href: string; label: string; icon: LucideIcon; badge?: keyof UnreadCounts; match: (p: string) => boolean };
@@ -16,13 +17,20 @@ const items: Item[] = [
 ];
 
 const HIDDEN = [/^\/byrja/];
+// Innskráningarsíðurnar hafa sitt eigið einfalda útlit (eins og á flestum síðum)
+const AUTH_PAGES = [/^\/innskraning/, /^\/nyskraning/, /^\/gleymt-lykilord/, /^\/nytt-lykilord/];
 
 // Valmynd efst í tölvu (neðri valmyndin er aðeins í síma)
 export function DesktopHeader() {
   const pathname = usePathname();
   const unread = useUnreadCounts("efst");
   const { t } = useT();
-  if (HIDDEN.some((r) => r.test(pathname))) return null;
+  const auth = useAuthStatus();
+  if (HIDDEN.some((r) => r.test(pathname)) || AUTH_PAGES.some((r) => r.test(pathname))) return null;
+  // Eftir innskráningu er haldið áfram á sömu síðu
+  const back = pathname === "/" ? "" : `?next=${encodeURIComponent(pathname)}`;
+  const loginHref = `/innskraning${back}`;
+  const signupHref = `/nyskraning${back}`;
 
   const me = pathname.startsWith("/profill") || pathname.startsWith("/minar-auglysingar");
   const link = (active: boolean) =>
@@ -53,12 +61,30 @@ export function DesktopHeader() {
         </nav>
         <div className="ml-auto flex items-center gap-2">
           <LangSwitch className="mr-1" />
-          <Link href="/uppahalds" aria-label={t("Uppáhalds")} className={`${link(pathname.startsWith("/uppahalds"))} px-2.5`}>
-            <Heart size={17} strokeWidth={1.75} />
-          </Link>
-          <Link href="/profill" aria-current={me ? "page" : undefined} className={link(me)}>
-            <User size={16} strokeWidth={1.75} /> {t("Ég")}
-          </Link>
+          {auth === "guest" ? (
+            // Óinnskráð: eins og á flestum síðum, „Skrá inn“ og „Nýskráning“
+            <>
+              <Link href={loginHref} className="rounded-lg px-3 py-1.5 text-sm font-medium text-stone-700 transition-colors hover:bg-surface-2 hover:text-stone-900">
+                {t("Skrá inn")}
+              </Link>
+              <Link
+                href={signupHref}
+                className="rounded-lg border border-line-strong px-3 py-1.5 text-sm font-medium text-stone-900 transition-colors hover:bg-surface-2"
+              >
+                {t("Nýskráning")}
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/uppahalds" aria-label={t("Uppáhalds")} className={`${link(pathname.startsWith("/uppahalds"))} px-2.5`}>
+                <Heart size={17} strokeWidth={1.75} />
+              </Link>
+              {/* Meðan lotan er lesin er plássið frátekið svo valmyndin hoppi ekki */}
+              <Link href="/profill" aria-current={me ? "page" : undefined} className={`${link(me)} ${auth === "loading" ? "invisible" : ""}`}>
+                <User size={16} strokeWidth={1.75} /> {t("Ég")}
+              </Link>
+            </>
+          )}
           <Link
             href="/ny-auglysing"
             className="ml-2 flex items-center gap-1.5 rounded-lg bg-orange-600 px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#e0560f] active:scale-[0.97]"

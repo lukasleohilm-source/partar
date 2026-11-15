@@ -183,7 +183,7 @@ enable_manual_linking = true
 # ATH: Google-innskráning (Client ID/Secret) er stillt í Supabase-stjórnborðinu, ekki hér.
 # Skoðaðu alltaf mismuninn áður en `supabase config push` er samþykkt svo Google verði ekki óvirkjað.
 # Passwords shorter than this value will be rejected as weak. Minimum 6, recommended 8 or more.
-minimum_password_length = 6
+minimum_password_length = 8
 # Passwords that do not meet the following requirements will be rejected as weak. Supported values
 # are: `letters_digits`, `lower_upper_letters_digits`, `lower_upper_letters_digits_symbols`
 password_requirements = ""
@@ -227,7 +227,7 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
-enable_confirmations = false
+enable_confirmations = true
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
@@ -256,7 +256,11 @@ content_path = "./supabase/templates/magic_link.html"
 
 [auth.email.template.confirmation]
 subject = "Velkomin(n) í Partar – staðfestu netfangið"
-content_path = "./supabase/templates/magic_link.html"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Nýtt lykilorð á Pörtum"
+content_path = "./supabase/templates/recovery.html"
 
 [auth.email.template.email_change]
 subject = "Staðfestu netfangið þitt á Pörtum"

@@ -11,7 +11,7 @@ import { useT } from "@/components/lang-provider";
 
 const SEEN_KEY = "partar_velkomin";
 // Síður þar sem glugginn á ekki við
-const SKIP = [/^\/innskraning/, /^\/byrja/, /^\/auth/, /^\/sameina/, /^\/skilmalar/, /^\/personuvernd/, /^\/gagnaeyding/, /^\/leidbeiningar/];
+const SKIP = [/^\/innskraning/, /^\/byrja/, /^\/auth/, /^\/sameina/, /^\/skilmalar/, /^\/personuvernd/, /^\/gagnaeyding/, /^\/leidbeiningar/, /^\/nyskraning/, /^\/gleymt-lykilord/, /^\/nytt-lykilord/];
 
 // Velkomugluggi við fyrstu heimsókn: skrá inn með Google, netfangi eða skoða sem gestur.
 // Birtist aðeins einu sinni og aldrei hjá þeim sem eru þegar með lotu (notendur eða gestir).
@@ -71,18 +71,24 @@ export function WelcomeGate() {
           <GoogleButton next={pathname} />
           <FacebookButton next={pathname} />
           <Link
-            href={`/innskraning?next=${encodeURIComponent(pathname)}`}
+            href={`/nyskraning?next=${encodeURIComponent(pathname)}`}
             onClick={close}
             className="flex w-full items-center justify-center gap-3 rounded-xl border border-stone-300 bg-surface py-3 text-base font-semibold text-stone-800 shadow-sm active:scale-[0.98]"
           >
-            <Mail size={20} className="text-stone-500" />{" "}{t("Skrá inn með netfangi")}
+            <Mail size={20} className="text-stone-500" />{" "}{t("Nýskráning með netfangi")}
           </Link>
+          <p className="pt-1 text-center text-sm text-stone-600">
+            {t("Ertu þegar með aðgang?")}{" "}
+            <Link href={`/innskraning?next=${encodeURIComponent(pathname)}`} onClick={close} className="font-semibold text-orange-700 hover:underline">
+              {t("Skrá inn")}
+            </Link>
+          </p>
           <button
             type="button"
             onClick={close}
-            className="flex w-full items-center justify-center gap-3 rounded-xl py-3 text-base font-semibold text-orange-700 active:bg-orange-50"
+            className="flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium text-stone-500 hover:text-stone-800"
           >
-            <UserRound size={20} />{" "}{t("Skoða sem gestur")}
+            <UserRound size={17} />{" "}{t("Skoða án aðgangs")}
           </button>
         </div>
 

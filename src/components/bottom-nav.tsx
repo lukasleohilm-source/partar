@@ -1,9 +1,10 @@
 "use client";
 
-import { BellRing, MessageCircle, Plus, Search, User, type LucideIcon } from "lucide-react";
+import { BellRing, LogIn, MessageCircle, Plus, Search, User, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useT } from "./lang-provider";
+import { useAuthStatus } from "./use-auth-status";
 import { useUnreadCounts, type UnreadCounts } from "./use-unread-counts";
 
 type Item = {
@@ -29,13 +30,22 @@ const items: Item[] = [
 ];
 
 // Síður sem eru á öllum skjánum (t.d. spjallþráður) fela valmyndina
-const HIDDEN = [/^\/skilabod\/.+/, /^\/byrja/];
+const HIDDEN = [/^\/skilabod\/.+/, /^\/byrja/, /^\/innskraning/, /^\/nyskraning/, /^\/gleymt-lykilord/, /^\/nytt-lykilord/];
 
 export function BottomNav() {
   const pathname = usePathname();
   const unread = useUnreadCounts();
   const { t } = useT();
+  const auth = useAuthStatus();
   if (HIDDEN.some((r) => r.test(pathname))) return null;
+
+  // Óinnskráðir sjá „Skrá inn“ í stað „Ég“
+  const back = pathname === "/" ? "" : `?next=${encodeURIComponent(pathname)}`;
+  const shown = items.map((item) =>
+    item.href === "/profill" && auth === "guest"
+      ? { ...item, href: `/innskraning${back}`, label: "Skrá inn", icon: LogIn, match: (p: string) => /^\/(innskraning|nyskraning)/.test(p) }
+      : item,
+  );
 
   return (
     <nav
@@ -43,7 +53,7 @@ export function BottomNav() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
     >
       <ul className="mx-auto grid max-w-md grid-cols-5">
-        {items.map((item) => {
+        {shown.map((item) => {
           const active = item.match(pathname);
           const count = item.badge ? unread[item.badge] : 0;
           const Icon = item.icon;

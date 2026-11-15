@@ -1,4 +1,4 @@
-import { Bell, ChevronRight, CircleHelp, FileText, Heart, LogOut, Languages, Package, Pencil, Search, Shield, ShieldCheck, Star, Trash2, UserRoundPlus } from "lucide-react";
+import { Bell, ChevronRight, CircleHelp, FileText, Heart, KeyRound, LogOut, Languages, Package, Pencil, Search, Shield, ShieldCheck, Star, Trash2, UserRoundPlus } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Avatar } from "@/components/avatar";
@@ -17,9 +17,9 @@ export async function generateMetadata() {
   return { title: `${t("Ég")} – Partar` };
 }
 
-export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ vistad?: string; stadfesting?: string }> }) {
+export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ vistad?: string; stadfesting?: string; lykilord?: string }> }) {
   const { t, lang } = await getT();
-  const { vistad, stadfesting } = await searchParams;
+  const { vistad, stadfesting, lykilord } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -114,6 +114,12 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         </p>
       )}
 
+      {lykilord && (
+        <p role="status" className="mb-5 rounded-2xl bg-green-50 p-3 text-sm text-green-800">
+          {t("Lykilorðið er vistað. Þú getur nú skráð þig inn með netfangi og lykilorði.")}
+        </p>
+      )}
+
       {verifyMessage && (
         <p
           role="status"
@@ -179,6 +185,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           label={t("Prófíll og sími")}
           hint={contact?.phone ? (contact.show_phone ? t("Sími sýnilegur á auglýsingum") : t("Sími falinn")) : t("Nafn, landshluti og símanúmer")}
         />
+        {!guest && <Row href="/nytt-lykilord" icon={KeyRound} tone="stone" label={t("Lykilorð")} hint={t("Setja eða breyta lykilorði")} />}
         {isAdmin && <Row href="/stjorn" icon={Shield} tone="dark" label={t("Stjórnborð")} />}
       </Group>
 
