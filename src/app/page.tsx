@@ -148,8 +148,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ v
 
       <div className="mx-auto max-w-md md:max-w-page md:px-4">
       <section className="mt-8 px-4 md:mt-12">
-        <h2 className="mb-4 text-xl font-semibold tracking-[-0.01em]">{t("Flokkar")}</h2>
-        {/* Listi með „>“: smellt opnar undirflokkana */}
+        {/* „Flokkar >“ opnar og lokar listanum; hver flokkur með „>“ opnar undirflokkana */}
         <CategoryTree categories={(categories.data ?? []) as CategoryRow[]} />
       </section>
 
