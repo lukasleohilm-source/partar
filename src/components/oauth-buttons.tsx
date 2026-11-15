@@ -1,7 +1,8 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { GoogleIdButton } from "@/components/google-id-button";
 import { createClient } from "@/lib/supabase/client";
 import { useT } from "@/components/lang-provider";
 
@@ -118,7 +119,16 @@ function OAuthButton({ provider, next = "/", mode = "auto", label }: ButtonProps
   );
 }
 
+// Kveikt þegar „Authorized JavaScript origins“ eru komin í Google Cloud (sjá google-id-button.tsx)
+export const GOOGLE_ON_SITE = true;
+
 export function GoogleButton(props: ButtonProps) {
+  const [fallback, setFallback] = useState(false);
+  const onUnavailable = useCallback(() => setFallback(true), []);
+  // Sameining gesta notar gömlu leiðina (þarf einnota lykil og /sameina)
+  if (GOOGLE_ON_SITE && !fallback && props.mode !== "merge" && !props.label) {
+    return <GoogleIdButton next={props.next ?? "/"} onUnavailable={onUnavailable} />;
+  }
   return <OAuthButton provider="google" {...props} />;
 }
 
