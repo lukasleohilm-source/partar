@@ -7,6 +7,7 @@ import { BackButton } from "@/components/listing/listing-actions";
 import { ListingCard } from "@/components/listing/listing-card";
 import { Stars } from "@/components/stars";
 import { REGIONS, formatDate, formatDecimal, isRegion } from "@/lib/i18n";
+import { VerifiedBadge } from "@/components/verified-badge";
 import { LISTING_SUMMARY_SELECT, timeAgo, type ListingSummary } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/lang-server";
@@ -16,7 +17,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const getProfile = cache(async (id: string) => {
   if (!UUID_RE.test(id)) return null;
   const supabase = await createClient();
-  const { data } = await supabase.from("profiles").select("id, display_name, region, created_at").eq("id", id).maybeSingle();
+  const { data } = await supabase.from("profiles").select("id, display_name, region, created_at, verified_at").eq("id", id).maybeSingle();
   return data;
 });
 
@@ -69,6 +70,7 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
           <Avatar name={profile.display_name} size={72} />
           <div className="min-w-0">
             <h1 className="truncate text-2xl font-semibold tracking-tight">{profile.display_name}</h1>
+            {profile.verified_at && <VerifiedBadge className="mt-1.5" />}
             <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-stone-500">
               {region && (
                 <span className="flex items-center gap-1">

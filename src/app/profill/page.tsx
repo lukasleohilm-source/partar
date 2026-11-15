@@ -1,4 +1,4 @@
-import { Bell, FileText, Heart, LogOut, Languages, Package, Pencil, Search, Shield, ShieldCheck, Star, Trash2, UserRoundPlus } from "lucide-react";
+import { Bell, ChevronRight, FileText, Heart, LogOut, Languages, Package, Pencil, Search, Shield, ShieldCheck, Star, Trash2, UserRoundPlus } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Avatar } from "@/components/avatar";
@@ -9,15 +9,16 @@ import { ActionRow, Group, Row } from "./ui";
 import { InstallRow } from "@/components/install-app";
 import { LangSwitch } from "@/components/lang-provider";
 import { getT } from "@/lib/lang-server";
+import { VerifiedBadge } from "@/components/verified-badge";
 
 export async function generateMetadata() {
   const { t } = await getT();
   return { title: `${t("Ég")} – Partar` };
 }
 
-export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ vistad?: string }> }) {
+export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ vistad?: string; stadfesting?: string }> }) {
   const { t, lang } = await getT();
-  const { vistad } = await searchParams;
+  const { vistad, stadfesting } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -26,7 +27,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
 
   const count = { count: "exact" as const, head: true };
   const [{ data: profile }, { data: contact }, { data: isAdmin }, listings, favorites, wants, { data: rating }] = await Promise.all([
-    supabase.from("profiles").select("display_name, region").eq("id", user.id).single(),
+    supabase.from("profiles").select("display_name, region, verified_at").eq("id", user.id).single(),
     supabase.from("profile_contacts").select("phone, show_phone").eq("id", user.id).single(),
     supabase.rpc("is_admin"),
     supabase.from("listings").select("id", count).eq("seller_id", user.id).eq("status", "active"),
@@ -38,6 +39,17 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   const guest = user.is_anonymous || !user.email;
   const name = profile?.display_name || "Notandi";
   const region = profile?.region && isRegion(profile.region) ? t(REGIONS[profile.region]) : null;
+  const verified = Boolean(profile?.verified_at);
+  // Niðurstaða staðfestingar með rafrænum skilríkjum (frá /auth/kenni)
+  const verifyMessages: Record<string, string> = {
+    ok: t("Takk! Þú ert nú staðfestur seljandi og merkið birtist á auglýsingunum þínum."),
+    haett: t("Hætt var við auðkenninguna. Þú getur reynt aftur hvenær sem er."),
+    utrunnid: t("Auðkenningin rann út. Reyndu aftur."),
+    "annar-adgangur": t("Þessi skilríki hafa þegar staðfest annan aðgang á Pörtum."),
+    "ekki-tilbuid": t("Staðfesting er ekki tilbúin enn. Reyndu aftur síðar."),
+    villa: t("Ekki tókst að staðfesta. Reyndu aftur."),
+  };
+  const verifyMessage = stadfesting ? (verifyMessages[stadfesting] ?? verifyMessages.villa) : null;
   const pending = user.new_email ? t("Bíður staðfestingar: {netfang}", { netfang: user.new_email }) : null;
 
   return (
@@ -51,6 +63,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           <div className="min-w-0 flex-1">
             <p className="truncate text-xl font-bold tracking-tight">{name}</p>
             {region && <p className="text-sm text-stone-600">{region}</p>}
+            {verified && <VerifiedBadge className="mt-1" />}
             {guest ? (
               <p className="mt-1 flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-semibold text-amber-600">{t("Gestur")}</span>
@@ -98,6 +111,34 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         <p role="status" className="mb-5 rounded-2xl bg-green-50 p-3 text-sm text-green-800">
           {t("Aðgangurinn er vistaður. Þú getur nú skráð þig inn með honum á hvaða tæki sem er.")}
         </p>
+      )}
+
+      {verifyMessage && (
+        <p
+          role="status"
+          className={`mb-5 rounded-2xl p-3 text-sm ${stadfesting === "ok" ? "bg-green-50 text-green-800" : "bg-amber-50 text-amber-900"}`}
+        >
+          {verifyMessage}
+        </p>
+      )}
+
+      {!guest && !verified && (
+        // Venjulegur hlekkur (ekki Link) svo Next sæki ekki leiðina fyrirfram
+        <a
+          href="/auth/kenni/start"
+          className="mb-5 flex items-center gap-3 rounded-2xl bg-surface p-4 ring-1 ring-emerald-600/25 active:bg-stone-100"
+        >
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-emerald-500/15 text-emerald-600">
+            <ShieldCheck size={22} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold text-stone-900">{t("Staðfesta með rafrænum skilríkjum")}</span>
+            <span className="block text-sm text-stone-600">
+              {t("Gerðu það einu sinni og fáðu merkið „Staðfestur seljandi“. Kaupendur treysta því betur.")}
+            </span>
+          </span>
+          <ChevronRight size={18} className="shrink-0 text-stone-400" />
+        </a>
       )}
 
       {guest && (

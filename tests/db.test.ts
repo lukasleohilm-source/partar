@@ -274,6 +274,44 @@ describe("spjall og aðgangsreglur", () => {
     await t.q(`delete from auth.users where id = $1`, [twin]);
   });
 
+  it("staðfestir seljendur: aðeins með leyndarmáli, ein kennitala á aðgang, ekki hægt að falsa", async () => {
+    await t.asAdmin();
+    const [{ secret }] = await t.q<{ secret: string }>(`select secret from private.kenni_config`);
+    const verifiedAt = async (id: string) =>
+      (await t.q<{ verified_at: string | null }>(`select verified_at from profiles where id = $1`, [id]))[0].verified_at;
+
+    // Notandi getur ekki staðfest sig sjálfur, hvorki með uppfærslu né án leyndarmáls
+    await t.as(seller);
+    await t.q(`update profiles set verified_at = now() where id = $1`, [seller]);
+    expect(await verifiedAt(seller)).toBeNull();
+    await expect(t.q(`select complete_identity_verification('rangt', $1, '0101302989', 'Jón')`, [seller])).rejects.toThrow(/forbidden/);
+
+    // Worker með réttu leyndarmáli staðfestir
+    await t.as(null);
+    await t.q(`select complete_identity_verification($1, $2, '0101302989', 'Jón Jónsson')`, [secret, seller]);
+    expect(await verifiedAt(seller)).not.toBeNull();
+
+    // Kennitalan er ekki vistuð, bara fingrafar; og sama kennitala getur ekki staðfest annan aðgang
+    await t.asAdmin();
+    const [row] = await t.q<{ national_id_hash: string; name: string }>(`select * from private.identity_verifications where user_id = $1`, [seller]);
+    expect(row.national_id_hash).not.toContain("0101302989");
+    expect(row.name).toBe("Jón Jónsson");
+    await t.as(null);
+    await expect(t.q(`select complete_identity_verification($1, $2, '0101302989', 'Jón')`, [secret, buyer])).rejects.toThrow(
+      /already_verified_elsewhere/,
+    );
+    await expect(t.q(`select complete_identity_verification($1, $2, '12345', 'X')`, [secret, buyer])).rejects.toThrow(/invalid_national_id/);
+
+    // Allir sjá merkið, enginn getur lesið fingrafarið
+    expect(await verifiedAt(seller)).not.toBeNull();
+    await expect(t.q(`select * from private.identity_verifications`)).rejects.toThrow();
+
+    // Seljandinn getur ekki fjarlægt staðfestinguna sjálfur heldur
+    await t.as(seller);
+    await t.q(`update profiles set verified_at = null, display_name = 'seljandi' where id = $1`, [seller]);
+    expect(await verifiedAt(seller)).not.toBeNull();
+  });
+
   it("verð lækkað: fyrra verð munað, helst við aðra lækkun og hverfur við hækkun", async () => {
     const id = await publish("Verðmerkisprufa", 45000, "gott", "hofudborgarsvaedid", null);
     const read = async () => {

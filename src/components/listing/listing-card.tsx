@@ -4,8 +4,9 @@ import { TrendingDown } from "lucide-react";
 import Link from "next/link";
 import { useT } from "@/components/lang-provider";
 import { KINDS, formatPrice } from "@/lib/i18n";
-import { coverOf, droppedFrom, timeAgo, type ListingSummary } from "@/lib/listings";
+import { coverOf, droppedFrom, sellerVerified, timeAgo, type ListingSummary } from "@/lib/listings";
 import { placeLabel } from "@/lib/places";
+import { VerifiedBadge } from "@/components/verified-badge";
 import { Thumb } from "./thumb";
 
 export function ListingCard({
@@ -52,7 +53,10 @@ export function ListingCard({
           )}
         </div>
         <div className="px-0.5 pt-2.5">
-          <p className="truncate text-[15px] font-medium leading-snug text-stone-900">{listing.title}</p>
+          <p className="flex items-center gap-1 text-[15px] font-medium leading-snug text-stone-900">
+            <span className="truncate">{listing.title}</span>
+            {sellerVerified(listing) && <VerifiedBadge compact />}
+          </p>
           <p className="mt-0.5 truncate text-[13px] text-stone-500">
             {t(placeLabel(listing.postal_code, listing.region))}
             {distanceKm != null && ` · ${distanceKm < 10 ? distanceKm.toFixed(1) : Math.round(distanceKm)} km`} ·{" "}

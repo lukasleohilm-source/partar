@@ -667,4 +667,15 @@ export const EN: Record<string, string> = {
   "Fer mjög eftir bíl og vél.": "Depends heavily on the car and engine.",
   "felgur (sett af 4)": "set of 4 rims",
   "Stálfelgur fást frá um 7.500 kr. stykkið; merkjafelgur á dekkjum fara langt yfir bilið.": "Steel rims start at about 7,500 kr each; branded rims with tyres go well above this range.",
+  // Staðfestur seljandi (Kenni)
+  "Staðfestur seljandi": "Verified seller",
+  "Hefur auðkennt sig með rafrænum skilríkjum": "Has verified their identity with Icelandic electronic ID",
+  "Staðfesta með rafrænum skilríkjum": "Verify with electronic ID",
+  "Gerðu það einu sinni og fáðu merkið „Staðfestur seljandi“. Kaupendur treysta því betur.": "Do it once and get the “Verified seller” badge. Buyers trust it more.",
+  "Takk! Þú ert nú staðfestur seljandi og merkið birtist á auglýsingunum þínum.": "Thanks! You are now a verified seller and the badge shows on your listings.",
+  "Hætt var við auðkenninguna. Þú getur reynt aftur hvenær sem er.": "Verification was cancelled. You can try again any time.",
+  "Auðkenningin rann út. Reyndu aftur.": "The verification expired. Please try again.",
+  "Þessi skilríki hafa þegar staðfest annan aðgang á Pörtum.": "This electronic ID has already verified another Partar account.",
+  "Staðfesting er ekki tilbúin enn. Reyndu aftur síðar.": "Verification isn't available yet. Please try again later.",
+  "Ekki tókst að staðfesta. Reyndu aftur.": "Verification failed. Please try again.",
 };

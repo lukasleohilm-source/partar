@@ -38,7 +38,15 @@ export type ListingSummary = {
   previous_price_isk: number | null;
   price_dropped_at: string | null;
   listing_images: ImageRef[];
+  // Seljandinn (fjöl-í-einn tenging; ótýpaður biðlari telur hana fylki)
+  seller?: { verified_at: string | null } | { verified_at: string | null }[] | null;
 };
+
+// Hefur seljandinn staðfest sig með rafrænum skilríkjum?
+export function sellerVerified(l: Pick<ListingSummary, "seller">): boolean {
+  const s = Array.isArray(l.seller) ? l.seller[0] : l.seller;
+  return Boolean(s?.verified_at);
+}
 
 const DROP_DAYS = 30;
 
@@ -50,7 +58,7 @@ export function droppedFrom(l: { price_isk: number | null; previous_price_isk: n
 }
 
 // Dálkar fyrir auglýsingaspjöld
-export const LISTING_SUMMARY_SELECT = `id, seller_id, title, kind, status, price_isk, previous_price_isk, price_dropped_at, condition, region, postal_code, published_at, listing_images(${IMAGE_COLS})`;
+export const LISTING_SUMMARY_SELECT = `id, seller_id, title, kind, status, price_isk, previous_price_isk, price_dropped_at, condition, region, postal_code, published_at, listing_images(${IMAGE_COLS}), seller:profiles!listings_seller_id_fkey(verified_at)`;
 
 // Íslenskur afstæður tími (sjá i18n.ts)
 export { timeAgo } from "./i18n";

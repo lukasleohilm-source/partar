@@ -31,6 +31,7 @@ import { BackButton, BumpButton, FavoriteButton, ShareButton } from "@/component
 import { SellerRating } from "@/components/stars";
 import { primaryButton, secondaryButton } from "@/components/ui/styles";
 import { CONDITIONS, KINDS, REGIONS, formatDate, formatNumber, formatPrice, type Condition, type Kind, type Region } from "@/lib/i18n";
+import { VerifiedBadge } from "@/components/verified-badge";
 import { IMAGE_COLS, coverOf, droppedFrom, imageUrl, timeAgo, type ImageRef } from "@/lib/listings";
 import { placeLabel } from "@/lib/places";
 import { createClient } from "@/lib/supabase/server";
@@ -71,7 +72,7 @@ type ListingDetail = {
     makes: { name: string };
     models: { name: string } | null;
   }[];
-  profiles: { display_name: string; created_at: string };
+  profiles: { display_name: string; created_at: string; verified_at: string | null };
 };
 
 
@@ -89,7 +90,7 @@ const getListing = cache(async (id: string) => {
        categories(name),
        listing_images(${IMAGE_COLS}),
        listing_fitments(make_id, model_id, year_from, year_to, makes(name), models(name)),
-       profiles!listings_seller_id_fkey(display_name, created_at)`,
+       profiles!listings_seller_id_fkey(display_name, created_at, verified_at)`,
     )
     .eq("id", id)
     .maybeSingle<ListingDetail>();
@@ -311,6 +312,7 @@ export default async function ListingPage({
               <Avatar name={listing.profiles.display_name} />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-bold">{listing.profiles.display_name}</p>
+                {listing.profiles.verified_at && <VerifiedBadge className="mt-0.5" />}
                 <p className="text-sm text-stone-500">{t("Á Pörtum síðan")}{" "}{formatDate(new Date(listing.profiles.created_at), { day: false, year: true }, lang)}</p>
               </div>
               <span className="flex shrink-0 items-center text-sm font-semibold text-orange-600">
